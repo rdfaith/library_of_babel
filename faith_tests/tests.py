@@ -1,8 +1,7 @@
 # Example file showing a basic pygame "game loop"
 import pygame
 
-# testsetsetset
-
+# testsetsetsettesttesttessssst
 # pygame setup
 WIDTH, HEIGHT = 320, 180
 pygame.init()
