@@ -1,29 +1,35 @@
-# Example file showing a basic pygame "game loop"
 import pygame
+import object_classes
+import game_world
 
-
-# pygame setup
-WIDTH, HEIGHT = 320, 180
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT), flags=pygame.SCALED) # SCALED flag automatically scales screen to highest possible resolution
-clock = pygame.time.Clock()
+screen = pygame.display.set_mode((320, 180), flags=pygame.SCALED)
 running = True
-#test
+clock = pygame.time.Clock()
+delta = 0.0
+#  create list with game objects
+
+#  create player character
+obstacle = object_classes.GameObject((200, 100), 'assets/test/egg.png')
+floor = object_classes.GameObject((0, 148), 'assets/test/floor.png')
+game_world = game_world.GameWorld([], [obstacle, floor], [])
+
 while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
+    #  check if closed
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # fill the screen with a color to wipe away anything from last frame
-    screen.fill("purple")
+    # do updates
+    game_world.do_updates(delta)
 
-    # RENDER YOUR GAME HERE
+    #  render
+    game_world.do_render(screen)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    clock.tick(60)  # limits FPS to 60
+    delta = clock.tick(60) / 1000
+
 
 pygame.quit()
