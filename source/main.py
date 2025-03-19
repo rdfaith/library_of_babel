@@ -1,21 +1,26 @@
+# Example file showing a basic pygame "game loop"
 import pygame
 import object_classes
 import game_world
+import utils
 
+# pygame setup
+WIDTH, HEIGHT = 320, 180
 pygame.init()
-screen = pygame.display.set_mode((320, 180), flags=pygame.SCALED)
-running = True
+screen = pygame.display.set_mode((WIDTH, HEIGHT),
+                                 flags=pygame.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
 clock = pygame.time.Clock()
+running = True
 delta = 0.0
-#  create list with game objects
 
 #  create player character
-obstacle = object_classes.GameObject((200, 100), 'assets/test/egg.png')
-floor = object_classes.GameObject((0, 148), 'assets/test/floor.png')
+obstacle = object_classes.GameObject((200, 100), utils.get_path('assets/test/egg.png'))
+floor = object_classes.GameObject((0, 148), utils.get_path('assets/test/floor.png'))
 game_world = game_world.GameWorld([], [obstacle, floor], [])
 
 while running:
-    #  check if closed
+    # poll for events
+    # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -30,6 +35,5 @@ while running:
     pygame.display.flip()
 
     delta = clock.tick(60) / 1000
-
 
 pygame.quit()

@@ -1,10 +1,11 @@
 import pygame
+import utils
 
 
 class GameObject:
     def __init__(self, coords: tuple, image_path: str) -> None:
-        self.image = pygame.image.load(image_path)
-        self.rect = self.image.get_rect(topleft=(coords))
+        self.image = pygame.image.load(utils.get_path(image_path))
+        self.rect = self.image.get_rect(topleft=coords)
 
     def update(self, delta: float, objects: list):
         pass
@@ -26,12 +27,10 @@ class MovingObject(GameObject):
 
     def does_collide(self, rect, objects: list):
         """Check if hit box collides with another object."""
-        collision = False
-        for object in objects:
-            if rect.colliderect(object.rect) == True:
-                collision = True
-                break
-        return collision
+        for o in objects:
+            if rect.colliderect(o.rect):
+                return True
+        return False
 
     def is_grounded(self, objects: list):
         """Check if element is on the floor."""
