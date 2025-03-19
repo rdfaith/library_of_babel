@@ -8,7 +8,7 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT), flags=pygame.SCALED) # SCALED flag automatically scales screen to highest possible resolution
 clock = pygame.time.Clock()
 running = True
-
+#test
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
