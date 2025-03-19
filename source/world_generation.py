@@ -3,11 +3,8 @@ import csv
 from object_classes import *
 from game_world import *
 from constants import *
-from main import *
 from utils import *
 
-pg.init()
-pg.display.set_mode((1, 1))
 
 def read_map(map_file_path: str) -> list[list[str]]:
     """Liest die Karte aus einer Datei und gibt sie als 2D-Liste zurück."""
@@ -24,7 +21,7 @@ def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
 
 def generate_world(map_file_path: str, tileset_file_path: str, camera_pos: pg.Vector2) -> GameWorld:
     # Variablen
-    map_data = read_map(get_path(map_file_path))
+    map_data = read_map(map_file_path)
     current_pos: pg.Vector2 = pg.Vector2(0, 0)
     objects = []
     collision_objects = []
@@ -45,7 +42,8 @@ def generate_world(map_file_path: str, tileset_file_path: str, camera_pos: pg.Ve
         for col in row:
             frame = level_dict.get(col, level_dict[" "])[0]
             drawing_position = camera_pos + current_pos
-            level_dict.get(col, level_dict[" "])[1].append(drawing_position)
+            game_object = GameObject(drawing_position, frame)
+            level_dict.get(col, level_dict[" "])[1].append(game_object)
             current_pos.x += FRAME_SIZE
         current_pos.x = 0
         current_pos.y += FRAME_SIZE
@@ -62,5 +60,9 @@ def generate_world(map_file_path: str, tileset_file_path: str, camera_pos: pg.Ve
             objects.extend(level_dict.get(elements, level_dict[" "])[1])
 
     return GameWorld(objects, collision_objects, interactable_objects)
-test = generate_world('assets/test_map.csv', 'assets/world_tileset.png', pg.Vector2(0, 0))
-print(test.interactable_objects)
+
+if __name__ == '__main__':
+    pg.init()
+    pg.display.set_mode((1, 1))
+    test = generate_world('assets/levels/test_map.csv', 'assets/sprites/world_tileset.png', pg.Vector2(0, 0))
+    print(test.interactable_objects)

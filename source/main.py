@@ -1,22 +1,24 @@
 # Example file showing a basic pygame "game loop"
 import pygame
 import object_classes
-import game_world
-import utils
+from game_world import GameWorld
+import world_generation
+from utils import *
+from constants import *
 
 # pygame setup
-WIDTH, HEIGHT = 320, 180
 pygame.init()
-screen = pygame.display.set_mode((WIDTH, HEIGHT),
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
                                  flags=pygame.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
 clock = pygame.time.Clock()
 running = True
 delta = 0.0
 
-#  create player character
-obstacle = object_classes.GameObject((200, 100), utils.get_path('assets/test/egg.png'))
-floor = object_classes.GameObject((0, 148), utils.get_path('assets/test/floor.png'))
-game_world = game_world.GameWorld([], [obstacle, floor], [])
+# create player character
+# obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
+# floor = object_classes.GameObject(pygame.Vector2(0, 148), pygame.image.load(get_path('assets/test/floor.png')))
+# # game_world = GameWorld([], [obstacle, floor], [])
+game_world = world_generation.generate_world('assets/levels/test_map.csv', 'assets/sprites/world_tileset.png', pygame.Vector2(0, 0))
 
 while running:
     # poll for events
