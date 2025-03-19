@@ -13,8 +13,8 @@ class GameObject:
     def draw(self, screen):
         """Draw object on screen."""
         screen.blit(self.image, self.rect)
-        #  Draw hit box, just for debugging
-        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+        # Draw hit box, just for debugging:
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
 
 class MovingObject(GameObject):
