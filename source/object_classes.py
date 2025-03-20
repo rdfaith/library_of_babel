@@ -17,7 +17,7 @@ class GameObject:
         position = self.rect.topleft - camera_pos
         screen.blit(self.image, position)
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
 
 
 class MovingObject(GameObject):
@@ -67,6 +67,7 @@ class Player(MovingObject):
 
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
         super().__init__(position, image, gravity)
+        self.speed_x = 100
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
@@ -135,7 +136,7 @@ class Enemy(MovingObject):
 
 class Worm(Enemy):
     def __init__(self, position: pygame.Vector2):
-        super().__init__(position, pygame.image.load(get_path("assets/test/egg.png")), True)
+        super().__init__(position, pygame.image.load(get_path("assets/test/worm.png")), True)
         self.speed_x = 40
         self.distance = 0
         self.max_distance = 50
@@ -158,5 +159,7 @@ class Worm(Enemy):
     def draw(self, screen, camera_pos):
         position = self.rect.topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position)
+        # Draw hit box, just for debugging:
+        pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
 
 
