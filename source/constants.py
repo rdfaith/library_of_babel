@@ -1,4 +1,4 @@
-import pygame
+import pygame as pg
 from utils import get_path
 import os
 
@@ -29,7 +29,7 @@ for i in range(65, 90, 1):
     file_path = get_path("assets/sprites/letters/letter_" + letter + ".png")
 
     if os.path.exists(file_path):
-        LETTER_IMAGES[letter] = pygame.image.load(file_path)
+        LETTER_IMAGES[letter] = pg.image.load(file_path)
 #endregion
 
 #World_generating
@@ -51,3 +51,11 @@ TILE_MAPPING = {
     0b1110: (14),  # Verbindung zur oberen, unteren und rechten Kachel (U-Form)
     0b1111: (15),  # Komplett umschlossene Kachel mit Verbindungen zu allen Seiten
 }
+
+#Background
+BG_LAYERS = [
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100,"depth": 20},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100,"depth": 12},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,"depth": 5},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33,"depth": -5}
+]

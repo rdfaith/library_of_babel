@@ -56,6 +56,19 @@ class GameWorld:
 
         # draw background
         screen.blit(self.bg_image, pg.Vector2())
+        # parallax background
+        max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
+        for layer in BG_LAYERS:
+            depth: int = layer["depth"]
+            parallax_factor: float = 1 - (depth / max_depth)  # Dynamische Berechnung des Parallax-Faktors
+
+            if depth > 0 :
+                # Berechnung der versetzten Hintergrundposition (x und y)
+                offset_y: int = layer["offset_y"]
+                bg_pos: pg.Vector2 = pg.Vector2(-self.camera_pos.x * parallax_factor, offset_y -self.camera_pos.y * parallax_factor)
+
+                # Hintergrund zeichnen
+                screen.blit(layer["image"], bg_pos)
 
         # draw objects
         for o in self.objects + self.static_objects + self.interactable_objects:
@@ -64,6 +77,16 @@ class GameWorld:
         # draw player
         self.player.draw(screen, self.camera_pos)
 
+        for layer in BG_LAYERS:
+            depth: int = layer["depth"]
+            parallax_factor: float = 1 - (depth / max_depth)  # Dynamische Berechnung des Parallax-Faktors
+            if depth <= 0:
+                # Berechnung der versetzten Hintergrundposition (x und y)
+                offset_y: int = layer["offset_y"]
+                bg_pos: pg.Vector2 = pg.Vector2(-self.camera_pos.x * parallax_factor, offset_y - self.camera_pos.y)
+
+                # Hintergrund zeichnen
+                screen.blit(layer["image"], bg_pos)
         # draw UI
         draw_ui()
 
