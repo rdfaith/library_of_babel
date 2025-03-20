@@ -137,7 +137,7 @@ class Enemy(MovingObject):
 class Worm(Enemy):
     def __init__(self, position: pygame.Vector2):
         super().__init__(position, pygame.image.load(get_path("assets/test/worm.png")), True)
-        self.speed_x = 40
+        self.speed_x = 30
         self.distance = 0
         self.max_distance = 50
         self.animator = Animator(pygame.image.load(get_path('assets/test/worm-Sheet.png')), 32, 16, 5, 10)
