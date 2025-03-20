@@ -17,7 +17,6 @@ class GameWorld:
                                             pg.image.load(get_path('assets/sprites/test_dino.png')), True)
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.rect.x - SCREEN_WIDTH // 2,
                                                  self.player.rect.y - SCREEN_HEIGHT // 2)
-        self.bg_image = pg.image.load(get_path("assets/sprites/bg_skybox.png"))
 
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
@@ -54,8 +53,6 @@ class GameWorld:
                 screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
 
 
-        # draw background
-        screen.blit(self.bg_image, pg.Vector2())
         # parallax background
         max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
         for layer in BG_LAYERS:
@@ -65,7 +62,7 @@ class GameWorld:
             if depth > 0 :
                 # Berechnung der versetzten Hintergrundposition (x und y)
                 offset_y: int = layer["offset_y"]
-                bg_pos: pg.Vector2 = pg.Vector2(-self.camera_pos.x * parallax_factor, offset_y -self.camera_pos.y * parallax_factor)
+                bg_pos: pg.Vector2 = pg.Vector2(-self.camera_pos.x * parallax_factor, offset_y -self.camera_pos.y * parallax_factor/2)
 
                 # Hintergrund zeichnen
                 screen.blit(layer["image"], bg_pos)
