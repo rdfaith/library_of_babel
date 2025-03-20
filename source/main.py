@@ -55,8 +55,8 @@ while running:
                 running = False
                 game = False
 
-            if pygame.Rect.collidepoint(optionbutton,pygame.mouse.get_pos()) == True:
-                if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.KEYDOWN and gameo == True:
+                if event.key == pygame.K_e:
                     game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
                     clock = pygame.time.Clock()
                     gameo = False
