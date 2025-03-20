@@ -13,7 +13,7 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
 running = True
 delta = 0.0
 menu = True
-gamea = False
+game = False
 woaw = True
 gameo = False
 
@@ -44,16 +44,16 @@ while running:
             if pygame.Rect.collidepoint(optionbutton,pygame.mouse.get_pos()) == True:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     menu = False
-                    gamea = True
+                    game = True
                     game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
                     clock = pygame.time.Clock()
-    while gamea:
+    while game:
 
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                gamea = False
+                game = False
 
             if pygame.Rect.collidepoint(optionbutton,pygame.mouse.get_pos()) == True:
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -64,6 +64,8 @@ while running:
 
         # do updates
         game_world.do_updates(delta)
+        if game_world.player.player_lives <= 0:
+            gameo = True
 
         #  render
         game_world.do_render(screen)
