@@ -11,7 +11,9 @@ class GameWorld:
         self.camera_pos: pg.Vector2 = pg.Vector2(0, 0)
 
     def do_updates(self, delta: float) -> None:
-        self.player.update(delta, self.static_objects)
+        self.player.update(delta, self)
+        for i in self.interactable_objects:
+            i.update(delta, self)
 
     def do_render(self, screen):
         screen.fill("purple")

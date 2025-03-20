@@ -16,7 +16,8 @@ delta = 0.0
 #  create player character
 obstacle = object_classes.GameObject((200, 100), utils.get_path('assets/test/egg.png'))
 floor = object_classes.GameObject((0, 148), utils.get_path('assets/test/floor.png'))
-game_world = game_world.GameWorld([], [obstacle, floor], [])
+worm = object_classes.Worm((150, 100), 'assets/test/egg.png', True)
+game_world = game_world.GameWorld([], [obstacle, floor], [worm])
 
 while running:
     # poll for events
