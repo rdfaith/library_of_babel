@@ -11,9 +11,10 @@ class GameObject:
     def update(self, delta: float, game_world):
         pass
 
-    def draw(self, screen):
+    def draw(self, screen, camera_pos):
         """Draw object on screen."""
-        screen.blit(self.image, self.rect)
+        position = self.rect.topleft - camera_pos
+        screen.blit(self.image, position)
         # Draw hit box, just for debugging:
         # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
@@ -21,13 +22,13 @@ class GameObject:
 class MovingObject(GameObject):
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
         super().__init__(position, image)
-        self.speed_x = 100
+        self.speed_x = 75
         self.speed_y = 600
         self.velocity = pygame.math.Vector2(0.0, 0.0)
         self.gravity = gravity
         self.has_collided = False
 
-    def does_collide(self, rect, objects: list):
+    def does_collide(self, rect, objects: list) -> bool:
         """Check if hit box collides with another object."""
         for o in objects:
             if rect.colliderect(o.rect):
@@ -101,7 +102,7 @@ class Player(MovingObject):
         #  Check collision and apply movement or not
         super().update(delta, game_world)
 
-        if self.time_since_bounce < 0.5:
+        if self.time_since_bounce < 0.5 and not self.is_grounded(game_world.static_objects):
             self.time_since_bounce += delta
         else:
             self.bounce_velocity_x = 0
@@ -129,7 +130,7 @@ class Enemy(MovingObject):
 
         else:
             player.player_lives -= 1
-            player.bounce_velocity_x = self.current_direction * 200
+            player.bounce_velocity_x = self.current_direction * 300
             player.velocity.y = -250
             self.has_collided = True
 
@@ -153,3 +154,4 @@ class Worm(Enemy):
             self.current_direction *= (-1)
             self.distance = 0
             self.has_collided = False
+
