@@ -41,7 +41,26 @@ class GameWorld:
             self.camera_pos.y = max(0, min(self.camera_pos.y, LEVEL_HEIGHT - SCREEN_HEIGHT))
 
     def do_render(self, screen):
+        def draw_ui():
+            ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
+            ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
+            screen.blit(ui_bg, pg.Vector2())
+
+            for i in range(self.player.player_lives):
+                screen.blit(ui_heart, HEART_POSITIONS[i])
+
+
+        # draw background
         screen.blit(self.bg_image, pg.Vector2())
+
+        # draw objects
         for o in self.objects + self.static_objects + self.interactable_objects:
             o.draw(screen, self.camera_pos)
+
+        # draw player
         self.player.draw(screen, self.camera_pos)
+
+        # draw UI
+        draw_ui()
+
+
