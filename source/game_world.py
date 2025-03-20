@@ -12,12 +12,17 @@ class GameWorld:
         self.camera_pos: pg.Vector2 = pg.Vector2(0, 0)
         self.bg_image = pg.image.load(get_path("assets/sprites/bg_skybox.png"))
 
+    def set_player_position(self, pos: pg.Vector2) -> None:
+        """Sets player position, used when initialising level"""
+        self.player.rect.x = pos.x
+        self.player.rect.y = pos.y
+
     def do_updates(self, delta: float) -> None:
         self.player.update(delta, self)
         for i in self.interactable_objects:
             i.update(delta, self)
 
-    def do_render(self, screen):
+    def do_render(self, screen) -> None:
         screen.fill("purple")
         screen.blit(self.bg_image, pg.Vector2())
         for o in self.objects + self.static_objects + self.interactable_objects:

@@ -63,8 +63,8 @@ class MovingObject(GameObject):
 
 class Player(MovingObject):
 
-    def __init__(self, coords: tuple, image_path: str, gravity: bool):
-        super().__init__(coords, image_path, gravity)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
+        super().__init__(position, image, gravity)
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
@@ -107,10 +107,11 @@ class Player(MovingObject):
             self.bounce_velocity_x = 0
             self.time_since_bounce = 0.0
 
+
 class Enemy(MovingObject):
 
-    def __init__(self, coords: tuple, image_path: str, gravity: bool):
-        super().__init__(coords, image_path, gravity)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
+        super().__init__(position, image, gravity)
         self.current_direction = 1
 
     def on_collide(self, player: Player, game_world: GameWorld) -> None:
@@ -134,8 +135,8 @@ class Enemy(MovingObject):
 
 
 class Worm(Enemy):
-    def __init__(self, coords: tuple, image_path: str, gravity: bool):
-        super().__init__(coords, image_path, gravity)
+    def __init__(self, position: pygame.Vector2):
+        super().__init__(position, pygame.image.load(get_path("assets/test/egg.png")), True)
         self.speed_x = 40
         self.distance = 0
         self.max_distance = 50
@@ -152,4 +153,3 @@ class Worm(Enemy):
             self.current_direction *= (-1)
             self.distance = 0
             self.has_collided = False
-

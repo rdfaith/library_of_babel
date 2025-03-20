@@ -18,7 +18,7 @@ delta = 0.0
 # obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
 # floor = object_classes.GameObject(pygame.Vector2(0, 148), pygame.image.load(get_path('assets/test/floor.png')))
 # # game_world = GameWorld([], [obstacle, floor], [])
-game_world = world_generation.generate_world('assets/levels/test_map.csv', 'assets/sprites/world_tileset.png', pygame.Vector2(0, 0))
+game_world = world_generation.generate_world('assets/levels/test_map2.csv', 'assets/sprites/world_tileset.png', pygame.Vector2(0, 0))
 
 while running:
     # poll for events
