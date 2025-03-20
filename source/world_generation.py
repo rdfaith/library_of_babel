@@ -47,6 +47,7 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
     interactable_objects: list[GameObject] = []
     objects: list[GameObject] = [] # unused currently
     player_start_pos: pg.Vector2
+    level_size: tuple[int, int] = (len(map_data[0]) * FRAME_SIZE, len(map_data) * FRAME_SIZE)
 
     # # Level Dictionary für Tiles
     # # Frame, Position_list, collidable, interactive, enemy
@@ -108,7 +109,7 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
     #     if not collidable and not interactive:
     #         objects.extend(level_dict.get(elements, level_dict[" "])[1])
 
-    game_world: GameWorld = GameWorld(objects, collision_objects, interactable_objects, player_start_pos)
+    game_world: GameWorld = GameWorld(objects, collision_objects, interactable_objects, player_start_pos, level_size)
     return game_world
 
 if __name__ == '__main__':
