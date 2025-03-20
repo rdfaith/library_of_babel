@@ -45,7 +45,7 @@ while running:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     menu = False
                     game = True
-                    game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
+                    game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/autotile_test.png')
                     clock = pygame.time.Clock()
     while game:
 

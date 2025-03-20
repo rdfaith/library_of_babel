@@ -20,7 +20,12 @@ class GameObject:
         # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
 
-class MovingObject(GameObject):
+class InteractableObject(GameObject):
+    def on_collide(self, player, game_world) -> None:
+        pass
+
+
+class MovingObject(InteractableObject):
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
         super().__init__(position, image)
         self.speed_x = 75
@@ -62,17 +67,26 @@ class MovingObject(GameObject):
         else:
             self.velocity.y = 0
 
+
 class Player(MovingObject):
 
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
         super().__init__(position, image, gravity)
+        self.letters_collected: list[str] = []
         self.speed_x = 100
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
 
-    def on_hit_by_enemy(self, enemy: GameObject):
-        pass
+    def on_hit_by_enemy(self, enemy: GameObject, direction: int):
+        self.bounce_velocity_x = direction * 250
+        self.velocity.y = -300
+
+        if self.player_lives > 0:
+            self.player_lives -= 1
+
+    def on_pickup_letter(self, letter: str):
+        self.letters_collected.append(letter)
 
     def do_interaction(self, game_world: GameWorld):
         """Check if player collides with interactable object and calls according on_collide function."""
@@ -88,10 +102,10 @@ class Player(MovingObject):
         keys = pygame.key.get_pressed()
 
         # Move the player left/right based on the keys pressed
-        
-        if keys[pygame.K_a] and self.player_lives >0:
+
+        if keys[pygame.K_a] and self.player_lives > 0:
             self.velocity.x = -self.speed_x  # Move left
-        elif keys[pygame.K_d] and self.player_lives >0:
+        elif keys[pygame.K_d] and self.player_lives > 0:
             self.velocity.x = self.speed_x  # Move right
         else:
             self.velocity.x = 0
@@ -101,7 +115,7 @@ class Player(MovingObject):
             self.velocity.x = self.bounce_velocity_x
 
         # Move the player up based on keys pressed
-        if self.player_lives >0:
+        if self.player_lives > 0:
             if keys[pygame.K_SPACE] and self.is_grounded(game_world.static_objects):  # and if is_grounded
                 self.velocity.y = -self.speed_y
 
@@ -114,6 +128,14 @@ class Player(MovingObject):
             self.bounce_velocity_x = 0
             self.time_since_bounce = 0.0
 
+class LetterPickUp(InteractableObject):
+    def __init__(self, position: pygame.Vector2, letter: str):
+        self.letter = letter
+        image = LETTER_IMAGES[letter]
+        super().__init__(position, image)
+
+    def on_collide(self, player, game_world) -> None:
+        player.on_pickup_letter(self.letter)
 
 class Enemy(MovingObject):
 
@@ -133,9 +155,7 @@ class Enemy(MovingObject):
             player.velocity.x = 0
 
         else:
-            player.player_lives -= 1
-            player.bounce_velocity_x = self.current_direction * 250
-            player.velocity.y = -300
+            player.on_hit_by_enemy(self, self.current_direction)
 
 
 class Worm(Enemy):
