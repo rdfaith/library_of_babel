@@ -3,8 +3,8 @@ import pygame as pg
 from constants import *
 from utils import *
 
-def smooth_movement(current_pos: pg.Vector2, target_pos: pg.Vector2, delay: float) -> pg.Vector2:
-    return current_pos + (target_pos - current_pos) * delay
+def smooth_movement(current_pos: float, target_pos: float, delay: float) -> float:
+    return current_pos + (target_pos - current_pos) * (delay/100)
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list) -> None:
@@ -20,11 +20,16 @@ class GameWorld:
         for i in self.interactable_objects:
             i.update(delta, self)
 
-        #camera position
-        target_pos: pg.Vector2 = pg.Vector2(self.player.rect.x - SCREEN_WIDTH // 2, self.player.rect.y - SCREEN_HEIGHT // 2)
-        self.camera_pos = smooth_movement(self.camera_pos, target_pos, 0.1)
-        self.camera_pos = pg.Vector2(max(0, min(self.player.rect.x - SCREEN_WIDTH // 2, LEVEL_WIDTH - SCREEN_WIDTH)), max(0, min(self.player.rect.y - SCREEN_HEIGHT // 2, LEVEL_HEIGHT - SCREEN_HEIGHT)))
-
+            # Zielposition der Kamera
+            target_pos: pg.Vector2 = pg.Vector2(
+                self.player.rect.x - SCREEN_WIDTH // 2,
+                self.player.rect.y - SCREEN_HEIGHT // 2
+            )
+            self.camera_pos.x = smooth_movement(self.camera_pos.x, target_pos.x, CAMERA_DELAY_X)
+            if abs(target_pos.y - self.camera_pos.y) > DEAD_ZONE_Y:
+                self.camera_pos.y = smooth_movement(self.camera_pos.y, target_pos.y, CAMERA_DELAY_Y)
+            self.camera_pos.x = max(0, min(self.camera_pos.x, LEVEL_WIDTH - SCREEN_WIDTH))
+            self.camera_pos.y = max(0, min(self.camera_pos.y, LEVEL_HEIGHT - SCREEN_HEIGHT))
     def do_render(self, screen):
         screen.fill("purple")
         screen.blit(self.bg_image, pg.Vector2())
