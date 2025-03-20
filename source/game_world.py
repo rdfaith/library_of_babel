@@ -47,7 +47,11 @@ class GameWorld:
             screen.blit(ui_bg, pg.Vector2())
 
             for i in range(self.player.player_lives):
-                screen.blit(ui_heart, HEART_POSITIONS[i])
+                screen.blit(ui_heart, UI_HEART_POSITIONS[i])
+
+            for i in range(len(self.player.letters_collected)):
+                letter = self.player.letters_collected[i]
+                screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
 
 
         # draw background

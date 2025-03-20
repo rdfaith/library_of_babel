@@ -73,6 +73,10 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
                     interactable_objects.append(Worm(pos))
                 case "player":
                     player_start_pos = pg.Vector2(pos.x, pos.y)
+                case _:  # letter objects
+                    if len(col) == 1:
+                        if 65 <= ord(col) <= 90:
+                            interactable_objects.append(LetterPickUp(pos, col))
 
             current_pos.x += FRAME_SIZE
         current_pos.x = 0

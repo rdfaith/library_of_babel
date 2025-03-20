@@ -13,10 +13,15 @@ CAMERA_DELAY_X, CAMERA_DELAY_Y = 50, 2
 STANDARD_TILESET: str = "assets/sprites/tiles/autotile_tileset.png"
 
 #region UI Constants
-HEART_POS_0: pygame.Vector2 = pygame.Vector2(20,2)
-HEART_POS_1: pygame.Vector2 = pygame.Vector2(35,2)
-HEART_POS_2: pygame.Vector2 = pygame.Vector2(50,2)
-HEART_POSITIONS: list[pygame.Vector2] = [HEART_POS_0, HEART_POS_1, HEART_POS_2]
+HEART_POS_0: pg.Vector2 = pg.Vector2(20, 2)
+HEART_POS_1: pg.Vector2 = pg.Vector2(35, 2)
+HEART_POS_2: pg.Vector2 = pg.Vector2(50, 2)
+UI_HEART_POSITIONS: list[pg.Vector2] = [HEART_POS_0, HEART_POS_1, HEART_POS_2]
+
+# LETTER_POS_0: pg.Vector2 = pg.Vector2(256, 0)
+UI_LETTER_POSITIONS: list[pg.Vector2] = []
+for i in range(5):
+    UI_LETTER_POSITIONS.append(pg.Vector2(256 + (12 * i), 0))
 
 LETTER_IMAGES = {}
 for i in range(65, 90, 1):

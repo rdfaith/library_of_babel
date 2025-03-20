@@ -128,6 +128,7 @@ class Player(MovingObject):
             self.bounce_velocity_x = 0
             self.time_since_bounce = 0.0
 
+
 class LetterPickUp(InteractableObject):
     def __init__(self, position: pygame.Vector2, letter: str):
         self.letter = letter
@@ -136,6 +137,8 @@ class LetterPickUp(InteractableObject):
 
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_letter(self.letter)
+        game_world.interactable_objects.remove(self)
+
 
 class Enemy(MovingObject):
 
@@ -149,11 +152,10 @@ class Enemy(MovingObject):
 
         if player.velocity.y < 0 and player.rect.bottom <= self.rect.top + threshold:
             # If player jumps on top of it, enemy dies
-            game_world.interactable_objects.remove(self)  # Remove enemy from the game
             player.velocity.y = -250
             player.bounce_velocity_x = 0
             player.velocity.x = 0
-
+            game_world.interactable_objects.remove(self)  # Remove enemy from the game
         else:
             player.on_hit_by_enemy(self, self.current_direction)
 
