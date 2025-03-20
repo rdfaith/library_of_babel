@@ -4,9 +4,9 @@ from game_world import *
 
 
 class GameObject:
-    def __init__(self, coords: tuple, image_path: str) -> None:
-        self.image = pygame.image.load(utils.get_path(image_path))
-        self.rect = self.image.get_rect(topleft=coords)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface) -> None:
+        self.image = image
+        self.rect = self.image.get_rect(topleft=position)
 
     def update(self, delta: float, game_world):
         pass
@@ -14,14 +14,14 @@ class GameObject:
     def draw(self, screen):
         """Draw object on screen."""
         screen.blit(self.image, self.rect)
-        #  Draw hit box, just for debugging
-        pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+        # Draw hit box, just for debugging:
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
 
 class MovingObject(GameObject):
-    def __init__(self, coords: tuple, image_path: str, gravity: bool) -> None:
-        super().__init__(coords, image_path)
-        self.speed_x = 59
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
+        super().__init__(position, image)
+        self.speed_x = 100
         self.speed_y = 600
         self.velocity = pygame.math.Vector2(0.0, 0.0)
         self.gravity = gravity
