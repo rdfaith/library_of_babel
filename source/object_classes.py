@@ -11,9 +11,10 @@ class GameObject:
     def update(self, delta: float, game_world):
         pass
 
-    def draw(self, screen):
+    def draw(self, screen, camera_pos):
         """Draw object on screen."""
-        screen.blit(self.image, self.rect)
+        position = self.rect.topleft - camera_pos
+        screen.blit(self.image, position)
         # Draw hit box, just for debugging:
         # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
 
