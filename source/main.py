@@ -15,11 +15,11 @@ running = True
 delta = 0.0
 
 # create player character
-#obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
-#floor = object_classes.GameObject(pygame.Vector2(0, 148), pygame.image.load(get_path('assets/test/floor.png')))
-#worm = object_classes.Worm(pygame.Vector2(140, 100), pygame.image.load(get_path('assets/test/worm.png')), True)
-#game_world = GameWorld([], [obstacle, floor], [worm])
-game_world = world_generation.generate_world('assets/levels/test_map.csv', 'assets/sprites/world_tileset.png', pygame.Vector2(0, 0))
+obstacle = object_classes.GameObject(pygame.Vector2(200, 115), pygame.image.load(get_path('assets/test/egg.png')))
+floor = object_classes.GameObject(pygame.Vector2(0, 148), pygame.image.load(get_path('assets/test/floor.png')))
+worm = object_classes.Worm(pygame.Vector2(140, 100), pygame.image.load(get_path('assets/test/worm.png')), True)
+game_world = GameWorld([], [obstacle, floor], [worm])
+#game_world = world_generation.generate_world('assets/levels/test_map.csv', 'assets/sprites/world_tileset.png', pygame.Vector2(0, 0))
 
 while running:
     # poll for events
