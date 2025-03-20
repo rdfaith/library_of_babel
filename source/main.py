@@ -17,7 +17,7 @@ game = False
 woaw = True
 gameo = False
 
-optionbutton = pygame.Rect(160,90,80,40)
+optionbutton = pygame.Rect(120,70,80,40)
 
 # create player character
 #obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
@@ -70,7 +70,10 @@ while running:
         #  render
         game_world.do_render(screen)
         if gameo == True:
-            pygame.draw.rect(screen,(255,255,255),optionbutton,50)
+            #pygame.draw.rect(screen,(255,255,255),optionbutton,50)
+            dah = pygame.image.load(get_path('assets/sprites/restart.png'))
+            screen.blit(dah,optionbutton)
+            
             
 
         # flip() the display to put your work on screen
