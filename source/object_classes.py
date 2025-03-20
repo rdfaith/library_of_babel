@@ -1,6 +1,7 @@
 import pygame
 import utils
 from game_world import *
+from animator_object import Animator
 
 
 class GameObject:
@@ -61,14 +62,17 @@ class MovingObject(GameObject):
         else:
             self.velocity.y = 0
 
-
 class Player(MovingObject):
 
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
         super().__init__(position, image, gravity)
+        self.speed_x = 100
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
+
+    def on_hit_by_enemy(self, enemy: GameObject):
+        pass
 
     def do_interaction(self, game_world: GameWorld):
         """Check if player collides with interactable object and calls according on_collide function."""
@@ -91,7 +95,7 @@ class Player(MovingObject):
         else:
             self.velocity.x = 0
 
-        #self.velocity.x += self.bounce_velocity_x
+        # self.velocity.x += self.bounce_velocity_x
         if self.bounce_velocity_x != 0:
             self.velocity.x = self.bounce_velocity_x
 
@@ -102,7 +106,7 @@ class Player(MovingObject):
         #  Check collision and apply movement or not
         super().update(delta, game_world)
 
-        if self.time_since_bounce < 0.5 and not self.is_grounded(game_world.static_objects):
+        if self.time_since_bounce < 0.7 and not self.is_grounded(game_world.static_objects):
             self.time_since_bounce += delta
         else:
             self.bounce_velocity_x = 0
