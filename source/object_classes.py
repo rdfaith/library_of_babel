@@ -62,6 +62,7 @@ class MovingObject(GameObject):
         else:
             self.velocity.y = 0
 
+
 class Player(MovingObject):
 
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
@@ -71,8 +72,12 @@ class Player(MovingObject):
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
 
-    def on_hit_by_enemy(self, enemy: GameObject):
-        pass
+    def on_hit_by_enemy(self, enemy: GameObject, direction: int):
+        self.bounce_velocity_x = direction * 250
+        self.velocity.y = -300
+
+        if self.player_lives > 0:
+            self.player_lives -= 1
 
     def do_interaction(self, game_world: GameWorld):
         """Check if player collides with interactable object and calls according on_collide function."""
@@ -133,9 +138,7 @@ class Enemy(MovingObject):
             player.velocity.x = 0
 
         else:
-            player.player_lives -= 1
-            player.bounce_velocity_x = self.current_direction * 250
-            player.velocity.y = -300
+            player.on_hit_by_enemy(self, self.current_direction)
 
 
 class Worm(Enemy):
