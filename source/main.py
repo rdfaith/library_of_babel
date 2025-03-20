@@ -10,33 +10,71 @@ from constants import *
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
                                  flags=pygame.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
-clock = pygame.time.Clock()
 running = True
 delta = 0.0
+menu = True
+gamea = False
+woaw = True
+gameo = False
+
+optionbutton = pygame.Rect(160,90,80,40)
 
 # create player character
 #obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
 #floor = object_classes.GameObject(pygame.Vector2(0, 148), pygame.image.load(get_path('assets/test/floor.png')))
 #worm = object_classes.Worm(pygame.Vector2(140, 100), pygame.image.load(get_path('assets/test/worm.png')), True)
 #game_world = GameWorld([], [obstacle, floor], [worm])
-game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
+
 
 while running:
-    # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+    while menu:
+        screen.fill((0,0,0))
+        if pygame.Rect.collidepoint(optionbutton,pygame.mouse.get_pos()) == True:
+            pygame.draw.rect(screen,(255,255,255),optionbutton,50)
+        else:
+            pygame.draw.rect(screen,(0,255,255),optionbutton,50)
+        pygame.display.flip()
+        
+        # poll for events
+        # pygame.QUIT event means the user clicked X to close your window
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                menu = False
+            if pygame.Rect.collidepoint(optionbutton,pygame.mouse.get_pos()) == True:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    menu = False
+                    gamea = True
+                    game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
+                    clock = pygame.time.Clock()
+    while gamea:
 
-    # do updates
-    game_world.do_updates(delta)
 
-    #  render
-    game_world.do_render(screen)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                gamea = False
 
-    # flip() the display to put your work on screen
-    pygame.display.flip()
+            if pygame.Rect.collidepoint(optionbutton,pygame.mouse.get_pos()) == True:
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
+                    clock = pygame.time.Clock()
+                    gameo = False
 
-    delta = clock.tick(60) / 1000
 
+        # do updates
+        game_world.do_updates(delta)
+
+        #  render
+        game_world.do_render(screen)
+        if gameo == True:
+            pygame.draw.rect(screen,(255,255,255),optionbutton,50)
+            
+
+        # flip() the display to put your work on screen
+        pygame.display.flip()
+
+        delta = clock.tick(60) / 1000
+
+        
 pygame.quit()
