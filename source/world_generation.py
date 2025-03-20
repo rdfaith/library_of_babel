@@ -33,7 +33,7 @@ def generate_world(map_file_path: str, tileset_file_path: str, camera_pos: pg.Ve
     level_dict = {
         " ": [get_frame(0, 6, tileset_file_path), [], False, False],
         "w": [get_frame(0, 1, tileset_file_path), [], True, False],
-        "b": [get_frame(0, 0, tileset_file_path), [], False, True],
+        "b": [get_frame(0, 0, tileset_file_path), [], False, False],
         "g": [get_frame(2, 0, tileset_file_path), [], True, False],
         "r": [get_frame(2, 1, tileset_file_path), [], True, False]
     }

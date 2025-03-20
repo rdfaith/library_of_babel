@@ -21,13 +21,13 @@ class GameObject:
 class MovingObject(GameObject):
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
         super().__init__(position, image)
-        self.speed_x = 100
+        self.speed_x = 75
         self.speed_y = 600
         self.velocity = pygame.math.Vector2(0.0, 0.0)
         self.gravity = gravity
         self.has_collided = False
 
-    def does_collide(self, rect, objects: list):
+    def does_collide(self, rect, objects: list) -> bool:
         """Check if hit box collides with another object."""
         for o in objects:
             if rect.colliderect(o.rect):
@@ -63,8 +63,8 @@ class MovingObject(GameObject):
 
 class Player(MovingObject):
 
-    def __init__(self, coords: tuple, image_path: str, gravity: bool):
-        super().__init__(coords, image_path, gravity)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
+        super().__init__(position, image, gravity)
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
@@ -101,16 +101,17 @@ class Player(MovingObject):
         #  Check collision and apply movement or not
         super().update(delta, game_world)
 
-        if self.time_since_bounce < 0.5:
+        if self.time_since_bounce < 0.5 and not self.is_grounded(game_world.static_objects):
             self.time_since_bounce += delta
         else:
             self.bounce_velocity_x = 0
             self.time_since_bounce = 0.0
 
+
 class Enemy(MovingObject):
 
-    def __init__(self, coords: tuple, image_path: str, gravity: bool):
-        super().__init__(coords, image_path, gravity)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
+        super().__init__(position, image, gravity)
         self.current_direction = 1
 
     def on_collide(self, player: Player, game_world: GameWorld) -> None:
@@ -128,14 +129,13 @@ class Enemy(MovingObject):
 
         else:
             player.player_lives -= 1
-            player.bounce_velocity_x = self.current_direction * 200
+            player.bounce_velocity_x = self.current_direction * 300
             player.velocity.y = -250
-            self.has_collided = True
 
 
 class Worm(Enemy):
-    def __init__(self, coords: tuple, image_path: str, gravity: bool):
-        super().__init__(coords, image_path, gravity)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
+        super().__init__(position, image, gravity)
         self.speed_x = 40
         self.distance = 0
         self.max_distance = 50

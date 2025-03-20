@@ -8,7 +8,7 @@ class GameWorld:
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
-        self.player = object_classes.Player((100, 100), pg.image.load(get_path('assets/sprites/test_dino.png')), True)
+        self.player = object_classes.Player(pg.Vector2(100, 100), pg.image.load(get_path('assets/sprites/test_dino.png')), True)
         self.camera_pos: pg.Vector2 = pg.Vector2(0, 0)
         self.bg_image = pg.image.load(get_path("assets/sprites/bg_skybox.png"))
 
