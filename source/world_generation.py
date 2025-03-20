@@ -11,6 +11,23 @@ def read_map(map_file_path: str) -> list[list[str]]:
         reader = csv.reader(f)
         return [list(row) for row in reader]
 
+def find_tile(pos:pg.Vector2, map_data: list[list[str]]) -> int:
+    map_width: int = len(map_data[0])
+    map_height: int = len(map_data)
+    coord_x, coord_y = int(pos.x/FRAME_SIZE), int(pos.y/FRAME_SIZE)
+    object: str = map_data[coord_y][coord_x]
+
+    # Prüfe direkte Nachbarn (oben, rechts, unten, links)
+    top: bool = coord_y > 0 and map_data[coord_y - 1][coord_x] == object
+    right: bool = coord_x < map_width - 1 and map_data[coord_y][coord_x + 1] == object
+    bottom: bool = coord_y < map_height - 1 and map_data[coord_y + 1][coord_x] == object
+    left: bool = coord_x > 0 and map_data[coord_y][coord_x - 1] == object
+
+    # Binärwert berechnen (Reihenfolge: oben, rechts, unten, links)
+    index: int = (top << 3) | (right << 2) | (bottom << 1) | left
+
+    return TILE_MAPPING.get(index, (0))
+
 def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
     """Extrahiert einen Frame aus dem Tileset."""
     spritesheet = pg.image.load(get_path(tileset_file_path)).convert_alpha()
@@ -48,9 +65,10 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
 
             match col:
                 case "block":
-                    collision_objects.append(GameObject(pos, get_sprite(0, 1)))
+                    collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 0)))
                 case "shelf":
-                    collision_objects.append(GameObject(pos, get_sprite(0, 0)))
+                    collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 1)))
+
                 case "worm":
                     interactable_objects.append(Worm(pos))
                 case "player":
