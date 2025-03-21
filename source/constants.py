@@ -60,3 +60,12 @@ BG_LAYERS = [
     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,"depth": 5},
     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33,"depth": -5}
 ]
+
+# Schriftart
+WHITE = (255, 255, 255)
+GRAY = (200, 200, 200)
+BLACK = (0, 0, 0)
+BLUE = (50, 100, 255)
+LEVELS = ["test_map", "test_map2", "test_map3"]
+
+
