@@ -63,9 +63,7 @@ BG_LAYERS = [
 
 # Schriftart
 WHITE = (255, 255, 255)
-GRAY = (200, 200, 200)
-BLACK = (0, 0, 0)
 BLUE = (50, 100, 255)
-LEVELS = ["generated_map","test_map", "test_map2", "test_map3"]
+MAP_FOLDER = "assets/levels/"
 
 

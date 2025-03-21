@@ -6,10 +6,15 @@ import world_generation
 from utils import *
 from constants import *
 import random_world
+import os
 
 # pygame setup
 pg.init()
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
+pg.mixer.init()
+sound = pg.mixer.Sound(get_path('assets/sounds/bg_music.mp3'))
+
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
+                                 flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
 running = True
 delta = 0.0
 menu = True
@@ -18,7 +23,7 @@ woaw = True
 gameo = False
 level_selection = False
 selected_level = 0  # Index der ausgewählten Option
-FONT = pg.font.Font(None, 40)
+FONT = pg.font.Font(None, 30)
 
 optionbutton = pg.Rect(120,70,80,40)
 
@@ -54,30 +59,33 @@ while running:
     while level_selection:
         # Menüoptionen
         screen.fill((0, 0, 0))
-        for i, option in enumerate(LEVELS):
+        levels: list[str] = [os.path.splitext(f)[0] for f in os.listdir(get_path(MAP_FOLDER)) if
+                      os.path.isfile(os.path.join(get_path(MAP_FOLDER), f))]
+        for i, option in enumerate(levels):
             color: str = BLUE if i == selected_level else WHITE
             text = FONT.render(option, True, color)
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 40))
+            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
                 level_selection = False
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_DOWN:
-                    selected_level = (selected_level + 1) % len(LEVELS)
+                    selected_level = (selected_level + 1) % len(levels)
                 elif event.key == pg.K_UP:
-                    selected_level = (selected_level - 1) % len(LEVELS)
+                    selected_level = (selected_level - 1) % len(levels)
                 elif event.key == pg.K_RETURN:
                     game = True
                     level_selection = False
-                    level = LEVELS[selected_level]
-                    game_world = world_generation.generate_world(f"assets/levels/{level}.csv",'assets/sprites/autotile_test.png')
+                    level = levels[selected_level]
+                    game_world = world_generation.generate_world(f"{MAP_FOLDER + level}.csv",'assets/sprites/autotile_test.png')
                     clock = pg.time.Clock()
         pg.display.flip()
 
     while game:
 
-
+        sound.play(loops=-1)
+        sound.set_volume(0.5)
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False

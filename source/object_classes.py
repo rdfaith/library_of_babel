@@ -4,6 +4,7 @@ from game_world import *
 from animator_object import Animator
 
 
+
 class GameObject:
     def __init__(self, position: pygame.Vector2, image: pygame.Surface) -> None:
         self.image = image
@@ -99,6 +100,7 @@ class Player(MovingObject):
 
     def update(self, delta: float, game_world, fallen: bool):
         #  Interact with interactable game elements and call their on_collide function
+        WALK_SOUND = pg.mixer.Sound(get_path('assets/sounds/walk_sound.wav'))
         self.do_interaction(game_world)
         if fallen:
             self.player_lives = 0
@@ -107,9 +109,9 @@ class Player(MovingObject):
 
         # Move the player left/right based on the keys pressed
 
-        if keys[pygame.K_a] and self.player_lives > 0:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT] and self.player_lives > 0:
             self.velocity.x = -self.speed_x  # Move left
-        elif keys[pygame.K_d] and self.player_lives > 0:
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT] and self.player_lives > 0:
             self.velocity.x = self.speed_x  # Move right
         else:
             self.velocity.x = 0
@@ -120,10 +122,12 @@ class Player(MovingObject):
 
         # Move the player up based on keys pressed
         if self.player_lives > 0:
-            if keys[pygame.K_SPACE] and self.is_grounded(game_world.static_objects):  # and if is_grounded
+            if keys[pygame.K_SPACE] or keys[pygame.K_UP] and self.is_grounded(game_world.static_objects):  # and if is_grounded
                 self.velocity.y = -self.speed_y
 
         #  Check collision and apply movement or not
+        if self.velocity.x != 0:
+            WALK_SOUND.play(loops=-1)
         super().update(delta, game_world)
 
         if self.time_since_hit < self.invincibility_time and not self.is_grounded(game_world.static_objects):

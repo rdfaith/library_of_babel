@@ -7,7 +7,6 @@ from utils import *
 def smooth_movement(current_pos: float, target_pos: float, delay: float) -> float:
     return current_pos + (target_pos - current_pos) * (delay / 100)
 
-
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2, level_size: tuple[int, int]) -> None:
         self.objects = objects
@@ -17,6 +16,7 @@ class GameWorld:
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.rect.x - SCREEN_WIDTH // 2,
                                                  self.player.rect.y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
+        self.play_start_position = player_pos
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
         self.player.rect.x = pos.x
@@ -66,10 +66,17 @@ class GameWorld:
             if depth > 0 :
                 # Berechnung der versetzten Hintergrundposition (x und y)
                 offset_y: int = layer["offset_y"]
-                bg_pos: pg.Vector2 = pg.Vector2(-self.camera_pos.x * parallax_factor, offset_y -self.camera_pos.y * parallax_factor/2)
-
+                print(self.camera_pos.x)
+                bg_pos: pg.Vector2 = pg.Vector2((-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor, offset_y -self.camera_pos.y * parallax_factor/2)
+                bg_width = layer["image"].get_width()
+                mod_x = bg_pos.x % bg_width
+                print(bg_pos)
                 # Hintergrund zeichnen
-                screen.blit(layer["image"], bg_pos)
+
+                screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
+                screen.blit(layer["image"], pg.Vector2(mod_x - bg_width, bg_pos.y))
+
+
 
         # draw objects
         for o in self.objects + self.static_objects + self.interactable_objects:
@@ -84,10 +91,17 @@ class GameWorld:
             if depth <= 0:
                 # Berechnung der versetzten Hintergrundposition (x und y)
                 offset_y: int = layer["offset_y"]
-                bg_pos: pg.Vector2 = pg.Vector2(-self.camera_pos.x * parallax_factor, offset_y - self.camera_pos.y)
-
+                print(self.camera_pos.x)
+                bg_pos: pg.Vector2 = pg.Vector2(
+                    (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
+                    offset_y - self.camera_pos.y * parallax_factor / 2)
+                bg_width = layer["image"].get_width()
+                mod_x = bg_pos.x % bg_width
+                print(bg_pos)
                 # Hintergrund zeichnen
-                screen.blit(layer["image"], bg_pos)
+
+                screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
+                screen.blit(layer["image"], pg.Vector2(mod_x - bg_width, bg_pos.y))
         # draw UI
         draw_ui()
 
