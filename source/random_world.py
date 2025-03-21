@@ -7,7 +7,7 @@ def create_level(width=50, height=16):
     # Leeres Level mit Luft füllen
     level = [[' ' for _ in range(width)] for _ in range(height)]
 
-    # Erzeuge einen Grundparcours mit verschiedenen Höhen
+    # Erzeuge einen Grundparcours mit verschiedenen Höhen und Lücken
     ground_y = height - 2  # Zweitunterste Zeile als Basis
     last_height = ground_y
     for x in range(width):
@@ -15,20 +15,28 @@ def create_level(width=50, height=16):
             last_height -= 1  # Plattform geht nach oben
         elif random.random() < 0.2 and last_height < ground_y:
             last_height += 1  # Plattform geht nach unten
-        level[last_height][x] = "block"
+        if random.random() > 0.1:  # Erzeuge gelegentliche Lücken im Boden
+            level[last_height][x] = "block"
 
         # Lücken unterhalb der Plattformen mit Blöcken füllen
         for y in range(last_height + 1, height):
             level[y][x] = "block"
 
-    # Spieler setzen (irgendwo auf den ersten 5 Blöcken des Bodens, 2 Blöcke über dem Boden gezeichnet)
+    # Löcher im Boden (mindestens 2 Blöcke breit und durchgängig)
+    for _ in range(random.randint(2, 4)):
+        x = random.randint(5, width - 7)
+        for i in range(2):
+            for y in range(height):
+                level[y][x + i] = ' '
+
+    # Spieler setzen (2 Blöcke über dem Boden gezeichnet)
     player_x = random.randint(0, 4)
     for y in range(height):
         if level[y][player_x] == "block" and level[y - 1][player_x] == ' ':
-            level[y - 3][player_x] = "player"  # Spieler ist 1.5 Blöcke hoch, gezeichnet 2 Blöcke über dem Boden
+            level[y - 3][player_x] = "player"
             break
 
-    # Säulen setzen (mit Mindestabstand von 2, immer auf einem Block stehend, oben mit Block oder Shelf)
+    # Säulen setzen (müssen auf Blöcken stehen, können komplexe Strukturen bilden)
     pillar_x_positions = set()
     for _ in range(random.randint(3, 6)):
         while True:
@@ -41,15 +49,16 @@ def create_level(width=50, height=16):
                         for h in range(pillar_height):
                             level[y - h - 1][x] = "pillar"
 
-                        # Säulenabschluss setzen
-                        if random.choice([True, False]):
-                            level[y - pillar_height][x] = "block"
+                        # Struktur oben erweitern (Torstrukturen möglich)
+                        if random.random() < 0.5:
+                            for i in range(random.randint(1, 3)):
+                                level[y - pillar_height][x + i] = "block"
                         else:
                             level[y - pillar_height][x] = "shelf"
                         break
                 break
 
-    # Shelfs setzen (horizontal oder vertikal, aber nicht beides, vertikale Shelfs auf einem Block stehend)
+    # Shelfs setzen (horizontal oder vertikal, nicht beides, vertikale Shelfs auf Blöcken stehend)
     for _ in range(random.randint(4, 8)):
         if random.choice([True, False]):  # Horizontale Plattform
             x = random.randint(3, width - 6)
@@ -66,6 +75,14 @@ def create_level(width=50, height=16):
                         level[y - i][x] = "shelf"
                     break
 
+    # Zwischenplattformen hinzufügen, wenn Sprünge zu hoch sind
+    for x in range(1, width - 1):
+        for y in range(1, height - 1):
+            if (0 <= y + 2 < height and 0 <= y - 1 < height and
+                    level[y][x] == ' ' and level[y + 2][x] in ["block", "pillar"] and level[y - 1][x] == ' '):
+                if random.random() < 0.4:  # Wahrscheinlichkeit für Zwischenplattformen
+                    level[y][x] = "shelf"
+
     # Buchstaben "BABEL" platzieren (müssen erreichbar sein)
     letters = list("BABEL")
     for letter in letters:
@@ -76,14 +93,17 @@ def create_level(width=50, height=16):
                 level[y][x] = letter
                 break
 
-    # Gegner "worm" platzieren (nicht in unmittelbarer Nähe des Spielers)
+    # Gegner "worm" platzieren (nicht in unmittelbarer Nähe des Spielers, können auch in der Luft spawnen, aber nicht direkt neben Blöcken)
     for _ in range(random.randint(2, 5)):
         while True:
             x = random.randint(5, width - 5)
-            y = random.randint(1, height - 2)
-            if level[y][x] == ' ' and level[y + 1][x] in ["block", "shelf"] and abs(x - player_x) > 5:
-                level[y][x] = "worm"
-                break
+            y = random.randint(2, height - 3)
+            if level[y][x] == ' ' and abs(x - player_x) > 5:
+                if level[y + 1][x] in ["block", "shelf"] or (
+                        random.random() < 0.5 and level[y + 1][x] == ' ' and level[y - 1][x] == ' ' and all(
+                        level[y][x + dx] == ' ' for dx in [-1, 1])):
+                    level[y][x] = "worm"
+                    break
 
     return level
 
@@ -97,4 +117,3 @@ with open(filename, "w", newline="") as file:
     writer = csv.writer(file)
     writer.writerows(level_data)
 
-print(f"Welt wurde gespeichert als {filename}")

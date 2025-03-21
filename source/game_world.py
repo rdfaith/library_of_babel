@@ -66,11 +66,9 @@ class GameWorld:
             if depth > 0 :
                 # Berechnung der versetzten Hintergrundposition (x und y)
                 offset_y: int = layer["offset_y"]
-                print(self.camera_pos.x)
                 bg_pos: pg.Vector2 = pg.Vector2((-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor, offset_y -self.camera_pos.y * parallax_factor/2)
                 bg_width = layer["image"].get_width()
                 mod_x = bg_pos.x % bg_width
-                print(bg_pos)
                 # Hintergrund zeichnen
 
                 screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
@@ -91,13 +89,11 @@ class GameWorld:
             if depth <= 0:
                 # Berechnung der versetzten Hintergrundposition (x und y)
                 offset_y: int = layer["offset_y"]
-                print(self.camera_pos.x)
                 bg_pos: pg.Vector2 = pg.Vector2(
                     (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
                     offset_y - self.camera_pos.y * parallax_factor / 2)
                 bg_width = layer["image"].get_width()
                 mod_x = bg_pos.x % bg_width
-                print(bg_pos)
                 # Hintergrund zeichnen
 
                 screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
