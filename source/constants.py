@@ -33,7 +33,7 @@ for i in range(65, 90, 1):
         LETTER_IMAGES[letter] = pg.image.load(file_path)
 #endregion
 
-#World_generating
+#region World_generating
 TILE_MAPPING = {
     0b0000: (0),  # Isolierte Kachel ohne Verbindungen
     0b0001: (1),  # Verbindung zur linken Kachel
@@ -52,6 +52,7 @@ TILE_MAPPING = {
     0b1110: (14),  # Verbindung zur oberen, unteren und rechten Kachel (U-Form)
     0b1111: (15),  # Komplett umschlossene Kachel mit Verbindungen zu allen Seiten
 }
+#endregion
 
 #Background
 BG_LAYERS = [
@@ -61,6 +62,9 @@ BG_LAYERS = [
     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100, "depth": 5},
     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33, "depth": -5}
 ]
+
+# Effects
+VIGNETTE = pg.image.load(get_path("assets/sprites/effects/vignette_lesser.png"))
 
 # Schriftart
 WHITE = (255, 255, 255)

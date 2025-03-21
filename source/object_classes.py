@@ -208,7 +208,9 @@ class Player(MovingObject):
 
     def draw(self, screen, camera_pos):
         position = self.rect.topleft - camera_pos
-        screen.blit(self.animator.get_frame(self.current_direction), position)
+        screen.blit(self.animator.get_frame(self.current_direction), position - self.sprite_offset)
+        # Draw hit box, just for debugging:
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
 
 class LetterPickUp(InteractableObject):
     def __init__(self, position: pygame.Vector2, letter: str):

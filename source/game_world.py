@@ -91,6 +91,12 @@ class GameWorld:
                 if layer["depth"] <= 0:
                     draw_parallax_layer(layer, max_depth, False)
 
+        def draw_post_processing():
+            vignette = VIGNETTE.convert_alpha()
+            player_position = self.player.rect.topleft - self.player.sprite_offset - self.camera_pos
+            vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
+            screen.blit(VIGNETTE, vignette_position)
+
         #endregion
 
         # Kameraposition setzen
@@ -108,6 +114,9 @@ class GameWorld:
 
         # draw foreground parallax
         draw_fg_parallax()
+
+        # Visual effects
+        draw_post_processing()
 
         # draw UI
         draw_ui()

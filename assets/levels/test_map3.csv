@@ -1,19 +1,11 @@
-shelf,,,,,,,,,,,,,,,,,,,,,,,
-shelf,,,,,,,,,,,,,,,,,,,,,,,
-shelf,,,,,,,,,,,,,,,,,,,,,,,
-shelf,,,,,,,,,,,,,,,,,,,,,,,
-shelf,,,,,,,,,,,,,,,,,,,,,,,
-shelf,,,,,,,,,,,,,,,,,,,,,,,
-shelf,,,,,,,,,,,,,,,,,L,,,,,,
-shelf,,,,,,,,,,,,,,E,block,block,block,block,,,block,block,block
-shelf,,,,,,,,shelf,B,,,,,block,block,,,,,,,,
-shelf,player,,,,,,shelf,shelf,shelf,,,,block,block,block,,,,,,,,
-shelf,,,,,,,,,,,,block,block,block,block,,,,,,,,
-shelf,,,B,,,,,,,,,block,shelf,,,,,,,,,,
-shelf,,,,,,,,,,,block,block,,,,,,,,,,,
-shelf,,,shelf,,,,,,,block,block,block, ,,,,,,,,,,
-shelf,,,shelf,,,,A,,block,block,block,block,,,,,,,,,,,
-block,block,block,block,block,block,block,block,block,block,block,block,block,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,,,,,,,,,,,,
-,,,,,,,,,,,,     ,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,shelf,shelf,,,,,,,
+block,,,,,,,,,,,,,,,,,,,,,,,,,shelf
+block,,,,,,,,,,,,,,,,worm,,,,,,,,,shelf
+block,,,,,,,,,,,,,shelf,shelf,shelf,,,,,,,,,,shelf
+block,,,,,,,,,,,,,,,,,,,,,,,,,shelf
+block,,,,,,,,,,,,,,,,,,,,,,,,,shelf
+block,player,,,,,,,,,,,,,,,,,,,,,,,,shelf
+block,,,,,,,,,,,,,,,,,worm,,,,,,,,shelf
+block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
