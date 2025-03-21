@@ -2,6 +2,7 @@ import pygame
 import utils
 from animator_object import *
 from utils import *
+from constants import *
 
 
 def generate_hitbox(position: pygame.Vector2, hitbox_image: pygame.Surface) -> (pygame.Rect, pygame.Vector2):
@@ -205,6 +206,9 @@ class Player(MovingObject):
             self.bounce_velocity_x = 0
             self.time_since_hit = 0.0
 
+    def draw(self, screen, camera_pos):
+        position = self.rect.topleft - camera_pos
+        screen.blit(self.animator.get_frame(self.current_direction), position)
 
 class LetterPickUp(InteractableObject):
     def __init__(self, position: pygame.Vector2, letter: str):
@@ -215,10 +219,6 @@ class LetterPickUp(InteractableObject):
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_letter(self.letter)
         game_world.interactable_objects.remove(self)
-
-    def draw(self, screen, camera_pos):
-        position = self.rect.topleft - camera_pos
-        screen.blit(self.animator.get_frame(self.current_direction), position)
 
 
 class Enemy(MovingObject):
@@ -247,7 +247,7 @@ class Worm(Enemy):
         self.speed_x = 30
         self.distance = 0
         self.max_distance = 50
-        self.run = Animation("run", get_path('assets/test/worm-Sheet.png'), 32, 16, 5, 10)
+        self.run = Animation("run", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
         #self.die = Animation(get_path(), 32, 16, x, 10)
 
         self.active_animation = self.run
