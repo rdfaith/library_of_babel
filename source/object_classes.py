@@ -4,10 +4,34 @@ from animator_object import *
 from utils import *
 
 
+def generate_hitbox(position: pygame.Vector2, hitbox_image: pygame.Surface) -> (pygame.Rect, pygame.Vector2):
+    """Generates a rectangular hitbox based on the non-transparent part of hitbox_image, and returns the offset."""
+    bbox = hitbox_image.get_bounding_rect()  # Get bounding rectangle of non-transparent area
+
+    if bbox.width > 0 and bbox.height > 0:
+        # Calculate the hitbox rect and its offset from the top-left corner of the image
+        hitbox = pygame.Rect(position.x + bbox.x, position.y + bbox.y, bbox.width, bbox.height)
+        offset = pygame.Vector2(bbox.x, bbox.y)  # The offset between the image and the hitbox
+    else:
+        # If fully transparent, return a default empty hitbox and zero offset
+        hitbox = pygame.Rect(position.x, position.y, 0, 0)
+        offset = pygame.Vector2(0, 0)
+
+    return hitbox, offset
+
+
 class GameObject:
-    def __init__(self, position: pygame.Vector2, image: pygame.Surface) -> None:
-        self.image = image
-        self.rect = self.image.get_rect(topleft=position)
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, hitbox_image: pygame.Surface = None):
+        self.image = image.convert_alpha()  # Sprite image
+
+        # Use image to generate hitbox if no other hitbox is provided:
+        if hitbox_image:
+            rect, offset = generate_hitbox(position, hitbox_image)
+            self.rect = rect
+            self.sprite_offset = offset
+        else:
+            self.rect = self.image.get_rect(topleft=position)
+            self.sprite_offset = pg.Vector2()  # null vector for no offset
 
     def update(self, delta: float, game_world):
         pass
@@ -15,14 +39,20 @@ class GameObject:
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
         position = self.rect.topleft - camera_pos
-        screen.blit(self.image, position)
+        screen.blit(self.image, position - self.sprite_offset)
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.rect, 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
 
 
-class MovingObject(GameObject):
-    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
-        super().__init__(position, image)
+class InteractableObject(GameObject):
+    def on_collide(self, player, game_world) -> None:
+        pass
+
+
+class MovingObject(InteractableObject):
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool,
+                 hitbox_image: pygame.Surface = None):
+        super().__init__(position, image, hitbox_image)
         self.speed_x = 75
         self.speed_y = 400
         self.velocity = pygame.math.Vector2(0.0, 0.0)
@@ -68,12 +98,16 @@ class MovingObject(GameObject):
 
 class Player(MovingObject):
 
-    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool):
-        super().__init__(position, image, gravity)
+    def __init__(self, position: pygame.Vector2):
+        image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
+        hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert_alpha()
+        super().__init__(position, image, True, hitbox_image)
+        self.letters_collected: list[str] = []
         self.speed_x = 100
         self.player_lives = 3
         self.bounce_velocity_x = 0
-        self.time_since_bounce: float = 0.0
+        self.time_since_hit: float = 0.0
+        self.invincibility_time: float = 0.7
         self.current_direction = 1
         self.is_jumping = False
         self.is_running = False
@@ -103,8 +137,17 @@ class Player(MovingObject):
             self.animator = Animator(animation)
             self.animator.reset_animation(animation)
 
-    def on_hit_by_enemy(self, enemy: GameObject):
-        pass
+    def on_hit_by_enemy(self, enemy: GameObject, direction: int):
+        if self.time_since_hit != 0.0:
+            self.bounce_velocity_x = direction * 250
+            self.velocity.y = -300
+
+            if self.player_lives > 0:
+                # self.player_lives -= 1
+                pass
+
+    def on_pickup_letter(self, letter: str):
+        self.letters_collected.append(letter)
 
     def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
@@ -112,19 +155,23 @@ class Player(MovingObject):
             if self.rect.colliderect(o.rect):
                 o.on_collide(self, game_world)
 
-    def update(self, delta: float, game_world):
+    def update(self, delta: float, game_world, fallen: bool):
         #  Interact with interactable game elements and call their on_collide function
+        WALK_SOUND = pg.mixer.Sound(get_path('assets/sounds/walk_sound.wav'))
         self.do_interaction(game_world)
 
+        if fallen:
+            self.player_lives = 0
         # get player movement
         keys = pygame.key.get_pressed()
 
         # Move the player left/right based on the keys pressed
-        if keys[pygame.K_a]:
+
+        if keys[pygame.K_a] or keys[pygame.K_LEFT] and self.player_lives > 0:
             self.velocity.x = -self.speed_x  # Move left
             self.current_direction = -1
             self.is_running = True
-        elif keys[pygame.K_d]:
+        elif keys[pygame.K_d] or keys[pygame.K_RIGHT] and self.player_lives > 0:
             self.velocity.x = self.speed_x  # Move right
             self.current_direction = 1
             self.is_running = True
@@ -138,7 +185,7 @@ class Player(MovingObject):
             self.is_running = False
 
         # Move the player up based on keys pressed
-        if keys[pygame.K_SPACE] and self.is_grounded(game_world.static_objects):  # and if is_grounded
+        if (keys[pygame.K_SPACE] or keys[pygame.K_UP]) and self.is_grounded(game_world.static_objects):  # and if is_grounded
             self.velocity.y = -self.speed_y
             self.is_jumping = True
         else:
@@ -148,13 +195,26 @@ class Player(MovingObject):
         self.animator.update()
 
         #  Check collision and apply movement or not
+        if self.velocity.x != 0:
+            WALK_SOUND.play(loops=-1)
         super().update(delta, game_world)
 
-        if self.time_since_bounce < 0.7 and not self.is_grounded(game_world.static_objects):
-            self.time_since_bounce += delta
+        if self.time_since_hit < self.invincibility_time and not self.is_grounded(game_world.static_objects):
+            self.time_since_hit += delta
         else:
             self.bounce_velocity_x = 0
-            self.time_since_bounce = 0.0
+            self.time_since_hit = 0.0
+
+
+class LetterPickUp(InteractableObject):
+    def __init__(self, position: pygame.Vector2, letter: str):
+        self.letter = letter
+        image = LETTER_IMAGES[letter]
+        super().__init__(position, image, image)
+
+    def on_collide(self, player, game_world) -> None:
+        player.on_pickup_letter(self.letter)
+        game_world.interactable_objects.remove(self)
 
     def draw(self, screen, camera_pos):
         position = self.rect.topleft - camera_pos
@@ -173,15 +233,12 @@ class Enemy(MovingObject):
 
         if player.velocity.y < 0 and player.rect.bottom <= self.rect.top + threshold:
             # If player jumps on top of it, enemy dies
-            game_world.interactable_objects.remove(self)  # Remove enemy from the game
             player.velocity.y = -250
             player.bounce_velocity_x = 0
             player.velocity.x = 0
-
+            game_world.interactable_objects.remove(self)  # Remove enemy from the game
         else:
-            player.player_lives -= 1
-            player.bounce_velocity_x = self.current_direction * 250
-            player.velocity.y = -300
+            player.on_hit_by_enemy(self, self.current_direction)
 
 
 class Worm(Enemy):
@@ -227,4 +284,4 @@ class Worm(Enemy):
         position = self.rect.topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
-        pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
