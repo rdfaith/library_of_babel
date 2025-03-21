@@ -29,7 +29,7 @@ class MovingObject(InteractableObject):
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
         super().__init__(position, image)
         self.speed_x = 75
-        self.speed_y = 600
+        self.speed_y = 700
         self.velocity = pygame.math.Vector2(0.0, 0.0)
         self.gravity = gravity
         self.has_collided = False

@@ -5,6 +5,7 @@ from game_world import GameWorld
 import world_generation
 from utils import *
 from constants import *
+import random_world
 
 # pygame setup
 pg.init()
@@ -71,7 +72,6 @@ while running:
                     game = True
                     level_selection = False
                     level = LEVELS[selected_level]
-                    print(f"assets/levels/{level}.csv")
                     game_world = world_generation.generate_world(f"assets/levels/{level}.csv",'assets/sprites/autotile_test.png')
                     clock = pg.time.Clock()
         pg.display.flip()
@@ -86,7 +86,8 @@ while running:
 
             if event.type == pg.KEYDOWN and gameo == True:
                 if event.key == pg.K_e:
-                    game_world = world_generation.generate_world('assets/levels/test_map3.csv', 'assets/sprites/world_tileset.png')
+                    game_world = world_generation.generate_world(f"assets/levels/{level}.csv",
+                                                                 'assets/sprites/autotile_test.png')
                     clock = pg.time.Clock()
                     gameo = False
 

@@ -69,7 +69,8 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
                     collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 0)))
                 case "shelf":
                     collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 1)))
-
+                case "pillar":
+                    collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 2)))
                 case "worm":
                     interactable_objects.append(Worm(pos))
                 case "player":
