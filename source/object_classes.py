@@ -149,7 +149,7 @@ class Player(MovingObject):
 
         # Move the player up based on keys pressed
         if self.player_lives > 0:
-            if keys[pygame.K_SPACE] or keys[pygame.K_UP] and self.is_grounded(game_world.static_objects):  # and if is_grounded
+            if (keys[pygame.K_SPACE] or keys[pygame.K_UP]) and self.is_grounded(game_world.static_objects):
                 self.velocity.y = -self.speed_y
 
         #  Check collision and apply movement or not
