@@ -14,7 +14,7 @@ class GameWorld:
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.rect.x - SCREEN_WIDTH // 2,
                                                  self.player.rect.y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
-
+        self.play_start_position = player_pos
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
         self.player.rect.x = pos.x

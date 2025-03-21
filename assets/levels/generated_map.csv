@@ -2,12 +2,12 @@
  , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
  , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
  , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
- , , , , , , , , , , ,shelf,shelf,shelf,shelf,shelf, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
- , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
- , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,worm, , ,worm, , , , , , , , 
- , , , , , , , , , , , , , ,block, , , , , , , , , , , , ,block, , , , , , , , , , ,shelf,shelf,shelf,shelf, , , , ,B, , , 
- , , , , , , , , , , , , , ,pillar, , , ,worm, , , , , , , , ,pillar, , , , , , , , , , , , , , ,shelf, , , ,shelf, , , 
- , , , , , , , , , , , , , ,pillar, , , ,shelf, , , , , , , , ,pillar, , , , , , , , , , , , , , ,pillar, , , ,shelf, , , 
+ , , , , , , , , , , ,shelf,shelf,shelf,shelf,shelf, , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,worm, , ,worm, , , , , , , ,
+ , , , , , , , , , , , , , ,block, , , , , , , , , , , , ,block, , , , , , , , , , ,shelf,shelf,shelf,shelf, , , , ,B, , ,
+ , , , , , , , , , , , , , ,pillar, , , ,worm, , , , , , , , ,pillar, , , , , , , , , , , , , , ,shelf, , , ,shelf, , ,
+ , , , , , , , , , , , , , ,pillar, , , ,shelf, , , , , , , , ,pillar, , , , , , , , , , , , , , ,pillar, , , ,shelf, , ,
  , ,player, , , , , , , , , , , ,pillar, , , ,pillar, , , , , , , , ,pillar, , ,block, , , ,block,block,block,block, , , ,worm,pillar, , , ,shelf,block,block,block
  , , , , , , , , , , , ,worm, ,pillar, , , ,pillar, , , , , , ,block, ,pillar,block,block,block,block,block,block,block,block,block,block,block, ,block,block,pillar,E, ,block,block,block,block,block
  , , ,A, , , ,block,block,block,block,block,block,block,block, , , ,pillar, , , ,block, , ,pillar,B,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
