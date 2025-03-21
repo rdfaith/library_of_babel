@@ -10,7 +10,8 @@ SCREEN_HEIGHT = 180
 DEAD_ZONE_Y = 20
 CAMERA_DELAY_X, CAMERA_DELAY_Y = 50, 2
 
-STANDARD_TILESET: str = "assets/sprites/tiles/autotile_tileset.png"
+DEFAULT_TILESET: str = "assets/sprites/tiles/autotile_tileset.png"
+DEFAULT_COLLIDER_TILESET: str = "assets/sprites/tiles/colliders_tileset.png"
 
 #region UI Constants
 HEART_POS_0: pg.Vector2 = pg.Vector2(20, 2)
@@ -54,11 +55,11 @@ TILE_MAPPING = {
 
 #Background
 BG_LAYERS = [
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0,"depth": 20},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100,"depth": 16},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100,"depth": 12},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,"depth": 5},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33,"depth": -5}
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0, "depth": 20},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100, "depth": 16},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100, "depth": 12},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100, "depth": 5},
+    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33, "depth": -5}
 ]
 
 # Schriftart
@@ -66,6 +67,4 @@ WHITE = (255, 255, 255)
 GRAY = (200, 200, 200)
 BLACK = (0, 0, 0)
 BLUE = (50, 100, 255)
-LEVELS = ["generated_map","test_map", "test_map2", "test_map3"]
-
-
+LEVELS = ["generated_map", "test_map", "test_map2", "test_map3", "test_map_no_interactable"]

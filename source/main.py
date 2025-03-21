@@ -71,7 +71,7 @@ while running:
                     game = True
                     level_selection = False
                     level = LEVELS[selected_level]
-                    game_world = world_generation.generate_world(f"assets/levels/{level}.csv",'assets/sprites/autotile_test.png')
+                    game_world = world_generation.generate_world(f"assets/levels/{level}.csv",'assets/sprites/tiles/autotile_tileset.png')
                     clock = pg.time.Clock()
         pg.display.flip()
 
@@ -86,7 +86,7 @@ while running:
             if event.type == pg.KEYDOWN and gameo == True:
                 if event.key == pg.K_e:
                     game_world = world_generation.generate_world(f"assets/levels/{level}.csv",
-                                                                 'assets/sprites/autotile_test.png')
+                                                                 'assets/sprites/tiles/autotile_tileset.png')
                     clock = pg.time.Clock()
                     gameo = False
 
@@ -100,7 +100,7 @@ while running:
         game_world.do_render(screen)
         if gameo == True:
             #pygame.draw.rect(screen,(255,255,255),optionbutton,50)
-            dah = pg.image.load(get_path('assets/sprites/restart.png'))
+            dah = pg.image.load(get_path('assets/sprites/ui/restart.png'))
             screen.blit(dah,optionbutton)
             
             

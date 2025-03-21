@@ -5,16 +5,18 @@ from game_world import *
 from constants import *
 from utils import *
 
+
 def read_map(map_file_path: str) -> list[list[str]]:
     """Liest die Karte aus einer Datei und gibt sie als 2D-Liste zurück."""
     with open(get_path(map_file_path), newline='') as f:
         reader = csv.reader(f)
         return [list(row) for row in reader]
 
-def find_tile(pos:pg.Vector2, map_data: list[list[str]]) -> int:
+
+def find_tile(pos: pg.Vector2, map_data: list[list[str]]) -> int:
     map_width: int = len(map_data[0])
     map_height: int = len(map_data)
-    coord_x, coord_y = int(pos.x/FRAME_SIZE), int(pos.y/FRAME_SIZE)
+    coord_x, coord_y = int(pos.x / FRAME_SIZE), int(pos.y / FRAME_SIZE)
     object: str = map_data[coord_y][coord_x]
 
     # Prüfe direkte Nachbarn (oben, rechts, unten, links)
@@ -28,6 +30,7 @@ def find_tile(pos:pg.Vector2, map_data: list[list[str]]) -> int:
 
     return TILE_MAPPING.get(index, (0))
 
+
 def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
     """Extrahiert einen Frame aus dem Tileset."""
     spritesheet = pg.image.load(get_path(tileset_file_path)).convert_alpha()
@@ -35,9 +38,11 @@ def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
     frame.blit(spritesheet, (0, 0), (frame_x * FRAME_SIZE, frame_y * FRAME_SIZE, FRAME_SIZE, FRAME_SIZE))
     return frame
 
-def get_sprite(frame_x: int, frame_y: int) -> pg.Surface:
+
+def get_sprite_and_collider(frame_x: int, frame_y: int) -> (pg.Surface, pg.Surface):
     """Extrahiert aus dem festgelegten standard tileset"""
-    return get_frame(frame_x, frame_y, STANDARD_TILESET)
+    return get_frame(frame_x, frame_y, DEFAULT_TILESET), get_frame(frame_x, frame_y, DEFAULT_COLLIDER_TILESET)
+
 
 def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
     # Variablen
@@ -45,7 +50,7 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
     current_pos: pg.Vector2 = pg.Vector2(0, 0)
     collision_objects: list[GameObject] = []
     interactable_objects: list[GameObject] = []
-    objects: list[GameObject] = [] # unused currently
+    objects: list[GameObject] = []  # unused currently
     player_start_pos: pg.Vector2
     level_size: tuple[int, int] = (len(map_data[0]) * FRAME_SIZE, len(map_data) * FRAME_SIZE)
 
@@ -66,11 +71,11 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
 
             match col:
                 case "block":
-                    collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 0)))
+                    collision_objects.append(GameObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 0)))
                 case "shelf":
-                    collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 1)))
+                    collision_objects.append(GameObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 1)))
                 case "pillar":
-                    collision_objects.append(GameObject(pos, get_sprite(find_tile(pos, map_data), 2)))
+                    collision_objects.append(GameObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 2)))
                 case "worm":
                     interactable_objects.append(Worm(pos))
                 case "player":
@@ -112,6 +117,7 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
 
     game_world: GameWorld = GameWorld(objects, collision_objects, interactable_objects, player_start_pos, level_size)
     return game_world
+
 
 if __name__ == '__main__':
     pg.init()
