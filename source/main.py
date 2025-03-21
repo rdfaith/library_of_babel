@@ -14,7 +14,7 @@ pg.mixer.init()
 sound = pg.mixer.Sound(get_path('assets/sounds/bg_music.mp3'))
 
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
-                                 flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
+                             flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
 running = True
 delta = 0.0
 menu = True
@@ -52,7 +52,7 @@ while running:
                 running = False
                 menu = False
                 level_selection = False
-            if pg.Rect.collidepoint(optionbutton,pg.mouse.get_pos()) == True:
+            if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     menu = False
                     level_selection = True
@@ -60,7 +60,7 @@ while running:
         # Menüoptionen
         screen.fill((0, 0, 0))
         levels: list[str] = [os.path.splitext(f)[0] for f in os.listdir(get_path(MAP_FOLDER)) if
-                      os.path.isfile(os.path.join(get_path(MAP_FOLDER), f))]
+                             os.path.isfile(os.path.join(get_path(MAP_FOLDER), f))]
         for i, option in enumerate(levels):
             color: str = BLUE if i == selected_level else WHITE
             text = FONT.render(option, True, color)
@@ -78,7 +78,8 @@ while running:
                     game = True
                     level_selection = False
                     level = levels[selected_level]
-                    game_world = world_generation.generate_world(f"{MAP_FOLDER + level}.csv",'assets/sprites/autotile_test.png')
+                    game_world = world_generation.generate_world(f"{MAP_FOLDER + level}.csv",
+                                                                 'assets/sprites/autotile_test.png')
                     clock = pg.time.Clock()
         pg.display.flip()
 
@@ -98,7 +99,6 @@ while running:
                     clock = pg.time.Clock()
                     gameo = False
 
-
         # do updates
         game_world.do_updates(delta)
         if game_world.player.player_lives <= 0:
@@ -109,14 +109,11 @@ while running:
         if gameo == True:
             #pygame.draw.rect(screen,(255,255,255),optionbutton,50)
             dah = pg.image.load(get_path('assets/sprites/ui/restart.png'))
-            screen.blit(dah,optionbutton)
-            
-            
+            screen.blit(dah, optionbutton)
 
         # flip() the display to put your work on screen
         pg.display.flip()
 
         delta = clock.tick(60) / 1000
 
-        
 pg.quit()
