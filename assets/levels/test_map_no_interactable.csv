@@ -1,0 +1,12 @@
+block,B,,,,,,,,,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,shelf,shelf,,
+block,,,,,,,,,,,,,,,,,,,,
+block,,,,,,,,,,,,,,,,,,,,
+block,,player,,,,,,,,,,,shelf,shelf,shelf,,,,,
+block,,,,,,,,,,,block,,,,,,,,,
+block,block,,,,worm,,,shelf,,,block,,,worm,,,,,,
+block,block,,,,shelf,,,shelf,,,block,,,,,,,,,
+block,block,block,block,,shelf,,,shelf,,,block,,,,worm,,,,,
+block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block

@@ -9,8 +9,7 @@ import random_world
 
 # pygame setup
 pg.init()
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
-                                 flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
 running = True
 delta = 0.0
 menu = True

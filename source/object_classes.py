@@ -76,14 +76,17 @@ class Player(MovingObject):
         self.speed_x = 100
         self.player_lives = 3
         self.bounce_velocity_x = 0
-        self.time_since_bounce: float = 0.0
+        self.time_since_hit: float = 0.0
+        self.invincibility_time: float = 0.7
 
     def on_hit_by_enemy(self, enemy: GameObject, direction: int):
-        self.bounce_velocity_x = direction * 250
-        self.velocity.y = -300
+        if self.time_since_hit != 0.0:
+            self.bounce_velocity_x = direction * 250
+            self.velocity.y = -300
 
-        if self.player_lives > 0:
-            self.player_lives -= 1
+            if self.player_lives > 0:
+                # self.player_lives -= 1
+                pass
 
     def on_pickup_letter(self, letter: str):
         self.letters_collected.append(letter)
@@ -123,11 +126,11 @@ class Player(MovingObject):
         #  Check collision and apply movement or not
         super().update(delta, game_world)
 
-        if self.time_since_bounce < 0.7 and not self.is_grounded(game_world.static_objects):
-            self.time_since_bounce += delta
+        if self.time_since_hit < self.invincibility_time and not self.is_grounded(game_world.static_objects):
+            self.time_since_hit += delta
         else:
             self.bounce_velocity_x = 0
-            self.time_since_bounce = 0.0
+            self.time_since_hit = 0.0
 
 
 class LetterPickUp(InteractableObject):
@@ -167,7 +170,7 @@ class Worm(Enemy):
         self.speed_x = 30
         self.distance = 0
         self.max_distance = 50
-        self.animator = Animator(pygame.image.load(get_path('assets/test/worm-Sheet.png')), 32, 16, 5, 10)
+        self.animator = Animator(pygame.image.load(get_path('assets/sprites/anim/worm_walk.png')), 32, 16, 5, 10)
 
     def update(self, delta: float, game_world):
         self.velocity.x = self.current_direction * self.speed_x
@@ -187,4 +190,4 @@ class Worm(Enemy):
         position = self.rect.topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
-        pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
