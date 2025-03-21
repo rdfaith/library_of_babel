@@ -1,8 +1,7 @@
-import object_classes
 import pygame as pg
+from player import Player
 from constants import *
 from utils import *
-
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
@@ -10,7 +9,7 @@ class GameWorld:
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
-        self.player = object_classes.Player(player_pos)
+        self.player = Player(player_pos)
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.rect.x - SCREEN_WIDTH // 2,
                                                  self.player.rect.y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size

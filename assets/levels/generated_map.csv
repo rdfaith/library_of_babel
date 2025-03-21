@@ -1,16 +1,16 @@
  , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
- , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,shelf, , , , , , , , , , , , , , , , , 
- , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,block,block, , , , , , , , , ,shelf, , , , , , 
- , , , , , , , , , , , , , , , , , , , , , , , ,worm, , , , , , , ,pillar, , , , ,shelf,shelf, , , , ,pillar, , , , , , 
- , , , , , , , , , , , , , , ,worm, , , , , , , , , , , , , , , , ,pillar, ,shelf,shelf, , ,shelf,shelf, , ,shelf,pillar, ,shelf,shelf,shelf,shelf, 
- , , , , , , , , , , , , , , , , , , , , ,shelf, , ,shelf, , , ,shelf, , ,A,pillar,shelf, ,pillar,block,block,shelf, ,L, ,block,block,shelf, , , , ,block
- , , , , , , , , , , , , , , , , , , , , ,pillar, , , , ,E,shelf, , ,shelf,block,pillar,shelf,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , , , , , , , , , , , , , , , , , , ,B,shelf,pillar, , ,block, ,block,block,block,block,block,block,block,shelf,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , , , , , , , , , , , , , ,B, , , , ,shelf, ,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , , , , , , , , , , ,shelf, , ,shelf, , ,shelf,shelf, ,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , , , ,player, , , , , , ,shelf,shelf,shelf, , , , , ,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , , , , , , ,shelf,shelf, ,shelf,pillar,block, ,block, ,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , , , , , , , , , , ,block,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
- , ,shelf,shelf,block,shelf,block,block,block, ,block,block,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
-block,block,block,block,block,block,pillar,block, , ,block,block,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
-block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , ,worm, , , , , , , , , , , , , , , , , 
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
+ , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , , 
+ , , , , , , , , ,B, , , , , , , , , , , , , , , , , , , , , , , , ,worm, , , , , , , , , , , , , , , 
+ , , , , , , , , ,shelf,shelf,shelf,shelf,shelf, ,A, , , , , , , , , , , , , ,shelf,shelf,shelf, , , , , , , ,worm, , , , , , , , , , 
+ , , , , , , , , , , , , , ,shelf,shelf, , , , , , , , , , , , , , ,shelf, , , , , , , , , , , , , ,shelf, , , , , 
+ , , , , , , ,E, , , , , , , , , , , , , , , , , , , , , ,block,shelf,block, , , , , , , , ,shelf, , , ,shelf, , , , , 
+ , , , , , ,shelf,shelf,shelf,shelf,shelf, , , ,block,block, , , , , , , , , , , , , ,pillar, , , , , ,shelf,shelf, , , , , , , ,pillar, , , , , 
+player, , , , ,shelf, , , ,shelf, , , , ,pillar, , , , , , , ,B, , , , , , ,pillar, ,shelf,shelf, , ,block,block, , ,shelf,block,block,block,block,pillar, ,shelf, , , 
+ , , ,shelf, , , , ,shelf,pillar, , , , ,pillar, , , ,shelf, ,shelf, ,shelf, , , ,shelf,L,shelf,pillar, ,block,block,block,block,block,block, , ,block,block,block,block,block,block,block, ,shelf, , 
+ ,shelf,block,block,block,block,block,block,block,pillar, , , , ,pillar, , , , ,shelf, ,shelf, , ,shelf, , ,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block, ,shelf,block
+block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block, ,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block, ,block
+block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block,block, , ,block,block,block,block,block,block,block,block,block,block,block
