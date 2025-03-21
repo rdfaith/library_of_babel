@@ -23,7 +23,12 @@ class GameWorld:
         self.player.rect.y = pos.y
 
     def do_updates(self, delta: float) -> None:
-        self.player.update(delta, self)
+        # check if the player has fallen
+        fallen: bool = False
+        if self.player.rect.y > self.level_height:
+            fallen = True
+
+        self.player.update(delta, self, fallen)
         for i in self.interactable_objects:
             i.update(delta, self)
 

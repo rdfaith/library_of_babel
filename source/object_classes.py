@@ -94,10 +94,11 @@ class Player(MovingObject):
             if self.rect.colliderect(o.rect):
                 o.on_collide(self, game_world)
 
-    def update(self, delta: float, game_world):
+    def update(self, delta: float, game_world, fallen: bool):
         #  Interact with interactable game elements and call their on_collide function
         self.do_interaction(game_world)
-
+        if fallen:
+            self.player_lives = 0
         # get player movement
         keys = pygame.key.get_pressed()
 
