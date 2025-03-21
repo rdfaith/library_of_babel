@@ -1,7 +1,7 @@
 import pygame
 import utils
-from game_world import *
-from animator_object import Animator
+from animator_object import *
+from utils import *
 
 
 class GameObject:
@@ -24,10 +24,13 @@ class MovingObject(GameObject):
     def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool) -> None:
         super().__init__(position, image)
         self.speed_x = 75
-        self.speed_y = 600
+        self.speed_y = 400
         self.velocity = pygame.math.Vector2(0.0, 0.0)
         self.gravity = gravity
         self.has_collided = False
+
+    def set_animation(self, animation) -> None:
+        pass
 
     def does_collide(self, rect, objects: list) -> bool:
         """Check if hit box collides with another object."""
@@ -44,7 +47,7 @@ class MovingObject(GameObject):
         else:
             return False
 
-    def update(self, delta: float, game_world: GameWorld):
+    def update(self, delta: float, game_world):
         """update hit box and position depending on collision"""
         # x axis
         preview_rect_x = self.rect.move(self.velocity.x * delta + 1 if self.velocity.x > 0 else -1, 0)
@@ -55,12 +58,13 @@ class MovingObject(GameObject):
 
         # y axis
         if not self.is_grounded(game_world.static_objects):
-            self.velocity.y += 50
+            self.velocity.y += 30
         preview_rect_y = self.rect.move(0, self.velocity.y * delta)
         if not self.does_collide(preview_rect_y, game_world.static_objects):
             self.rect.move_ip(0, self.velocity.y * delta)
         else:
             self.velocity.y = 0
+
 
 class Player(MovingObject):
 
@@ -70,11 +74,39 @@ class Player(MovingObject):
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.time_since_bounce: float = 0.0
+        self.current_direction = 1
+        self.is_jumping = False
+        self.is_running = False
+
+        # define animations
+        self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 10)
+        self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
+        self.jump_up = Animation("jump_up", get_path('assets/test/dino-test-jump-up-Sheet.png'), 24, 24, 6, 10)
+        self.fall = Animation("fall", get_path('assets/test/dino-test-fall-Sheet.png'), 24, 24, 8, 10)
+
+        self.active_animation = self.idle
+        self.animator = Animator(self.active_animation)
+
+    def check_animation(self) -> None:
+        if self.is_jumping:
+            self.set_animation(self.jump_up)
+        elif self.velocity.y > 0:
+            self.set_animation(self.fall)
+        elif self.is_running:
+            self.set_animation(self.run)
+        else:
+            self.set_animation(self.idle)
+
+    def set_animation(self, animation):
+        if self.active_animation.name != animation.name:
+            self.active_animation = animation
+            self.animator = Animator(animation)
+            self.animator.reset_animation(animation)
 
     def on_hit_by_enemy(self, enemy: GameObject):
         pass
 
-    def do_interaction(self, game_world: GameWorld):
+    def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
         for o in game_world.interactable_objects:
             if self.rect.colliderect(o.rect):
@@ -90,18 +122,30 @@ class Player(MovingObject):
         # Move the player left/right based on the keys pressed
         if keys[pygame.K_a]:
             self.velocity.x = -self.speed_x  # Move left
+            self.current_direction = -1
+            self.is_running = True
         elif keys[pygame.K_d]:
             self.velocity.x = self.speed_x  # Move right
+            self.current_direction = 1
+            self.is_running = True
         else:
             self.velocity.x = 0
+            self.is_running = False
 
         # self.velocity.x += self.bounce_velocity_x
         if self.bounce_velocity_x != 0:
             self.velocity.x = self.bounce_velocity_x
+            self.is_running = False
 
         # Move the player up based on keys pressed
         if keys[pygame.K_SPACE] and self.is_grounded(game_world.static_objects):  # and if is_grounded
             self.velocity.y = -self.speed_y
+            self.is_jumping = True
+        else:
+            self.is_jumping = False
+
+        self.check_animation()
+        self.animator.update()
 
         #  Check collision and apply movement or not
         super().update(delta, game_world)
@@ -112,6 +156,10 @@ class Player(MovingObject):
             self.bounce_velocity_x = 0
             self.time_since_bounce = 0.0
 
+    def draw(self, screen, camera_pos):
+        position = self.rect.topleft - camera_pos
+        screen.blit(self.animator.get_frame(self.current_direction), position)
+
 
 class Enemy(MovingObject):
 
@@ -119,7 +167,7 @@ class Enemy(MovingObject):
         super().__init__(position, image, gravity)
         self.current_direction = 1
 
-    def on_collide(self, player: Player, game_world: GameWorld) -> None:
+    def on_collide(self, player: Player, game_world) -> None:
         """Is called on collision with player and reduces lives."""
         threshold = 5
 
@@ -142,7 +190,24 @@ class Worm(Enemy):
         self.speed_x = 30
         self.distance = 0
         self.max_distance = 50
-        self.animator = Animator(pygame.image.load(get_path('assets/test/worm-Sheet.png')), 32, 16, 5, 10)
+        self.run = Animation("run", get_path('assets/test/worm-Sheet.png'), 32, 16, 5, 10)
+        #self.die = Animation(get_path(), 32, 16, x, 10)
+
+        self.active_animation = self.run
+        self.animator = Animator(self.active_animation)
+
+    def check_animation(self) -> None:
+        # if self.is_dead:
+        #   self.set_animation(self.die)
+        # else:
+        #   pass
+        pass
+
+    def set_animation(self, animation):
+        if self.active_animation.name != animation.name:
+            self.active_animation = animation
+            self.animator = Animator(animation)
+            self.animator.reset_animation(animation)
 
     def update(self, delta: float, game_world):
         self.velocity.x = self.current_direction * self.speed_x
