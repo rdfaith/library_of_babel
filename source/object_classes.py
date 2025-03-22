@@ -99,7 +99,8 @@ class MovingObject(InteractableObject):
         """update hit box and position depending on collision"""
 
         # Apply gravity
-        self.velocity.y = min(self.velocity.y + self.gravity, self.max_y_velocity)
+        if self.has_gravity:
+            self.velocity.y = min(self.velocity.y + self.gravity, self.max_y_velocity)
 
         # Calculate movement
         dx, dy = self.velocity * delta
