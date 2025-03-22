@@ -3,6 +3,7 @@ from player import Player
 from constants import *
 from utils import *
 
+
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int]) -> None:
@@ -14,18 +15,19 @@ class GameWorld:
                                                  self.player.rect.y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
+
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
         self.player.rect.x = pos.x
         self.player.rect.y = pos.y
 
     def do_updates(self, delta: float) -> None:
-        # check if the player has fallen
-        fallen: bool = False
-        if self.player.rect.y > self.level_height:
-            fallen = True
 
-        self.player.update(delta, self, fallen)
+        # check if the player has fallen out of bounds
+        if self.player.rect.y > self.level_height:
+            self.player.on_fell_out_of_bounds()
+
+        self.player.update(delta, self)
 
         for o in self.interactable_objects:
             o.update(delta, self)
@@ -34,11 +36,10 @@ class GameWorld:
 
         #region Functions
         def set_camera_position() -> None:
+            """Sets self.camera_pos to the correct position for this frame"""
 
             def smooth_movement(current_pos: float, target_pos: float, delay: float) -> float:
                 return current_pos + (target_pos - current_pos) * (delay / 100)
-
-            """Sets self.camera_pos to the correct position for this frame"""
 
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
@@ -79,18 +80,21 @@ class GameWorld:
             screen.blit(layer["image"], bg_pos)
 
         def draw_bg_parallax():
+            """Draws the background parallax layers"""
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for layer in BG_LAYERS:
                 if layer["depth"] > 0:
                     draw_parallax_layer(layer, max_depth, True)
 
         def draw_fg_parallax():
+            """Draws the foreground parallax layers"""
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for layer in BG_LAYERS:
                 if layer["depth"] <= 0:
                     draw_parallax_layer(layer, max_depth, False)
 
         def draw_post_processing():
+            """Adds visual effects and post-processing"""
             vignette = VIGNETTE.convert_alpha()
             player_position = self.player.rect.topleft - self.player.sprite_offset - self.camera_pos
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)

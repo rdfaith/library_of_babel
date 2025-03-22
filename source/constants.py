@@ -6,7 +6,15 @@ FRAME_SIZE = 16
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 180
 
-#Kamera
+# Game controls / User input
+KEY_UP      = [pg.K_UP,     pg.K_w]
+KEY_JUMP    = [pg.K_SPACE]
+KEY_RIGHT   = [pg.K_RIGHT,  pg.K_d]
+KEY_LEFT    = [pg.K_LEFT,   pg.K_a]
+KEY_DOWN    = [pg.K_DOWN,   pg.K_s]
+KEY_CROUCH  = [pg.K_LCTRL]
+
+# Camera
 DEAD_ZONE_Y = 20
 CAMERA_DELAY_X, CAMERA_DELAY_Y = 50, 2
 
@@ -70,5 +78,3 @@ VIGNETTE = pg.image.load(get_path("assets/sprites/effects/vignette_lesser.png"))
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
 MAP_FOLDER = "assets/levels/"
-
-

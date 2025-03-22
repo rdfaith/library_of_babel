@@ -22,8 +22,24 @@ def generate_hitbox(position: pygame.Vector2, hitbox_image: pygame.Surface) -> (
 
 
 class GameObject:
-    def __init__(self, position: pygame.Vector2, image: pygame.Surface, hitbox_image: pygame.Surface = None):
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface):
         self.image = image.convert_alpha()  # Sprite image
+        self.position = position
+
+    def update(self, delta: float, game_world):
+        pass
+
+    def draw(self, screen, camera_pos):
+        """Draw object on screen."""
+        position = self.position - camera_pos
+        screen.blit(self.image, position)
+
+
+class ColliderObject(GameObject):
+    """Base class for all object with a collider"""
+
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, hitbox_image: pygame.Surface = None):
+        super().__init__(position, image)
 
         # Use image to generate hitbox if no other hitbox is provided:
         if hitbox_image:
@@ -34,30 +50,31 @@ class GameObject:
             self.rect = self.image.get_rect(topleft=position)
             self.sprite_offset = pg.Vector2()  # null vector for no offset
 
-    def update(self, delta: float, game_world):
-        pass
-
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
         position = self.rect.topleft - camera_pos
         screen.blit(self.image, position - self.sprite_offset)
-        # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
 
 
-class InteractableObject(GameObject):
+class InteractableObject(ColliderObject):
+    """Base class for all objects that define special behaviour when colliding with player"""
+
     def on_collide(self, player, game_world) -> None:
         pass
 
 
 class MovingObject(InteractableObject):
-    def __init__(self, position: pygame.Vector2, image: pygame.Surface, gravity: bool,
+    """Base class for all moving objects with physical collision handling"""
+
+    def __init__(self, position: pygame.Vector2, image: pygame.Surface, has_gravity: bool,
                  hitbox_image: pygame.Surface = None):
         super().__init__(position, image, hitbox_image)
-        self.speed_x = 75
-        self.speed_y = 400
-        self.velocity = pygame.math.Vector2(0.0, 0.0)
-        self.gravity = gravity
+        self.max_y_velocity = 800.0
+        self.gravity = 30.0
+        self.speed_x = 75.0
+        self.speed_y = 400.0
+        self.velocity = pygame.Vector2(0.0, 0.0)
+        self.has_gravity = has_gravity
         self.has_collided = False
 
     def set_animation(self, animation) -> None:
@@ -70,7 +87,7 @@ class MovingObject(InteractableObject):
                 return True
         return False
 
-    def is_grounded(self, objects: list):
+    def check_is_grounded(self, objects: list) -> bool:
         """Check if element is on the floor."""
         preview_rect = self.rect.move(0, 1)
         if self.does_collide(preview_rect, objects):
@@ -80,23 +97,44 @@ class MovingObject(InteractableObject):
 
     def update(self, delta: float, game_world):
         """update hit box and position depending on collision"""
-        # x axis
-        preview_rect_x = self.rect.move(self.velocity.x * delta + 1 if self.velocity.x > 0 else -1, 0)
-        if not self.does_collide(preview_rect_x, game_world.static_objects):
-            self.rect.x += self.velocity.x * delta
-        else:
-            self.has_collided = True
 
-        # y axis
-        if not self.is_grounded(game_world.static_objects):
-            self.velocity.y += 30
-        preview_rect_y = self.rect.move(0, self.velocity.y * delta)
-        if not self.does_collide(preview_rect_y, game_world.static_objects):
-            self.rect.move_ip(0, self.velocity.y * delta)
-        else:
-            self.velocity.y = 0
+        # Apply gravity
+        self.velocity.y = min(self.velocity.y + self.gravity, self.max_y_velocity)
 
+        # Calculate movement
+        dx, dy = self.velocity * delta
 
+        # Move x and check collisions
+        self.position.x += dx
+        self.rect.topleft = self.position
+
+        self.has_collided = False
+
+        for o in game_world.static_objects:
+            if self.rect.colliderect(o):  # Check collision
+                self.has_collided = True
+                if dx > 0:  # Moving right
+                    self.rect.right = o.rect.left
+                elif dx < 0:  # Moving left
+                    self.rect.left = o.rect.right
+                self.position.x, _ = self.rect.topleft  # Reset precise position
+                break  # break out of the loop (only handle first collision per axis)
+
+        # move y and check collisions
+        self.position.y += dy
+        self.rect.topleft = self.position
+
+        for o in game_world.static_objects:
+            if self.rect.colliderect(o):  # Check collision
+                if dy > 0:  # Falling down
+                    self.rect.bottom = o.rect.top
+                    self.velocity.y = 0
+                    # self.on_ground = True
+                elif dy < 0:  # Hitting the ceiling
+                    self.rect.top = o.rect.bottom
+                    self.velocity.y = 0
+                _, self.position.y = self.rect.topleft  # Reset precise position
+                break  # break out of the loop (only handle first collision per axis)
 
 
 class LetterPickUp(InteractableObject):
@@ -133,7 +171,7 @@ class Enemy(MovingObject):
 class Worm(Enemy):
     def __init__(self, position: pygame.Vector2):
         super().__init__(position, pygame.image.load(get_path("assets/test/worm.png")), True)
-        self.speed_x = 30
+        self.speed_x = 10
         self.distance = 0
         self.max_distance = 50
         self.run = Animation("run", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
@@ -156,8 +194,8 @@ class Worm(Enemy):
             self.animator.reset_animation(animation)
 
     def update(self, delta: float, game_world):
+
         self.velocity.x = self.current_direction * self.speed_x
-        self.animator.update()
 
         super().update(delta, game_world)
 
@@ -168,6 +206,8 @@ class Worm(Enemy):
             self.current_direction *= (-1)
             self.distance = 0
             self.has_collided = False
+
+        self.animator.update()
 
     def draw(self, screen, camera_pos):
         position = self.rect.topleft - camera_pos
