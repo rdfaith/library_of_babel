@@ -21,6 +21,8 @@ class Player(MovingObject):
     def __init__(self, position: pygame.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
         hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert_alpha()
+        hitbox_image_crouch = pg.image.load(get_path('assets/sprites/dino/test_hitbox_crouch.png')).convert_alpha()
+
         super().__init__(position, image, True, hitbox_image)
 
         self.letters_collected: list[str] = []
@@ -54,6 +56,7 @@ class Player(MovingObject):
     def on_player_death(self, reason: str):
         self.player_lives = 0
         self.state = self.State.DEAD
+        self.on_state_changed(self.State.DEAD)
         # self.set_animation(self.dead) # uncomment when death animation implemented
         pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
 
@@ -90,7 +93,7 @@ class Player(MovingObject):
     def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
         for o in game_world.interactable_objects:
-            if self.rect.colliderect(o.rect):
+            if self.get_rect().colliderect(o.get_rect()):
                 o.on_collide(self, game_world)
 
     def handle_movement(self, keys, game_world):
@@ -145,11 +148,12 @@ class Player(MovingObject):
         # Check invincibility frames
         if self.time_since_hit < self.invincibility_time:
             self.time_since_hit += delta
-            if self.bounce_velocity_x != 0:
-                self.velocity.x = self.bounce_velocity_x
         else:
             self.bounce_velocity_x = 0
             self.time_since_hit = 0.0
+
+        if self.bounce_velocity_x != 0:
+            self.velocity.x = self.bounce_velocity_x
 
 
         # Check collision and apply movement or not
@@ -158,7 +162,7 @@ class Player(MovingObject):
         self.animator.update()
 
     def draw(self, screen, camera_pos):
-        position = self.rect.topleft - camera_pos
-        screen.blit(self.animator.get_frame(self.current_direction), position - self.sprite_offset)
+        position = self.get_rect().topleft - camera_pos
+        screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.rect.move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

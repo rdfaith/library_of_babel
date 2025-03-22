@@ -1,3 +1,4 @@
+import pygame as pg
 import os
 import pathlib
 

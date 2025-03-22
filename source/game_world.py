@@ -11,20 +11,20 @@ class GameWorld:
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
         self.player = Player(player_pos)
-        self.camera_pos: pg.Vector2 = pg.Vector2(self.player.rect.x - SCREEN_WIDTH // 2,
-                                                 self.player.rect.y - SCREEN_HEIGHT // 2)
+        self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
+                                                 self.player.get_rect().y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
 
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
-        self.player.rect.x = pos.x
-        self.player.rect.y = pos.y
+        self.player.get_rect().x = pos.x
+        self.player.get_rect().y = pos.y
 
     def do_updates(self, delta: float) -> None:
 
         # check if the player has fallen out of bounds
-        if self.player.rect.y > self.level_height:
+        if self.player.get_rect().y > self.level_height:
             self.player.on_fell_out_of_bounds()
 
         self.player.update(delta, self)
@@ -43,8 +43,8 @@ class GameWorld:
 
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
-                self.player.rect.x - SCREEN_WIDTH // 2,
-                self.player.rect.y - SCREEN_HEIGHT // 2
+                self.player.get_rect().x - SCREEN_WIDTH // 2,
+                self.player.get_rect().y - SCREEN_HEIGHT // 2
             )
 
             self.camera_pos.x = smooth_movement(self.camera_pos.x, target_pos.x, CAMERA_DELAY_X)
@@ -96,7 +96,7 @@ class GameWorld:
         def draw_post_processing():
             """Adds visual effects and post-processing"""
             vignette = VIGNETTE.convert_alpha()
-            player_position = self.player.rect.topleft - self.player.sprite_offset - self.camera_pos
+            player_position = self.player.get_rect().topleft - self.player.get_sprite_offset() - self.camera_pos
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
             screen.blit(VIGNETTE, vignette_position)
 
