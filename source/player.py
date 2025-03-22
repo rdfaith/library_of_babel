@@ -8,6 +8,7 @@ from enum import Enum
 # Pygame event for player death
 PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
 
+
 class Player(MovingObject):
     # Player states
     class State(Enum):
@@ -38,8 +39,8 @@ class Player(MovingObject):
 
         self.state = None
 
-        self.is_jumping = False
-        self.is_running = False
+        self.is_jump_unlocked: bool = False
+        self.is_crouch_unlocked: bool = False
 
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
@@ -68,7 +69,8 @@ class Player(MovingObject):
             self.velocity.y = -300
 
             if self.player_lives > 1:
-                self.player_lives -= 1
+                print("Aua")
+                # self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")
 
@@ -77,6 +79,23 @@ class Player(MovingObject):
 
     def on_pickup_letter(self, letter: str):
         self.letters_collected.append(letter)
+
+        word = "".join(self.letters_collected).upper()
+
+        word_completed = False
+
+        match word:
+            case "JUMP":
+                self.is_jump_unlocked = True
+                word_completed = True
+            case "DUCK":
+                self.is_crouch_unlocked = True
+                word_completed = True
+            case "BABEL":
+                print("Yayy, you won!")
+
+        if word_completed:
+            self.letters_collected = []
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
@@ -127,16 +146,15 @@ class Player(MovingObject):
             new_state = self.State.IDLE
 
         if is_grounded:
-            if keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]:
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
-            elif keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]:
+            elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 new_state = self.State.DUCK
         elif self.velocity.y <= 0:
             new_state = self.State.JUMP
         else:
             new_state = self.State.FALL
-
 
         if new_state != self.state:
             self.state = new_state
@@ -163,7 +181,6 @@ class Player(MovingObject):
         if self.bounce_velocity_x != 0:
             self.velocity.x = self.bounce_velocity_x
 
-
         # Check collision and apply movement or not
         super().update(delta, game_world)
 
@@ -173,4 +190,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
