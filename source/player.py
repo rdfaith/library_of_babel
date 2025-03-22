@@ -25,6 +25,8 @@ class Player(MovingObject):
 
         super().__init__(position, image, True, hitbox_image)
 
+        self.hitbox.add_hitbox("crouch", self.position, hitbox_image_crouch)
+
         self.letters_collected: list[str] = []
         self.speed_x = 70
         self.jump_force = 400
@@ -90,6 +92,12 @@ class Player(MovingObject):
             case _:
                 self.set_animation(self.idle)
 
+        # Change hitbox
+        if self.state == self.State.DUCK:
+            self.set_hitbox("crouch")
+        else:
+            self.set_hitbox("default")
+
     def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
         for o in game_world.interactable_objects:
@@ -119,16 +127,16 @@ class Player(MovingObject):
             new_state = self.State.IDLE
 
         if is_grounded:
-            if keys[pg.K_SPACE]:
+            if keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
-            elif keys[pg.K_DOWN] or keys[pg.K_s]:
-
+            elif keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]:
                 new_state = self.State.DUCK
         elif self.velocity.y <= 0:
             new_state = self.State.JUMP
         else:
             new_state = self.State.FALL
+
 
         if new_state != self.state:
             self.state = new_state
@@ -165,4 +173,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

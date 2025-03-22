@@ -48,11 +48,20 @@ class Hitbox:
         self._add_hitbox_to_dict(name, *Hitbox._get_rect_and_offset(position, hitbox_image))
 
     def set_current(self, name: str):
+
         if self._hitboxes[name]:
             self._current_hitbox = name
         else:
             print("ERROR: Invalid hitbox", name)
             self._current_hitbox = "default"
+
+    def get_offset_diff(self, hb1: str, hb2: str = None):
+        """Returns sprite offset difference of two hitboxes.
+        If second argument is None, the current hitbox will be used"""
+        if hb2:
+            return self._hitboxes[hb1]["offset"] - self._hitboxes[hb2]["offset"]
+        else:
+            return self.get_offset() - self._hitboxes[hb1]["offset"]
 
     def get_rect(self) -> pg.Rect:
         return self._hitboxes[self._current_hitbox]["rect"]

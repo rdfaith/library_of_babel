@@ -37,6 +37,11 @@ class ColliderObject(GameObject):
     def get_sprite_offset(self) -> pg.Vector2:
         return self.hitbox.get_offset()
 
+    def set_hitbox(self, hitbox_name: str):
+        self.position -= self.hitbox.get_offset_diff(hitbox_name)  # Adjust position for new hitbox
+        self.hitbox.set_current(hitbox_name)
+
+
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
         rect = self.get_rect()
