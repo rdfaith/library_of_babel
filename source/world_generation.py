@@ -85,6 +85,8 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
                     objects.append(Candle(pos))
                 case "deco_hourglass":
                     objects.append((Hourglass(pos)))
+                case "deco_books":
+                    objects.append(GameObject(pos.copy(), pg.image.load(get_path("assets/sprites/deco/books1.png"))))
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:
