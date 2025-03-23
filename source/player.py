@@ -38,7 +38,7 @@ class Player(MovingObject):
         self.invincibility_time: float = 0.7
         self.current_direction = 1
 
-        self.state = None
+        self.state = self.State.IDLE
 
         self.is_jump_unlocked: bool = True
         self.is_crouch_unlocked: bool = True
@@ -118,12 +118,6 @@ class Player(MovingObject):
             case _:
                 self.set_animation(self.idle)
 
-        # Change hitbox
-        if self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK:
-            self.set_hitbox("crouch")
-        else:
-            self.set_hitbox("default")
-
     def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
         for o in game_world.interactable_objects:
@@ -166,6 +160,14 @@ class Player(MovingObject):
         else:
             new_state = self.State.FALL
 
+        # Not crouch -> crouch
+        if self.state != self.State.DUCK and new_state == self.state.DUCK:
+            self.set_hitbox("crouch")
+        # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
+        if self.state == self.State.DUCK and new_state != self.state.DUCK:
+            if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
+                new_state = self.State.DUCK  # Set back to DUCK
+
         if new_state != self.state:
             self.state = new_state
             self.on_state_changed(self.state)
@@ -200,4 +202,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

@@ -41,6 +41,32 @@ class ColliderObject(GameObject):
         self.position -= self.hitbox.get_offset_diff(hitbox_name)  # Adjust position for new hitbox
         self.hitbox.set_current(hitbox_name)
 
+    def try_set_hitbox(self, hitbox_name: str, game_world) -> bool:
+        """Switches hitbox to hitbox_name if it doesn't cause collision, else doesn't switch.
+        Returns True if switched, else False."""
+        previous_hitbox: str = self.hitbox.get_current()
+
+        # Set new hitbox
+        self.set_hitbox(hitbox_name)
+        rect = self.get_rect()
+        rect.topleft = self.position
+
+        if self.check_collision(rect, game_world.static_objects) is None:  # No collision detected
+            return True
+        else:
+            self.set_hitbox(previous_hitbox)  # Go back to original hitbox
+            return False
+
+    def check_collision(self, rect, collider_objects):
+        """Checks for collision and returns the GameObject of the first collision it finds.
+        If there are no collisions detected, returns None."""
+
+        for col_obj in collider_objects:
+            if rect.colliderect(col_obj.get_rect()):  # Check collision
+                return col_obj
+        return None
+
+
 
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
@@ -106,31 +132,29 @@ class MovingObject(InteractableObject):
 
         self.has_collided = False
 
-        for o in game_world.static_objects:
-            if rect.colliderect(o.get_rect()):  # Check collision
-                self.has_collided = True
-                if dx > 0:  # Moving right
-                    rect.right = o.get_rect().left
-                elif dx < 0:  # Moving left
-                    rect.left = o.get_rect().right
-                self.position.x, _ = rect.topleft  # Reset precise position
-                break  # break out of the loop (only handle first collision per axis)
+        colliding_object = self.check_collision(rect, game_world.static_objects)
+        if colliding_object:
+            self.has_collided = True
+            if dx > 0:  # Moving right
+                rect.right = colliding_object.get_rect().left
+            elif dx < 0:  # Moving left
+                rect.left = colliding_object.get_rect().right
+            self.position.x, _ = rect.topleft  # Reset precise position
 
         # move y and check collisions
         self.position.y += dy
         rect.topleft = self.position
 
-        for o in game_world.static_objects:
-            if rect.colliderect(o.get_rect()):  # Check collision
-                if dy > 0:  # Falling down
-                    rect.bottom = o.get_rect().top
-                    self.velocity.y = 0
-                    # self.on_ground = True
-                elif dy < 0:  # Hitting the ceiling
-                    rect.top = o.get_rect().bottom
-                    self.velocity.y = 0
-                _, self.position.y = rect.topleft  # Reset precise position
-                break  # break out of the loop (only handle first collision per axis)
+        colliding_object = self.check_collision(rect, game_world.static_objects)
+        if colliding_object:
+            if dy > 0:  # Falling down
+                rect.bottom = colliding_object.get_rect().top
+                self.velocity.y = 0
+                # self.on_ground = True
+            elif dy < 0:  # Hitting the ceiling
+                rect.top = colliding_object.get_rect().bottom
+                self.velocity.y = 0
+            _, self.position.y = rect.topleft  # Reset precise position
 
 
 class LetterPickUp(InteractableObject):

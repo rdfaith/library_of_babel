@@ -62,6 +62,8 @@ class GameWorld:
                 screen.blit(ui_heart, UI_HEART_POSITIONS[i])
 
             for i in range(len(self.player.letters_collected)):
+                if i > 5:  # Break if more than 5 letters would have to be displayed
+                    break
                 letter = self.player.letters_collected[i]
                 screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
 
