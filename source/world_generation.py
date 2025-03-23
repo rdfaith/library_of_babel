@@ -83,6 +83,8 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
                     player_start_pos = pg.Vector2(pos.x, pos.y)
                 case "deco_candle":
                     objects.append(Candle(pos))
+                case "deco_hourglass":
+                    objects.append((Hourglass(pos)))
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:

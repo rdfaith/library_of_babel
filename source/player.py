@@ -197,7 +197,10 @@ class Player(MovingObject):
             self.time_since_hit = 0.0
 
         if self.bounce_velocity_x != 0:
-            self.velocity.x = self.bounce_velocity_x
+            if self.check_is_grounded(game_world.static_objects):
+                self.bounce_velocity_x = 0
+            else:
+                self.velocity.x = self.bounce_velocity_x
 
         # Check collision and apply movement or not
         super().update(delta, game_world)
@@ -208,4 +211,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

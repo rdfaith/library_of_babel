@@ -15,3 +15,16 @@ class Candle(AnimatedObject):
             10
         )
         super().__init__(position, animation)
+
+
+class Hourglass(AnimatedObject):
+    def __init__(self, position):
+        animation = Animation(
+            "idle",
+            get_path('assets/sprites/anim/deco/hourglass1.png'),
+            16,
+            32,
+            4,
+            10
+        )
+        super().__init__(position, animation)
