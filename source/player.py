@@ -49,7 +49,7 @@ class Player(MovingObject):
         self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
         self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
         self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
-        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-test.png'), 24, 24, 1, 10)
+        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
