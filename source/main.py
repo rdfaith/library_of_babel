@@ -1,4 +1,5 @@
 # Example file showing a basic pygame "game loop"
+import pygame
 import pygame as pg
 import object_classes
 from game_world import GameWorld
@@ -7,14 +8,16 @@ from utils import *
 from constants import *
 import random_world
 import os
+import shaders.shader as shader
 
 # pygame setup
 pg.init()
 pg.mixer.init()
 sound = pg.mixer.Sound(get_path('assets/sounds/bg_music.mp3'))
 
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
-                             flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
+screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+shader = shader.Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
+
 running = True
 delta = 0.0
 menu = True
@@ -34,6 +37,21 @@ optionbutton = pg.Rect(120, 70, 80, 40)
 #game_world = GameWorld([], [obstacle, floor], [worm])
 
 
+# clock = pg.time.Clock()
+# test = True
+# while test:
+#
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             pygame.quit()
+#
+#     screen.fill((100, 100, 100))
+#     pg.draw.rect(screen, (0, 255, 255), optionbutton, 50)
+#
+#     shader.update(screen)
+#
+#     clock.tick(60)
+
 while running:
 
     while menu:
@@ -42,7 +60,6 @@ while running:
             pg.draw.rect(screen, (255, 255, 255), optionbutton, 50)
         else:
             pg.draw.rect(screen, (0, 255, 255), optionbutton, 50)
-        pg.display.flip()
 
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
@@ -55,6 +72,14 @@ while running:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     menu = False
                     level_selection = True
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_RETURN:
+                    menu = False
+                    level_selection = True
+
+
+        shader.update(screen)
+
     while level_selection:
         # Menüoptionen
         screen.fill((0, 0, 0))
@@ -80,7 +105,8 @@ while running:
                     game_world = world_generation.generate_world(f"{MAP_FOLDER + level}.csv",
                                                                  'assets/sprites/autotile_test.png')
                     clock = pg.time.Clock()
-        pg.display.flip()
+
+        shader.update(screen)
 
     while game:
 
@@ -110,8 +136,8 @@ while running:
             dah = pg.image.load(get_path('assets/sprites/ui/restart.png'))
             screen.blit(dah, optionbutton)
 
-        # flip() the display to put your work on screen
-        pg.display.flip()
+        # Display the game via moderngl shader pipeline:
+        shader.update(screen)
 
         delta = clock.tick(60) / 1000
 

@@ -40,8 +40,8 @@ class Player(MovingObject):
 
         self.state = self.State.IDLE
 
-        self.is_jump_unlocked: bool = True
-        self.is_crouch_unlocked: bool = True
+        self.is_jump_unlocked: bool = False
+        self.is_crouch_unlocked: bool = False
 
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
@@ -211,4 +211,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

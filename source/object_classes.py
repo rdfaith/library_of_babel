@@ -245,4 +245,4 @@ class Worm(Enemy):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
-        pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
