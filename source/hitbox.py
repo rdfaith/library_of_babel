@@ -55,6 +55,9 @@ class Hitbox:
             print("ERROR: Invalid hitbox", name)
             self._current_hitbox = "default"
 
+    def get_current(self) -> str:
+        return self._current_hitbox
+
     def get_offset_diff(self, hb1: str, hb2: str = None):
         """Returns sprite offset difference of two hitboxes.
         If second argument is None, the current hitbox will be used"""
