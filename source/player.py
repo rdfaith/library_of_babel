@@ -40,8 +40,8 @@ class Player(MovingObject):
 
         self.state = None
 
-        self.is_jump_unlocked: bool = False
-        self.is_crouch_unlocked: bool = False
+        self.is_jump_unlocked: bool = True
+        self.is_crouch_unlocked: bool = True
 
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
@@ -51,6 +51,8 @@ class Player(MovingObject):
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
+
+        self.sound_manager = SoundManager()
 
     def set_animation(self, animation: Animation) -> None:
         self.active_animation = animation
@@ -71,6 +73,7 @@ class Player(MovingObject):
 
             if self.player_lives > 1:
                 print("Aua")
+                self.sound_manager.play_movement_sound("damage")
                 # self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")
@@ -100,21 +103,20 @@ class Player(MovingObject):
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
-        sound_manager = SoundManager()
         # Change animation and sound:
         match state:
             case self.State.FALL:
                 self.set_animation(self.fall)
-                sound_manager.play_movement_sound("fall")
+                self.sound_manager.play_movement_sound("fall")
             case self.State.JUMP:
                 self.set_animation(self.jump_up)
-                sound_manager.play_movement_sound("jump_up")
+                self.sound_manager.play_movement_sound("jump_up")
             case self.State.RUN:
                 self.set_animation(self.run)
-                sound_manager.play_movement_sound("run")
+                self.sound_manager.play_movement_sound("run")
             case _:
                 self.set_animation(self.idle)
-                sound_manager.play_movement_sound("idle")
+                self.sound_manager.play_movement_sound("idle")
 
         # Change hitbox
         if self.state == self.State.DUCK:

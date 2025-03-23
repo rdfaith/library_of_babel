@@ -85,7 +85,11 @@ PLAYER_SOUNDS = {
             "run": pg.mixer.Sound(get_path("assets/sounds/run.wav")),
             "jump_up": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
             "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
+            "damage": pg.mixer.Sound(get_path("assets/sounds/damage.wav")),
             "idle": None
+        }
+SYSTEM_SOUNDS = {
+            "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),

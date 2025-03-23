@@ -72,8 +72,10 @@ while running:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_DOWN:
                     selected_level = (selected_level + 1) % len(levels)
+                    sound_manager.play_system_sound("selection")
                 elif event.key == pg.K_UP:
                     selected_level = (selected_level - 1) % len(levels)
+                    sound_manager.play_system_sound("selection")
                 elif event.key == pg.K_RETURN:
                     game = True
                     level_selection = False
