@@ -16,8 +16,9 @@ class Player(MovingObject):
         RUN = 2
         JUMP = 3
         FALL = 4
-        DUCK = 5
-        DEAD = 6
+        DUCK_IDLE = 5
+        DUCK_WALK = 6
+        DEAD = 7
 
     def __init__(self, position: pygame.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
@@ -47,6 +48,8 @@ class Player(MovingObject):
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
         self.jump_up = Animation("jump_up", get_path('assets/test/dino-test-jump-up-Sheet.png'), 24, 24, 6, 10)
         self.fall = Animation("fall", get_path('assets/test/dino-test-fall-Sheet.png'), 24, 24, 8, 10)
+        self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
+        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-test.png'), 24, 24, 1, 10)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
@@ -114,6 +117,10 @@ class Player(MovingObject):
                 self.set_animation(self.jump_up)
             case self.State.RUN:
                 self.set_animation(self.run)
+            case self.State.DUCK_IDLE:
+                self.set_animation(self.duck_idle)
+            case self.State.DUCK_WALK:
+                self.set_animation(self.duck_walk)
             case _:
                 self.set_animation(self.idle)
 
@@ -150,19 +157,22 @@ class Player(MovingObject):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
-                new_state = self.State.DUCK
+                if self.velocity.x != 0:
+                    new_state = self.State.DUCK_WALK
+                else:
+                    new_state = self.State.DUCK_IDLE
         elif self.velocity.y <= 0:
             new_state = self.State.JUMP
         else:
             new_state = self.State.FALL
 
         # Not crouch -> crouch
-        if self.state != self.State.DUCK and new_state == self.state.DUCK:
+        if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
             self.set_hitbox("crouch")
         # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
-        if self.state == self.State.DUCK and new_state != self.state.DUCK:
+        if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
-                new_state = self.State.DUCK  # Set back to DUCK
+                new_state = self.state  # Set back to DUCK
 
         if new_state != self.state:
             self.state = new_state
