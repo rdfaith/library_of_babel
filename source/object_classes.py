@@ -8,7 +8,7 @@ from constants import *
 class GameObject:
     def __init__(self, position: pg.Vector2, image: pg.Surface):
         self.image = image.convert_alpha()  # Sprite image
-        self.position = position
+        self.position = position.copy()
 
     def update(self, delta: float, game_world):
         pass
@@ -17,6 +17,20 @@ class GameObject:
         """Draw object on screen."""
         position = self.position - camera_pos
         screen.blit(self.image, position)
+
+
+class AnimatedObject(GameObject):
+    """Base class for objects that are animated. No colliders or hitboxes. Used for decorative objects."""
+
+    def __init__(self, position: pg.Vector2, animation: Animation):
+        self.animation: Animation = animation
+        self.animator: Animator = Animator(animation)
+        super().__init__(position, self.animator.get_frame(1))
+
+    def draw(self, screen, camera_pos):
+        self.animator.update()
+        position = self.position - camera_pos
+        screen.blit(self.animator.get_frame(1), position)
 
 
 class ColliderObject(GameObject):
@@ -65,8 +79,6 @@ class ColliderObject(GameObject):
             if rect.colliderect(col_obj.get_rect()):  # Check collision
                 return col_obj
         return None
-
-
 
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
@@ -164,8 +176,8 @@ class LetterPickUp(InteractableObject):
         super().__init__(position, image, image)
 
     def on_collide(self, player, game_world) -> None:
-        player.on_pickup_letter(self.letter)
-        game_world.interactable_objects.remove(self)
+        if player.on_pickup_letter(self.letter):  # If player picks up (doesn't pick up if inventory full)
+            game_world.interactable_objects.remove(self)
 
 
 class Enemy(MovingObject):

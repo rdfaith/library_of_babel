@@ -25,7 +25,7 @@ level_selection = False
 selected_level = 0  # Index der ausgewählten Option
 FONT = pg.font.Font(None, 30)
 
-optionbutton = pg.Rect(120,70,80,40)
+optionbutton = pg.Rect(120, 70, 80, 40)
 
 # create player character
 #obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
@@ -36,15 +36,14 @@ optionbutton = pg.Rect(120,70,80,40)
 
 while running:
 
-
     while menu:
-        screen.fill((0,0,0))
-        if pg.Rect.collidepoint(optionbutton,pg.mouse.get_pos()) == True:
-            pg.draw.rect(screen,(255,255,255),optionbutton,50)
+        screen.fill((0, 0, 0))
+        if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
+            pg.draw.rect(screen, (255, 255, 255), optionbutton, 50)
         else:
-            pg.draw.rect(screen,(0,255,255),optionbutton,50)
+            pg.draw.rect(screen, (0, 255, 255), optionbutton, 50)
         pg.display.flip()
-        
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pg.event.get():

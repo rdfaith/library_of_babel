@@ -1,6 +1,7 @@
 import pygame as pg
 import csv
 from object_classes import *
+from deco_objects import *
 from game_world import *
 from constants import *
 from utils import *
@@ -40,7 +41,7 @@ def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
 
 
 def get_sprite_and_collider(frame_x: int, frame_y: int) -> (pg.Surface, pg.Surface):
-    """Extrahiert aus dem festgelegten standard tileset"""
+    """Extrahiert sprite und Kollisions-sprite aus den standard tilesets"""
     return get_frame(frame_x, frame_y, DEFAULT_TILESET), get_frame(frame_x, frame_y, DEFAULT_COLLIDER_TILESET)
 
 
@@ -67,7 +68,7 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
 
     for row in map_data:
         for col in row:
-            pos: pygame.Vector2 = current_pos
+            pos: pg.Vector2 = current_pos
 
             match col:
                 case "block":
@@ -77,9 +78,11 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
                 case "pillar":
                     collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 2)))
                 case "worm":
-                    interactable_objects.append(Worm(pos))
+                    interactable_objects.append(Worm(pos.copy()))
                 case "player":
                     player_start_pos = pg.Vector2(pos.x, pos.y)
+                case "deco_candle":
+                    objects.append(Candle(pos))
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:

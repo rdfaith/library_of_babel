@@ -39,8 +39,8 @@ class Player(MovingObject):
 
         self.state = self.State.IDLE
 
-        self.is_jump_unlocked: bool = True
-        self.is_crouch_unlocked: bool = True
+        self.is_jump_unlocked: bool = False
+        self.is_crouch_unlocked: bool = False
 
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
@@ -77,13 +77,17 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
-    def on_pickup_letter(self, letter: str):
+    def on_pickup_letter(self, letter: str) -> bool:
+        """Called when player moves into collider of letter.
+        Returns False if the letter can't be picked up, else True."""
+
+        if len(self.letters_collected) >= 5:  # Break and return False if can't pick up
+            return False
+
         self.letters_collected.append(letter)
 
         word = "".join(self.letters_collected).upper()
-
         word_completed = False
-
         match word:
             case "JUMP":
                 self.is_jump_unlocked = True
@@ -96,6 +100,8 @@ class Player(MovingObject):
 
         if word_completed:
             self.letters_collected = []
+
+        return True
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""

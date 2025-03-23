@@ -111,8 +111,10 @@ class GameWorld:
         draw_bg_parallax()
 
         # draw objects
-        for o in self.objects + self.static_objects + self.interactable_objects:
+        for o in self.static_objects + self.objects + self.interactable_objects:  # Static -> Deco -> Interactive
             o.draw(screen, self.camera_pos)
+
+
 
         # draw player
         self.player.draw(screen, self.camera_pos)
