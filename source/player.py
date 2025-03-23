@@ -4,6 +4,7 @@ from utils import *
 from object_classes import *
 from animator_object import *
 from enum import Enum
+from sound_manager import *
 
 # Pygame event for player death
 PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
@@ -16,9 +17,8 @@ class Player(MovingObject):
         RUN = 2
         JUMP = 3
         FALL = 4
-        DUCK_IDLE = 5
-        DUCK_WALK = 6
-        DEAD = 7
+        DUCK = 5
+        DEAD = 6
 
     def __init__(self, position: pygame.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
@@ -38,18 +38,16 @@ class Player(MovingObject):
         self.invincibility_time: float = 0.7
         self.current_direction = 1
 
-        self.state = self.State.IDLE
+        self.state = None
 
-        self.is_jump_unlocked: bool = True
-        self.is_crouch_unlocked: bool = True
+        self.is_jump_unlocked: bool = False
+        self.is_crouch_unlocked: bool = False
 
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
-        self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
-        self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
-        self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
-        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
+        self.jump_up = Animation("jump_up", get_path('assets/test/dino-test-jump-up-Sheet.png'), 24, 24, 6, 10)
+        self.fall = Animation("fall", get_path('assets/test/dino-test-fall-Sheet.png'), 24, 24, 8, 10)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
@@ -80,17 +78,13 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
-    def on_pickup_letter(self, letter: str) -> bool:
-        """Called when player moves into collider of letter.
-        Returns False if the letter can't be picked up, else True."""
-
-        if len(self.letters_collected) >= 5:  # Break and return False if can't pick up
-            return False
-
+    def on_pickup_letter(self, letter: str):
         self.letters_collected.append(letter)
 
         word = "".join(self.letters_collected).upper()
+
         word_completed = False
+
         match word:
             case "JUMP":
                 self.is_jump_unlocked = True
@@ -104,25 +98,29 @@ class Player(MovingObject):
         if word_completed:
             self.letters_collected = []
 
-        return True
-
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
-
-        # Change animation:
+        sound_manager = SoundManager()
+        # Change animation and sound:
         match state:
             case self.State.FALL:
                 self.set_animation(self.fall)
+                sound_manager.play_movement_sound("fall")
             case self.State.JUMP:
                 self.set_animation(self.jump_up)
+                sound_manager.play_movement_sound("jump_up")
             case self.State.RUN:
                 self.set_animation(self.run)
-            case self.State.DUCK_IDLE:
-                self.set_animation(self.duck_idle)
-            case self.State.DUCK_WALK:
-                self.set_animation(self.duck_walk)
+                sound_manager.play_movement_sound("run")
             case _:
                 self.set_animation(self.idle)
+                sound_manager.play_movement_sound("idle")
+
+        # Change hitbox
+        if self.state == self.State.DUCK:
+            self.set_hitbox("crouch")
+        else:
+            self.set_hitbox("default")
 
     def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
@@ -157,22 +155,11 @@ class Player(MovingObject):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
-                if self.velocity.x != 0:
-                    new_state = self.State.DUCK_WALK
-                else:
-                    new_state = self.State.DUCK_IDLE
+                new_state = self.State.DUCK
         elif self.velocity.y <= 0:
             new_state = self.State.JUMP
         else:
             new_state = self.State.FALL
-
-        # Not crouch -> crouch
-        if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
-            self.set_hitbox("crouch")
-        # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
-        if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
-            if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
-                new_state = self.state  # Set back to DUCK
 
         if new_state != self.state:
             self.state = new_state
@@ -180,7 +167,6 @@ class Player(MovingObject):
 
     def update(self, delta: float, game_world):
         #  Interact with interactable game elements and call their on_collide function
-        WALK_SOUND = pg.mixer.Sound(get_path('assets/sounds/walk_sound.wav'))
 
         self.do_interaction(game_world)
 
@@ -197,10 +183,7 @@ class Player(MovingObject):
             self.time_since_hit = 0.0
 
         if self.bounce_velocity_x != 0:
-            if self.check_is_grounded(game_world.static_objects):
-                self.bounce_velocity_x = 0
-            else:
-                self.velocity.x = self.bounce_velocity_x
+            self.velocity.x = self.bounce_velocity_x
 
         # Check collision and apply movement or not
         super().update(delta, game_world)
@@ -211,4 +194,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

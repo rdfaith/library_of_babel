@@ -78,3 +78,17 @@ VIGNETTE = pg.image.load(get_path("assets/sprites/effects/vignette_lesser.png"))
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
 MAP_FOLDER = "assets/levels/"
+
+#Sounds
+pg.mixer.init()
+PLAYER_SOUNDS = {
+            "run": pg.mixer.Sound(get_path("assets/sounds/run.wav")),
+            "jump_up": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
+            "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
+            "idle": None
+        }
+BG_MUSIC = {
+            "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
+            "game": pg.mixer.Sound(get_path("assets/sounds/game.mp3")),
+            "game_over": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
+        }
