@@ -26,9 +26,9 @@ class Player(MovingObject):
         WIN = 9
 
     def __init__(self, position: pygame.Vector2):
-        image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
-        hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert_alpha()
-        hitbox_image_crouch = pg.image.load(get_path('assets/sprites/dino/test_hitbox_crouch.png')).convert_alpha()
+        image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert()
+        hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert()
+        hitbox_image_crouch = pg.image.load(get_path('assets/sprites/dino/test_hitbox_crouch.png')).convert()
 
         super().__init__(position, image, True, hitbox_image)
 

@@ -14,7 +14,7 @@ class Animation:
 
 class Animator:
     def __init__(self, animation):
-        self.sprite_sheet = pg.image.load(animation.sprite_sheet)
+        self.sprite_sheet = pg.image.load(animation.sprite_sheet).convert_alpha()
         self.frame_width = animation.frame_width
         self.frame_height = animation.frame_height
         self.num_frames = animation.num_frames

@@ -4,6 +4,7 @@ from constants import *
 from utils import *
 from light_source import *
 
+
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int]) -> None:
@@ -11,7 +12,6 @@ class GameWorld:
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
         self.player = Player(player_pos)
-
 
         self.light_map: LightMap = LightMap()  # object that stores all light sources
 
@@ -39,7 +39,20 @@ class GameWorld:
         for o in self.interactable_objects:
             o.update(delta, self)
 
-    def do_render(self, game_screen, ui_screen):
+    def do_render(self, shader):
+
+        ui_screen = shader.ui_screen
+        game_screen = shader.game_screen
+        bg0_screen = shader.bg0_screen
+
+        bg_screens = shader.bg_screens
+
+        for screen in bg_screens:
+            screen.fill((0, 0, 0, 0))
+
+        bg0_screen.fill((0, 0, 0, 0))
+        game_screen.fill((0, 0, 0, 0))
+        ui_screen.fill((0, 0, 0, 0))
 
         #region Functions
         def set_camera_position() -> None:
@@ -61,10 +74,8 @@ class GameWorld:
             self.camera_pos.y = max(0, min(self.camera_pos.y, self.level_height - SCREEN_HEIGHT))
 
         def draw_ui():
-            ui_screen.fill((0, 0, 0, 0))
-
-            ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png")).convert_alpha()
-            ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png")).convert_alpha()
+            ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
+            ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
             ui_key = pg.image.load(get_path("assets/test/egg.png"))
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
 
@@ -78,10 +89,9 @@ class GameWorld:
                 ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
 
             if self.player.has_key:
-                ui.screen.blit(ui_key, UI_KEY_POSITION)
+                ui_screen.blit(ui_key, UI_KEY_POSITION)
 
-
-        def draw_parallax_layer(layer, max_depth, y_parallax=True):
+        def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]
             parallax_factor: float = 1 - (depth / max_depth)  # Dynamische Berechnung des Parallax-Faktors
 
@@ -93,25 +103,37 @@ class GameWorld:
             bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
 
             # Hintergrund zeichnen
-            game_screen.blit(layer["image"], bg_pos)
+            screen.blit(layer["image"], bg_pos)
 
         def draw_bg_parallax():
             """Draws the background parallax layers"""
+
+            BG_LAYERS = [
+                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0,
+                 "depth": 20},
+                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100,
+                 "depth": 16},
+                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100,
+                 "depth": 12},
+                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,
+                 "depth": 5},
+            ]
+
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
-            for layer in BG_LAYERS:
-                if layer["depth"] > 0:
-                    draw_parallax_layer(layer, max_depth, True)
+            for i in range(len(BG_LAYERS)):
+                if BG_LAYERS[i]["depth"] > 0:
+                    draw_parallax_layer(BG_LAYERS[i], max_depth, True, shader.bg_screens[i])
 
         def draw_fg_parallax():
             """Draws the foreground parallax layers"""
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
-            for layer in BG_LAYERS:
+            for layer in FG_LAYERS:
                 if layer["depth"] <= 0:
                     draw_parallax_layer(layer, max_depth, False)
 
         def draw_post_processing():
             """Adds visual effects and post-processing"""
-            vignette = VIGNETTE.convert_alpha()
+            vignette = VIGNETTE
             player_position = self.player.get_rect().topleft - self.player.get_sprite_offset() - self.camera_pos
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
             game_screen.blit(VIGNETTE, vignette_position)
@@ -141,7 +163,7 @@ class GameWorld:
         self.player.draw(game_screen, self.camera_pos)
 
         # draw foreground parallax
-        draw_fg_parallax()
+        # draw_fg_parallax()
 
         # Visual effects
         # draw_post_processing()

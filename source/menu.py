@@ -137,7 +137,7 @@ def main(running: bool, shader: Shader):
                     sys.exit()
 
             game_world.do_updates(delta)
-            game_world.do_render(game_screen, ui_screen)
+            game_world.do_render(shader)
 
             # !!! Render with shader (use this instead of display.flip()!!!)
             shader.update(game_world.camera_pos, game_world.light_map)

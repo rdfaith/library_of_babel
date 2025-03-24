@@ -8,6 +8,11 @@
 
 uniform sampler2D gameTex;
 uniform sampler2D uiTex;
+uniform sampler2D bg0Tex; // Parallax background (moon sky)
+uniform sampler2D bg1Tex; // Parallax background (wall windows)
+uniform sampler2D bg2Tex; // Parallax background (columns)
+uniform sampler2D bg3Tex; // Parallax background (shelves)
+
 uniform float time;
 
 uniform vec2 cameraPos;
@@ -61,23 +66,40 @@ vec4 applyVignette(vec4 baseColor) {
     return baseColor;
 }
 
+vec4 addLayerColor(vec4 lowerLayerCol, vec4 higherLayerCol) {
+    return higherLayerCol * higherLayerCol.a + lowerLayerCol * (1.0 - higherLayerCol.a);
+}
+
 
 void main() {
 
-    vec4 baseColor = texture(gameTex, fragTexCoord);
+    vec4 bg0 = texture(bg0Tex, fragTexCoord);
+    vec4 bg1 = texture(bg1Tex, fragTexCoord);
+    vec4 bg2 = texture(bg2Tex, fragTexCoord);
+    vec4 bg3 = texture(bg3Tex, fragTexCoord);
+
+    vec4 gameColor = texture(gameTex, fragTexCoord);
     vec4 uiColor = texture(uiTex, fragTexCoord);
 
+
+    vec4 color = addLayerColor(bg0, gameColor);
+//    color = addLayerColor(color, bg2);
+//    color = addLayerColor(color, bg3);
+//
+//    color = addLayerColor(bg3, gameColor);
+
     // Apply lighting to the base texture color
-    vec4 gameColor = vec4(baseColor.rgb * getLight(), baseColor.a);
+    color = vec4(color.rgb * getLight(), color.a);
 
     // Apply vignette
-    gameColor = applyVignette(gameColor);
+    color = applyVignette(gameColor);
 
+    color = addLayerColor(bg0, bg1);
+    color = addLayerColor(color, bg2);
+    color = addLayerColor(color, bg3);
+    color = addLayerColor(color, gameColor);
 
-    // Use UI or Game color, return
-    if (length(uiColor) > 0.1) {
-        f_color = uiColor;
-    } else {
-        f_color = gameColor;
-    }
+    color = vec4(color.rgb * getLight(), color.a);
+
+    f_color = addLayerColor(color, uiColor);
 }

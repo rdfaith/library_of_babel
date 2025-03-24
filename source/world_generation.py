@@ -34,7 +34,7 @@ def find_tile(pos: pg.Vector2, map_data: list[list[str]]) -> int:
 
 def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
     """Extrahiert einen Frame aus dem Tileset."""
-    spritesheet = pg.image.load(get_path(tileset_file_path)).convert_alpha()
+    spritesheet = pg.image.load(get_path(tileset_file_path)).convert()
     frame = pg.Surface((FRAME_SIZE, FRAME_SIZE), pg.SRCALPHA)
     frame.blit(spritesheet, (0, 0), (frame_x * FRAME_SIZE, frame_y * FRAME_SIZE, FRAME_SIZE, FRAME_SIZE))
     return frame
