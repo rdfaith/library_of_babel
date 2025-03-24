@@ -62,7 +62,6 @@ while running:
             pg.draw.rect(ui_screen,(255,255,255),optionbutton,50)
         else:
             pg.draw.rect(ui_screen,(0,255,255),optionbutton,50)
-        pg.display.flip()
 
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
@@ -76,6 +75,9 @@ while running:
                 menu = False
                 level_selection = True
         #start_screen(screen)
+
+        # Display the game via moderngl shader pipeline:
+        shader.update()
 
     while level_selection:
         unlocked_level = load_score(get_path("saves/unlocked_levels.sav"))
@@ -109,7 +111,9 @@ while running:
                     current_level = levels[selected_level]
                     game_world = load_world(current_level)
                     clock = pg.time.Clock()
-        pg.display.flip()
+
+        # Display the game via moderngl shader pipeline:
+        shader.update()
 
     while game:
 
@@ -168,13 +172,14 @@ while running:
             game_over = True
 
         #  render
-        game_world.do_render(game_screen)
+        game_world.do_render(game_screen, ui_screen)
         if game_over == True:
             #pygame.draw.rect(screen,(255,255,255),optionbutton,50)
             restart_image = pg.image.load(get_path('assets/sprites/ui/restart.png'))
             game_screen.blit(restart_image, optionbutton)
 
         # Display the game via moderngl shader pipeline:
+        # Pass camera position and light map (default both are zero)
         shader.update(game_world.camera_pos, game_world.get_light_map())
 
         delta = clock.tick(60) / 1000
