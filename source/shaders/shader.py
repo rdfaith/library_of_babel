@@ -33,7 +33,7 @@ class Shader:
         self.game_screen: pg.Surface = game_screen
         self.ui_screen: pg.Surface = ui_screen
 
-    def update(self, light_map: LightMap = LightMap()):
+    def update(self, camera_pos: pg.Vector2 = pg.Vector2(), light_map: LightMap = LightMap()):
         def surf_to_texture(surf):
             tex = self.ctx.texture(surf.get_size(), 4)
             tex.filter = (moderngl.NEAREST, moderngl.NEAREST)
@@ -51,9 +51,19 @@ class Shader:
 
         NUM_LIGHTS = 50  # Has to be the same as in frag_shader.glsl!!
 
-        self.program['lightPositions'] = [(pos.x, pos.y) for pos in light_map.get_positions(NUM_LIGHTS)]
-        self.program['lightColors'] = [(col.r, col.g, col.b) for col in light_map.get_colors(NUM_LIGHTS)]
-        self.program['lightIntensities'] = [i for i in light_map.get_intensities(NUM_LIGHTS)]
+        light_positions = [(pos.x, pos.y) for pos in light_map.get_positions(NUM_LIGHTS)]
+        light_colors = [(col.r, col.g, col.b) for col in light_map.get_colors(NUM_LIGHTS)]
+        light_intensities = [i for i in light_map.get_intensities(NUM_LIGHTS)]
+
+        print(light_positions[0])
+        print(camera_pos)
+
+        self.program['lightPositions'] = light_positions
+        self.program['lightColors'] = light_colors
+        self.program['lightIntensities'] = light_intensities
+
+        self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
+
 
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
 

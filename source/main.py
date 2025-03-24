@@ -80,7 +80,6 @@ while running:
                     menu = False
                     level_selection = True
 
-
         shader.update()
 
     while level_selection:
@@ -140,7 +139,7 @@ while running:
             ui_screen.blit(dah, optionbutton)
 
         # Display the game via moderngl shader pipeline:
-        shader.update(game_world.get_light_map())
+        shader.update(game_world.camera_pos, game_world.get_light_map())
 
         delta = clock.tick(60) / 1000
 
