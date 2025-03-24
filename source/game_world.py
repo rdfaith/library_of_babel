@@ -123,7 +123,7 @@ class GameWorld:
         draw_fg_parallax()
 
         # Visual effects
-        draw_post_processing()
+        # draw_post_processing()
 
         # draw UI
         draw_ui()

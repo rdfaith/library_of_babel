@@ -7,7 +7,7 @@ from source.constants import *
 
 class Shader:
     def __init__(self, screen_width, screen_height):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.SCALED | pg.OPENGL | pg.DOUBLEBUF)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
         self.ctx = moderngl.create_context()
 
         self.quad_buffer = self.ctx.buffer(data=array('f', [
