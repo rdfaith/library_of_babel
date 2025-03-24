@@ -5,6 +5,7 @@ from object_classes import *
 from animator_object import *
 from enum import Enum
 from sound_manager import *
+from light_source import LightSource
 
 # Pygame event for player death
 PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
@@ -32,6 +33,14 @@ class Player(MovingObject):
         super().__init__(position, image, True, hitbox_image)
 
         self.hitbox.add_hitbox("crouch", self.position, hitbox_image_crouch)
+
+        self.light_source: LightSource = LightSource(
+            self.position,
+            pg.Vector2(10, 12),
+            pg.Color((100, 180, 250)),
+            25.0,
+            0.04
+        )
 
         self.letters_collected: list[str] = []
         self.speed_x = 70
@@ -274,6 +283,7 @@ class Player(MovingObject):
         super().update(delta, game_world)
 
         self.animator.update()
+        self.light_source.set_position(self.position)  # update position of light source
 
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos

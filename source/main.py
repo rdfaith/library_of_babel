@@ -8,11 +8,17 @@ from constants import *
 from sound_manager import *
 import os
 from menus import *
+import shaders.shader as shader
 
 # pygame setup
 pg.init()
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
-                             flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
+
+game_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+light_source_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+ui_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+shader = shader.Shader(SCREEN_WIDTH, SCREEN_HEIGHT, game_screen, ui_screen, light_source_screen)
+
 running = True
 delta = 0.0
 menu = True
@@ -51,13 +57,13 @@ while running:
     if menu == True:
 
         sound_manager.play_bg_music("menu")
-        screen.fill((0,0,0))
+        ui_screen.fill((0,0,0))
         if pg.Rect.collidepoint(optionbutton,pg.mouse.get_pos()) == True:
-            pg.draw.rect(screen,(255,255,255),optionbutton,50)
+            pg.draw.rect(ui_screen,(255,255,255),optionbutton,50)
         else:
-            pg.draw.rect(screen,(0,255,255),optionbutton,50)
+            pg.draw.rect(ui_screen,(0,255,255),optionbutton,50)
         pg.display.flip()
-        
+
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pg.event.get():
@@ -75,7 +81,7 @@ while running:
         unlocked_level = load_score(get_path("saves/unlocked_levels.sav"))
         print(unlocked_level)
         # Menüoptionen
-        screen.fill((0, 0, 0))
+        ui_screen.fill((0, 0, 0))
 
         levels: list[str] = []
         for f in os.listdir(get_path(MAP_FOLDER)):
@@ -85,7 +91,7 @@ while running:
         for i, option in enumerate(levels):
             color: str = BLUE if i == selected_level else WHITE
             text = FONT.render(option, True, color)
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
+            ui_screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -142,7 +148,7 @@ while running:
                     while paused:
 
 
-                        screen.blit(pause_image,(0,0,320,180))
+                        game_screen.blit(pause_image,(0,0,320,180))
                         pg.display.flip()
                         for event in pg.event.get():
                             if event.type == pg.KEYDOWN:
@@ -162,14 +168,14 @@ while running:
             game_over = True
 
         #  render
-        game_world.do_render(screen)
+        game_world.do_render(game_screen)
         if game_over == True:
             #pygame.draw.rect(screen,(255,255,255),optionbutton,50)
             restart_image = pg.image.load(get_path('assets/sprites/ui/restart.png'))
-            screen.blit(restart_image, optionbutton)
+            game_screen.blit(restart_image, optionbutton)
 
-        # flip() the display to put your work on screen
-        pg.display.flip()
+        # Display the game via moderngl shader pipeline:
+        shader.update(game_world.camera_pos, game_world.get_light_map())
 
         delta = clock.tick(60) / 1000
 
