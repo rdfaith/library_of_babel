@@ -15,8 +15,11 @@ pg.init()
 pg.mixer.init()
 sound = pg.mixer.Sound(get_path('assets/sounds/bg_music.mp3'))
 
-screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-shader = shader.Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
+game_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+light_source_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+ui_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+shader = shader.Shader(SCREEN_WIDTH, SCREEN_HEIGHT, game_screen, ui_screen, light_source_screen)
 
 running = True
 delta = 0.0
@@ -55,11 +58,11 @@ optionbutton = pg.Rect(120, 70, 80, 40)
 while running:
 
     while menu:
-        screen.fill((0, 0, 0))
+        ui_screen.fill((0, 0, 0))
         if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
-            pg.draw.rect(screen, (255, 255, 255), optionbutton, 50)
+            pg.draw.rect(ui_screen, (255, 255, 255), optionbutton, 50)
         else:
-            pg.draw.rect(screen, (0, 255, 255), optionbutton, 50)
+            pg.draw.rect(ui_screen, (0, 255, 255), optionbutton, 50)
 
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
@@ -78,17 +81,17 @@ while running:
                     level_selection = True
 
 
-        shader.update(screen)
+        shader.update()
 
     while level_selection:
         # Menüoptionen
-        screen.fill((0, 0, 0))
+        ui_screen.fill((0, 0, 0))
         levels: list[str] = [os.path.splitext(f)[0] for f in os.listdir(get_path(MAP_FOLDER)) if
                              os.path.isfile(os.path.join(get_path(MAP_FOLDER), f))]
         for i, option in enumerate(levels):
             color: str = BLUE if i == selected_level else WHITE
             text = FONT.render(option, True, color)
-            screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
+            ui_screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
@@ -106,7 +109,7 @@ while running:
                                                                  'assets/sprites/autotile_test.png')
                     clock = pg.time.Clock()
 
-        shader.update(screen)
+        shader.update()
 
     while game:
 
@@ -130,14 +133,14 @@ while running:
             gameo = True
 
         #  render
-        game_world.do_render(screen)
+        game_world.do_render(game_screen, ui_screen)
         if gameo == True:
             #pygame.draw.rect(screen,(255,255,255),optionbutton,50)
             dah = pg.image.load(get_path('assets/sprites/ui/restart.png'))
-            screen.blit(dah, optionbutton)
+            ui_screen.blit(dah, optionbutton)
 
         # Display the game via moderngl shader pipeline:
-        shader.update(screen)
+        shader.update(game_world.get_light_map())
 
         delta = clock.tick(60) / 1000
 

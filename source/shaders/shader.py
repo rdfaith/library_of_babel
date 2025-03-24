@@ -3,10 +3,14 @@ import moderngl
 from array import array
 from source.utils import *
 from source.constants import *
+from source.light_source import *
 
 
 class Shader:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width, screen_height,
+                 game_screen: pg.Surface,
+                 ui_screen: pg.Surface,
+                 light_source_screen: pg.Surface):
         self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
         self.ctx = moderngl.create_context()
 
@@ -26,7 +30,10 @@ class Shader:
         self.program = self.ctx.program(vertex_shader=self.vert_shader, fragment_shader=self.frag_shader)
         self.render_object = self.ctx.vertex_array(self.program, [(self.quad_buffer, '2f 2f', 'vert', 'texcoord')])
 
-    def update(self, display: pg.Surface):
+        self.game_screen: pg.Surface = game_screen
+        self.ui_screen: pg.Surface = ui_screen
+
+    def update(self, light_map: LightMap = None):
         def surf_to_texture(surf):
             tex = self.ctx.texture(surf.get_size(), 4)
             tex.filter = (moderngl.NEAREST, moderngl.NEAREST)
@@ -34,12 +41,17 @@ class Shader:
             tex.write(surf.get_view('1'))
             return tex
 
-        frame_tex = surf_to_texture(display)
-        frame_tex.use(0)
-        self.program['tex'] = 0
+        ui_tex = surf_to_texture(self.ui_screen)
+        ui_tex.use(0)
+        self.program['uiTex'] = 0
+
+        game_tex = surf_to_texture(self.game_screen)
+        game_tex.use(1)
+        self.program['gameTex'] = 1
 
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
 
         pg.display.flip()
 
-        frame_tex.release()
+        ui_tex.release()
+        game_tex.release()

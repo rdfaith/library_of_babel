@@ -3,12 +3,14 @@ from utils import *
 from hitbox import Hitbox
 from animator_object import *
 from constants import *
+from light_source import LightSource
 
 
 class GameObject:
-    def __init__(self, position: pg.Vector2, image: pg.Surface):
+    def __init__(self, position: pg.Vector2, image: pg.Surface, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
         self.position = position.copy()
+        self.light_source = light_source  # Leave None if no light source
 
     def update(self, delta: float, game_world):
         pass
@@ -17,6 +19,9 @@ class GameObject:
         """Draw object on screen."""
         position = self.position - camera_pos
         screen.blit(self.image, position)
+
+    def get_light_source(self):
+        return self.light_source
 
 
 class AnimatedObject(GameObject):
