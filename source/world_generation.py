@@ -45,7 +45,7 @@ def get_sprite_and_collider(frame_x: int, frame_y: int) -> (pg.Surface, pg.Surfa
     return get_frame(frame_x, frame_y, DEFAULT_TILESET), get_frame(frame_x, frame_y, DEFAULT_COLLIDER_TILESET)
 
 
-def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
+def generate_world(map_file_path: str) -> GameWorld:
     # Variablen
     map_data = read_map(map_file_path)
     current_pos: pg.Vector2 = pg.Vector2(0, 0)
@@ -126,10 +126,3 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
 
     game_world: GameWorld = GameWorld(objects, collision_objects, interactable_objects, player_start_pos, level_size)
     return game_world
-
-
-if __name__ == '__main__':
-    pg.init()
-    pg.display.set_mode((1, 1))
-    test = generate_world('assets/levels/test_map.csv', 'assets/sprites/world_tileset.png')
-    print(test.interactable_objects)

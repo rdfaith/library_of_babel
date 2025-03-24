@@ -31,6 +31,19 @@ optionbutton = pg.Rect(120,70,80,40)
 #worm = object_classes.Worm(pygame.Vector2(140, 100), pygame.image.load(get_path('assets/test/worm.png')), True)
 #game_world = GameWorld([], [obstacle, floor], [worm])
 
+def write_score(filename:str, text:str) -> list:
+    with open(filename, "r") as file:
+        content = file.read()
+
+    if text not in content:
+        with open(filename, "a") as file:
+            file.write("\n" + text)
+def load_score(filename: str) -> list:
+    with open(filename, "r") as file:
+        scores = [line.rstrip("\n") for line in file]
+    return scores
+def load_world(level_name: str):
+    return world_generation.generate_world(f"{MAP_FOLDER + level_name}.csv")
 
 while running:
 
@@ -57,10 +70,16 @@ while running:
                     menu = False
                     level_selection = True
     while level_selection:
+        unlocked_level = load_score(get_path("saves/unlocked_levels.sav"))
+        print(unlocked_level)
         # Menüoptionen
         screen.fill((0, 0, 0))
-        levels: list[str] = [os.path.splitext(f)[0] for f in os.listdir(get_path(MAP_FOLDER)) if
-                             os.path.isfile(os.path.join(get_path(MAP_FOLDER), f))]
+
+        levels: list[str] = []
+        for f in os.listdir(get_path(MAP_FOLDER)):
+            for level in unlocked_level:
+                if f.startswith(level) and f.endswith(".csv") and os.path.isfile(os.path.join(get_path(MAP_FOLDER), f)):
+                    levels.append(os.path.splitext(f)[0])
         for i, option in enumerate(levels):
             color: str = BLUE if i == selected_level else WHITE
             text = FONT.render(option, True, color)
@@ -80,8 +99,7 @@ while running:
                     game = True
                     level_selection = False
                     level = levels[selected_level]
-                    game_world = world_generation.generate_world(f"{MAP_FOLDER + level}.csv",
-                                                                 'assets/sprites/autotile_test.png')
+                    game_world = load_world(level)
                     clock = pg.time.Clock()
         pg.display.flip()
 
@@ -89,14 +107,22 @@ while running:
 
         sound_manager.play_bg_music("game")
         for event in pg.event.get():
+            if event.type == pg.USEREVENT + 1:
+
+                print("test")
+            if event.type == pg.USEREVENT + 2:
+                unlocked_level = f"{level[:-1]}{int(level[-1]) + 1}"
+                write_score(get_path("saves/unlocked_levels.sav"), unlocked_level)
+                game_world = load_world(unlocked_level)
+                clock = pg.time.Clock()
+                game_world.do_updates(delta)
             if event.type == pg.QUIT:
                 running = False
                 game = False
 
             if event.type == pg.KEYDOWN and gameo == True:
                 if event.key == pg.K_e:
-                    game_world = world_generation.generate_world(f"assets/levels/{level}.csv",
-                                                                 'assets/sprites/tiles/autotile_tileset.png')
+                    game_world = load_world(level)
                     clock = pg.time.Clock()
                     gameo = False
 

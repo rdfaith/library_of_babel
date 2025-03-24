@@ -8,6 +8,7 @@ from sound_manager import *
 
 # Pygame event for player death
 PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
+PLAYER_WON = pygame.USEREVENT + 2
 
 
 class Player(MovingObject):
@@ -20,6 +21,7 @@ class Player(MovingObject):
         DUCK_IDLE = 5
         DUCK_WALK = 6
         DEAD = 7
+        WIN = 8
 
     def __init__(self, position: pygame.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
@@ -72,6 +74,12 @@ class Player(MovingObject):
         # self.set_animation(self.dead) # uncomment when death animation implemented
         pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
 
+    def on_player_win(self, reason: str):
+        self.state = self.State.WIN
+        self.on_state_changed(self.State.WIN)
+        # self.set_animation(self.won) # uncomment when death animation implemented
+        pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": reason}))
+
     def on_hit_by_enemy(self, enemy: GameObject, direction: int):
         if self.time_since_hit != 0.0:
             self.bounce_velocity_x = direction * 250
@@ -110,6 +118,10 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
+            case "LIGHT":
+                print("Es werde Licht")
+                self.on_player_win("alle Buchstaben gesammelt")
+
 
         if word_completed:
             self.letters_collected = []
