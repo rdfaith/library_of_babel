@@ -4,6 +4,7 @@ from utils import *
 from object_classes import *
 from animator_object import *
 from enum import Enum
+from sound_manager import *
 
 # Pygame event for player death
 PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
@@ -54,6 +55,8 @@ class Player(MovingObject):
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
 
+        self.sound_manager = SoundManager()
+
     def set_animation(self, animation: Animation) -> None:
         self.active_animation = animation
         self.animator = Animator(animation)
@@ -73,6 +76,7 @@ class Player(MovingObject):
 
             if self.player_lives > 1:
                 print("Aua")
+                self.sound_manager.play_movement_sound("damage")
                 # self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")
@@ -90,7 +94,9 @@ class Player(MovingObject):
         self.letters_collected.append(letter)
 
         word = "".join(self.letters_collected).upper()
+
         word_completed = False
+
         match word:
             case "JUMP":
                 self.is_jump_unlocked = True
@@ -113,16 +119,26 @@ class Player(MovingObject):
         match state:
             case self.State.FALL:
                 self.set_animation(self.fall)
+                self.sound_manager.play_movement_sound("fall")
             case self.State.JUMP:
                 self.set_animation(self.jump_up)
+                self.sound_manager.play_movement_sound("jump_up")
             case self.State.RUN:
                 self.set_animation(self.run)
+                self.sound_manager.play_movement_sound("run")
             case self.State.DUCK_IDLE:
                 self.set_animation(self.duck_idle)
             case self.State.DUCK_WALK:
                 self.set_animation(self.duck_walk)
             case _:
                 self.set_animation(self.idle)
+                self.sound_manager.play_movement_sound("idle")
+
+        # Change hitbox
+        if self.state == self.State.DUCK:
+            self.set_hitbox("crouch")
+        else:
+            self.set_hitbox("default")
 
     def do_interaction(self, game_world):
         """Check if player collides with interactable object and calls according on_collide function."""
@@ -183,7 +199,6 @@ class Player(MovingObject):
 
     def update(self, delta: float, game_world):
         #  Interact with interactable game elements and call their on_collide function
-        WALK_SOUND = pg.mixer.Sound(get_path('assets/sounds/walk_sound.wav'))
 
         self.do_interaction(game_world)
 
@@ -214,4 +229,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

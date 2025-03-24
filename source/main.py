@@ -5,13 +5,11 @@ from game_world import GameWorld
 import world_generation
 from utils import *
 from constants import *
-import random_world
+from sound_manager import *
 import os
 
 # pygame setup
 pg.init()
-pg.mixer.init()
-sound = pg.mixer.Sound(get_path('assets/sounds/bg_music.mp3'))
 
 screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
                              flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
@@ -24,8 +22,8 @@ gameo = False
 level_selection = False
 selected_level = 0  # Index der ausgewählten Option
 FONT = pg.font.Font(None, 30)
-
-optionbutton = pg.Rect(120, 70, 80, 40)
+sound_manager = SoundManager()
+optionbutton = pg.Rect(120,70,80,40)
 
 # create player character
 #obstacle = object_classes.GameObject(pygame.Vector2(200, 100), pygame.image.load(get_path('assets/test/egg.png')))
@@ -36,14 +34,17 @@ optionbutton = pg.Rect(120, 70, 80, 40)
 
 while running:
 
-    while menu:
-        screen.fill((0, 0, 0))
-        if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
-            pg.draw.rect(screen, (255, 255, 255), optionbutton, 50)
-        else:
-            pg.draw.rect(screen, (0, 255, 255), optionbutton, 50)
-        pg.display.flip()
 
+    while menu:
+
+        sound_manager.play_bg_music("menu")
+        screen.fill((0,0,0))
+        if pg.Rect.collidepoint(optionbutton,pg.mouse.get_pos()) == True:
+            pg.draw.rect(screen,(255,255,255),optionbutton,50)
+        else:
+            pg.draw.rect(screen,(0,255,255),optionbutton,50)
+        pg.display.flip()
+        
         # poll for events
         # pygame.QUIT event means the user clicked X to close your window
         for event in pg.event.get():
@@ -71,8 +72,10 @@ while running:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_DOWN:
                     selected_level = (selected_level + 1) % len(levels)
+                    sound_manager.play_system_sound("selection")
                 elif event.key == pg.K_UP:
                     selected_level = (selected_level - 1) % len(levels)
+                    sound_manager.play_system_sound("selection")
                 elif event.key == pg.K_RETURN:
                     game = True
                     level_selection = False
@@ -84,8 +87,7 @@ while running:
 
     while game:
 
-        sound.play(loops=-1)
-        sound.set_volume(0.5)
+        sound_manager.play_bg_music("game")
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False
