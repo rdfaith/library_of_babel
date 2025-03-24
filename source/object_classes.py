@@ -182,8 +182,14 @@ class LetterPickUp(InteractableObject):
         super().__init__(position, image, image)
 
     def on_collide(self, player, game_world) -> None:
-        if player.on_pickup_letter(self.letter):  # If player picks up (doesn't pick up if inventory full)
+        if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
             game_world.interactable_objects.remove(self)
+
+
+class KeyPickUp(MovingObject):
+    def on_collide(self, player, game_world) -> None:
+        player.on_pickup_key()
+        game_world.interactable_objects.remove(self)
 
 
 class Enemy(MovingObject):
