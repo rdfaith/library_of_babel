@@ -5,6 +5,7 @@ from object_classes import *
 from animator_object import *
 from enum import Enum
 from sound_manager import *
+from light_source import LightSource
 
 # Pygame event for player death
 PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
@@ -20,8 +21,9 @@ class Player(MovingObject):
         FALL = 4
         DUCK_IDLE = 5
         DUCK_WALK = 6
-        DEAD = 7
-        WIN = 8
+        DASH = 7
+        DEAD = 8
+        WIN = 9
 
     def __init__(self, position: pygame.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert_alpha()
@@ -32,29 +34,52 @@ class Player(MovingObject):
 
         self.hitbox.add_hitbox("crouch", self.position, hitbox_image_crouch)
 
+        self.light_source: LightSource = LightSource(
+            self.position,
+            pg.Vector2(10, 12),
+            pg.Color((100, 180, 250)),
+            25.0,
+            0.04
+        )
+
         self.letters_collected: list[str] = []
         self.speed_x = 70
         self.jump_force = 400
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.invincibility_time: float = 0.7
-        self.current_direction = 1
+        self.current_direction: int = 1
 
         self.state = self.State.IDLE
 
         if DEBUG_MODE:
             self.is_jump_unlocked: bool = True
             self.is_crouch_unlocked: bool = True
+            self.is_dash_unlocked: bool = True
         else:
             self.is_jump_unlocked: bool = False
             self.is_crouch_unlocked: bool = False
-        # define animations
+            self.is_dash_unlocked: bool = False
+
+        # Does Player have key
+        self.has_key = False
+
+        # Dash Values
+        self.dash_speed = 400  # Dash speed multiplier
+        self.dash_time: float = 0.2  # Dash duration in seconds
+        self.dash_cooldown: float = 2.0  # Cooldown before dashing again
+        self.dash_timer = 0  # Time left in current dash
+        self.dash_cooldown_timer = 0  # Cooldown timer after dash
+
+        # Define Animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
         self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
         self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
         self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
         self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
+        self.dash = Animation("dash", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 10)
+        self.dead = Animation("dead", get_path('assets/test/egg.png'), 24, 24, 1, 10)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
@@ -64,27 +89,26 @@ class Player(MovingObject):
     def set_animation(self, animation: Animation) -> None:
         self.active_animation = animation
         self.animator = Animator(animation)
-        self.animator.reset_animation(animation)
+        self.animator.reset_animation()
 
     def on_player_death(self, reason: str):
         self.player_lives = 0
         self.state = self.State.DEAD
         self.on_state_changed(self.State.DEAD)
-        # self.set_animation(self.dead) # uncomment when death animation implemented
+        self.set_animation(self.dead) # uncomment when death animation implemented
         pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
         self.player_lives = 3
 
     def on_player_win(self, reason: str):
         self.state = self.State.WIN
         self.on_state_changed(self.State.WIN)
-        # self.set_animation(self.won) # uncomment when death animation implemented
+        # self.set_animation(self.won) # uncomment when win animation implemented
         pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": reason}))
 
     def on_hit_by_enemy(self, enemy: GameObject, direction: int):
         if self.invincibility_time == 0:
-            self.bounce_velocity_x = -direction * 250
-            print(self.bounce_velocity_x)
-            self.velocity.y = -300
+            self.bounce_velocity_x = -direction * 200
+            self.velocity.y = -200
             self.invincibility_time = 0.7
 
             if self.player_lives > 1:
@@ -97,7 +121,10 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
-    def on_pickup_letter(self, letter: str) -> bool:
+    def on_pickup_key(self):
+        self.has_key = True
+
+    def on_pickup_letter(self, letter: str, game_world) -> bool:
         """Called when player moves into collider of letter.
         Returns False if the letter can't be picked up, else True."""
 
@@ -117,12 +144,17 @@ class Player(MovingObject):
             case "DUCK":
                 self.is_crouch_unlocked = True
                 word_completed = True
+            case "DASH":
+                self.is_dash_unlocked = True
+                word_completed = True
+            case "KEY":
+                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 16, self.position.y - 32), get_path('assets/test/egg.png'), True))
+                word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
             case "LIGHT":
                 print("Es werde Licht")
                 self.on_player_win("alle Buchstaben gesammelt")
-
 
         if word_completed:
             self.letters_collected = []
@@ -147,6 +179,8 @@ class Player(MovingObject):
                 self.set_animation(self.duck_idle)
             case self.State.DUCK_WALK:
                 self.set_animation(self.duck_walk)
+            case self.State.DASH:
+                self.set_animation(self.dash)
             case _:
                 self.set_animation(self.idle)
                 self.sound_manager.play_movement_sound("idle")
@@ -163,7 +197,7 @@ class Player(MovingObject):
             if self.get_rect().colliderect(o.get_rect()):
                 o.on_collide(self, game_world)
 
-    def handle_movement(self, keys, game_world):
+    def handle_movement(self, keys, delta, game_world):
         """Sets player movement and state according to input and switches animation if necessary"""
 
         # If dead, do nothing
@@ -173,34 +207,53 @@ class Player(MovingObject):
         new_state = self.state
         is_grounded = self.check_is_grounded(game_world.static_objects)
 
-        if keys[pg.K_a] or keys[pg.K_LEFT]:
-            self.velocity.x = -self.speed_x  # Move left
-            self.current_direction = -1
-            new_state = self.State.RUN
-        elif keys[pg.K_d] or keys[pg.K_RIGHT]:
-            self.velocity.x = self.speed_x  # Move right
-            self.current_direction = 1
-            new_state = self.State.RUN
-        elif is_grounded:
-            self.velocity.x = 0
-            new_state = self.State.IDLE
+        # Dash
+        if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:
+            self.has_gravity = False
+            self.dash_timer = self.dash_time  # Start dash duration
+            self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
+            self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
+            new_state = self.State.DASH
 
-        if is_grounded:
-            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
-                self.velocity.y = -self.jump_force
+        # Handle Input, input will be ignored if player is dashing
+        if self.dash_timer <= 0:
+            if keys[pg.K_a] or keys[pg.K_LEFT]:
+                self.velocity.x = -self.speed_x  # Move left
+                self.current_direction = -1
+                new_state = self.State.RUN
+            elif keys[pg.K_d] or keys[pg.K_RIGHT]:
+                self.velocity.x = self.speed_x  # Move right
+                self.current_direction = 1
+                new_state = self.State.RUN
+            elif is_grounded:
+                self.velocity.x = 0
+                new_state = self.State.IDLE
+
+            if is_grounded:
+                if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                    self.velocity.y = -self.jump_force
+                    new_state = self.State.JUMP
+                elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
+                    if self.velocity.x != 0:
+                        new_state = self.State.DUCK_WALK
+                    else:
+                        new_state = self.State.DUCK_IDLE
+            elif self.velocity.y <= 0:
                 new_state = self.State.JUMP
-            elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
-                if self.velocity.x != 0:
-                    new_state = self.State.DUCK_WALK
-                else:
-                    new_state = self.State.DUCK_IDLE
-        elif self.velocity.y <= 0:
-            new_state = self.State.JUMP
-        else:
-            new_state = self.State.FALL
+            else:
+                new_state = self.State.FALL
 
+        # Handle Dash Duration
+        if self.dash_timer > 0:
+            self.dash_timer -= delta
+            if self.dash_timer <= 0:  # Dash ends
+                self.velocity.x = 0 if not (keys[pg.K_LEFT] or keys[pg.K_RIGHT]) else self.velocity.x
+                new_state = self.State.RUN if (keys[pg.K_LEFT] or keys[pg.K_RIGHT]) else self.State.IDLE
+                self.has_gravity = True
 
-        # Test 42
+        # Handle Dash Cooldown Timer
+        if self.dash_cooldown_timer > 0:
+            self.dash_cooldown_timer -= delta
 
         # Not crouch -> crouch
         if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
@@ -228,7 +281,7 @@ class Player(MovingObject):
         #  Interact with interactable game elements and call their on_collide function
         self.do_interaction(game_world)
 
-        self.handle_movement(keys, game_world)
+        self.handle_movement(keys, delta, game_world)
 
         if self.bounce_velocity_x != 0:
             if self.check_is_grounded(game_world.static_objects) and self.invincibility_time != 0.7:
@@ -240,6 +293,7 @@ class Player(MovingObject):
         super().update(delta, game_world)
 
         self.animator.update()
+        self.light_source.set_position(self.position)  # update position of light source
 
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos

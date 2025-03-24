@@ -2,7 +2,7 @@ import pygame as pg
 from player import Player
 from constants import *
 from utils import *
-
+from light_source import *
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
@@ -11,6 +11,10 @@ class GameWorld:
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
         self.player = Player(player_pos)
+
+
+        self.light_map: LightMap = LightMap()  # object that stores all light sources
+
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
                                                  self.player.get_rect().y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
@@ -20,6 +24,9 @@ class GameWorld:
         """Sets player position, used when initialising level"""
         self.player.get_rect().x = pos.x
         self.player.get_rect().y = pos.y
+
+    def get_light_map(self) -> LightMap:
+        return self.light_map
 
     def do_updates(self, delta: float) -> None:
 
@@ -32,7 +39,7 @@ class GameWorld:
         for o in self.interactable_objects:
             o.update(delta, self)
 
-    def do_render(self, screen):
+    def do_render(self, game_screen, ui_screen):
 
         #region Functions
         def set_camera_position() -> None:
@@ -54,18 +61,25 @@ class GameWorld:
             self.camera_pos.y = max(0, min(self.camera_pos.y, self.level_height - SCREEN_HEIGHT))
 
         def draw_ui():
-            ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
-            ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
-            screen.blit(ui_bg, pg.Vector2())
+            ui_screen.fill((0, 0, 0, 0))
+
+            ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png")).convert_alpha()
+            ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png")).convert_alpha()
+            ui_key = pg.image.load(get_path("assets/test/egg.png"))
+            ui_screen.blit(ui_bg, pg.Vector2(0, 0))
 
             for i in range(self.player.player_lives):
-                screen.blit(ui_heart, UI_HEART_POSITIONS[i])
+                ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
 
             for i in range(len(self.player.letters_collected)):
                 if i > 5:  # Break if more than 5 letters would have to be displayed
                     break
                 letter = self.player.letters_collected[i]
-                screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
+                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
+
+            if self.player.has_key:
+                ui.screen.blit(ui_key, UI_KEY_POSITION)
+
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True):
             depth: int = layer["depth"]
@@ -79,7 +93,7 @@ class GameWorld:
             bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
 
             # Hintergrund zeichnen
-            screen.blit(layer["image"], bg_pos)
+            game_screen.blit(layer["image"], bg_pos)
 
         def draw_bg_parallax():
             """Draws the background parallax layers"""
@@ -100,7 +114,7 @@ class GameWorld:
             vignette = VIGNETTE.convert_alpha()
             player_position = self.player.get_rect().topleft - self.player.get_sprite_offset() - self.camera_pos
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
-            screen.blit(VIGNETTE, vignette_position)
+            game_screen.blit(VIGNETTE, vignette_position)
 
         #endregion
 
@@ -112,18 +126,25 @@ class GameWorld:
 
         # draw objects
         for o in self.static_objects + self.objects + self.interactable_objects:  # Static -> Deco -> Interactive
-            o.draw(screen, self.camera_pos)
+            o.draw(game_screen, self.camera_pos)
 
+        # get light sources:
+        self.light_map.clear_sources()
+        self.light_map.add_source(self.player.light_source)
 
+        for o in self.objects:
+            light_source = o.get_light_source()
+            if light_source:
+                self.light_map.add_source(light_source)
 
         # draw player
-        self.player.draw(screen, self.camera_pos)
+        self.player.draw(game_screen, self.camera_pos)
 
         # draw foreground parallax
         draw_fg_parallax()
 
         # Visual effects
-        draw_post_processing()
+        # draw_post_processing()
 
         # draw UI
         draw_ui()

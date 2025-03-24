@@ -4,12 +4,14 @@ from hitbox import Hitbox
 from animator_object import *
 from constants import *
 from enum import Enum
+from light_source import LightSource
 
 
 class GameObject:
-    def __init__(self, position: pg.Vector2, image: pg.Surface):
+    def __init__(self, position: pg.Vector2, image: pg.Surface, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
         self.position = position.copy()
+        self.light_source = light_source  # Leave None if no light source
 
     def update(self, delta: float, game_world):
         pass
@@ -19,14 +21,17 @@ class GameObject:
         position = self.position - camera_pos
         screen.blit(self.image, position)
 
+    def get_light_source(self):
+        return self.light_source
+
 
 class AnimatedObject(GameObject):
-    """Base class for objects that are animated. No colliders or hitboxes. Used for decorative objects."""
+    """Base class for objects that are animated. No colliders or hit boxes. Used for decorative objects."""
 
-    def __init__(self, position: pg.Vector2, animation: Animation):
+    def __init__(self, position: pg.Vector2, animation: Animation, light_source: LightSource = None):
         self.animation: Animation = animation
         self.animator: Animator = Animator(animation)
-        super().__init__(position, self.animator.get_frame(1))
+        super().__init__(position, self.animator.get_frame(1), light_source)
 
     def draw(self, screen, camera_pos):
         self.animator.update()
@@ -177,8 +182,14 @@ class LetterPickUp(InteractableObject):
         super().__init__(position, image, image)
 
     def on_collide(self, player, game_world) -> None:
-        if player.on_pickup_letter(self.letter):  # If player picks up (doesn't pick up if inventory full)
+        if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
             game_world.interactable_objects.remove(self)
+
+
+class KeyPickUp(MovingObject):
+    def on_collide(self, player, game_world) -> None:
+        player.on_pickup_key()
+        game_world.interactable_objects.remove(self)
 
 
 class Enemy(MovingObject):
@@ -199,10 +210,10 @@ class Worm(Enemy):
         self.distance = 0
         self.max_distance = 50
         self.state = self.State.WALK
-        self.time_until_death = 2
+        self.time_until_death = 3.5
 
         self.walk = Animation("walk", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
-        self.dead = Animation("dead", get_path('assets/test/worm.png'), 32, 16, 1, 10)
+        self.dead = Animation("dead", get_path('assets/test/worm_dead-Sheet.png'), 32, 16, 1, 10)
 
         self.active_animation = self.walk
         self.animator = Animator(self.active_animation)
@@ -210,17 +221,17 @@ class Worm(Enemy):
     def on_collide(self, player, game_world) -> None:
         """Is called on collision with player."""
         # threshold = 5
-
-        if player.velocity.y > 0 and not player.check_is_grounded(game_world.static_objects):
-                #and player.get_rect().bottom <= self.get_rect().top + 10)
-            # If player jumps on top of it, enemy dies
-            player.velocity.y = -250
-            player.bounce_velocity_x = 0
-            player.velocity.x = 0
-            self.state = self.State.DEAD
-            self.on_state_changed(self.State.DEAD)
-        else:
-            player.on_hit_by_enemy(self, player.current_direction)
+        if self.state != self.State.DEAD:
+            if player.velocity.y > 0 and not player.check_is_grounded(game_world.static_objects):
+                    #and player.get_rect().bottom <= self.get_rect().top + 10)
+                # If player jumps on top of it, enemy dies
+                player.velocity.y = -250
+                player.bounce_velocity_x = 0
+                player.velocity.x = 0
+                self.state = self.State.DEAD
+                self.on_state_changed(self.State.DEAD)
+            else:
+                player.on_hit_by_enemy(self, player.current_direction)
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
@@ -242,7 +253,7 @@ class Worm(Enemy):
         if self.active_animation.name != animation.name:
             self.active_animation = animation
             self.animator = Animator(animation)
-            self.animator.reset_animation(animation)
+            self.animator.reset_animation()
 
     def update(self, delta: float, game_world):
 
@@ -271,9 +282,15 @@ class Worm(Enemy):
 
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos
-        screen.blit(self.animator.get_frame(self.current_direction), position)
+
+        frame = self.animator.get_frame(self.current_direction)
+        if self.state == self.State.DEAD and self.time_until_death <= 2:
+            frame.set_alpha(255 - (2 - self.time_until_death) * 255)
+
+        screen.blit(frame, position)
+        # screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
-        pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
 
 
 class Monkey(Enemy):

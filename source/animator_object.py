@@ -39,7 +39,7 @@ class Animator:
             self.last_update = now
             self.current_frame = (self.current_frame + 1) % self.num_frames
 
-    def reset_animation(self, animation):
+    def reset_animation(self):
         self.current_frame = 0
 
     def get_frame(self, current_direction):
