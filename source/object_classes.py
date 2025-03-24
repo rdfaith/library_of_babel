@@ -3,6 +3,7 @@ from utils import *
 from hitbox import Hitbox
 from animator_object import *
 from constants import *
+from enum import Enum
 
 
 class GameObject:
@@ -186,6 +187,26 @@ class Enemy(MovingObject):
         super().__init__(position, image, gravity)
         self.current_direction = 1
 
+
+class Worm(Enemy):
+    class State(Enum):
+        WALK = 1
+        DEAD = 2
+
+    def __init__(self, position: pg.Vector2):
+        super().__init__(position, pg.image.load(get_path("assets/test/worm.png")), True)
+        self.speed_x = 10
+        self.distance = 0
+        self.max_distance = 50
+        self.state = self.State.WALK
+        self.time_until_death = 1
+
+        self.walk = Animation("walk", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
+        self.dead = Animation("dead", get_path('assets/test/worm.png'), 32, 16, 1, 10)
+
+        self.active_animation = self.walk
+        self.animator = Animator(self.active_animation)
+
     def on_collide(self, player, game_world) -> None:
         """Is called on collision with player."""
         # threshold = 5
@@ -196,29 +217,27 @@ class Enemy(MovingObject):
             player.velocity.y = -250
             player.bounce_velocity_x = 0
             player.velocity.x = 0
-            game_world.interactable_objects.remove(self)  # Remove enemy from the game
+            self.state = self.State.DEAD
+            self.on_state_changed(self.State.DEAD)
+            #game_world.interactable_objects.remove(self)  # Remove enemy from the game
         else:
             player.on_hit_by_enemy(self, player.current_direction)
 
+    def on_state_changed(self, state: Enum):
+        """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
 
-class Worm(Enemy):
-    def __init__(self, position: pg.Vector2):
-        super().__init__(position, pg.image.load(get_path("assets/test/worm.png")), True)
-        self.speed_x = 10
-        self.distance = 0
-        self.max_distance = 50
-        self.run = Animation("run", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
-        #self.die = Animation(get_path(), 32, 16, x, 10)
+        # Change animation:
+        match state:
+            case self.State.WALK:
+                self.set_animation(self.walk)
+            case self.State.DEAD:
+                self.set_animation(self.dead)
 
-        self.active_animation = self.run
-        self.animator = Animator(self.active_animation)
-
-    def check_animation(self) -> None:
-        # if self.is_dead:
-        #   self.set_animation(self.die)
-        # else:
-        #   pass
-        pass
+        # Change hit box
+        # if self.state == self.State.WALK:
+        #     normal hit box
+        # else: meaning, if dead
+        #     remove hit box
 
     def set_animation(self, animation):
         if self.active_animation.name != animation.name:
@@ -228,19 +247,29 @@ class Worm(Enemy):
 
     def update(self, delta: float, game_world):
 
-        self.velocity.x = self.current_direction * self.speed_x
+        if self.state == self.State.DEAD:
+            if self.time_until_death != 0:
+                self.time_until_death -= delta
+                if self.time_until_death <= 0:
+                    self.time_until_death = 0
+            else:
+                game_world.interactable_objects.remove(self)
 
-        super().update(delta, game_world)
+        else:
 
-        if not self.has_collided:
-            self.distance += abs(self.velocity.x * delta)
+            self.velocity.x = self.current_direction * self.speed_x
 
-        if self.distance >= self.max_distance or self.has_collided:
-            self.current_direction *= (-1)
-            self.distance = 0
-            self.has_collided = False
+            super().update(delta, game_world)
 
-        self.animator.update()
+            if not self.has_collided:
+                self.distance += abs(self.velocity.x * delta)
+
+            if self.distance >= self.max_distance or self.has_collided:
+                self.current_direction *= (-1)
+                self.distance = 0
+                self.has_collided = False
+
+            self.animator.update()
 
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos
@@ -248,11 +277,10 @@ class Worm(Enemy):
         # Draw hit box, just for debugging:
         pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
 
+
 class Monkey(Enemy):
     def __init__(self, position: pg.Vector2):
         super().__init__(position,pg.image.load(get_path("assets/test/monkey_test.png")), True)
         self.speed_x = 0
         self.distance = 0
         self.max_distance = 0
-
-        #
