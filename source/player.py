@@ -52,14 +52,17 @@ class Player(MovingObject):
             self.is_crouch_unlocked: bool = False
             self.is_dash_unlocked: bool = False
 
-        # dash values
-        self.dash_speed = 600  # Dash speed multiplier
+        # Does Player have key
+        self.has_key = False
+
+        # Dash Values
+        self.dash_speed = 400  # Dash speed multiplier
         self.dash_time: float = 0.2  # Dash duration in seconds
         self.dash_cooldown: float = 2.0  # Cooldown before dashing again
         self.dash_timer = 0  # Time left in current dash
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
-        # define animations
+        # Define Animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
         self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
@@ -94,8 +97,8 @@ class Player(MovingObject):
 
     def on_hit_by_enemy(self, enemy: GameObject, direction: int):
         if self.invincibility_time == 0:
-            self.bounce_velocity_x = -direction * 250
-            self.velocity.y = -300
+            self.bounce_velocity_x = -direction * 200
+            self.velocity.y = -200
             self.invincibility_time = 0.7
 
             if self.player_lives > 1:
@@ -108,7 +111,10 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
-    def on_pickup_letter(self, letter: str) -> bool:
+    def on_pickup_key(self):
+        self.has_key = True
+
+    def on_pickup_letter(self, letter: str, game_world) -> bool:
         """Called when player moves into collider of letter.
         Returns False if the letter can't be picked up, else True."""
 
@@ -130,6 +136,9 @@ class Player(MovingObject):
                 word_completed = True
             case "DASH":
                 self.is_dash_unlocked = True
+                word_completed = True
+            case "KEY":
+                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 16, self.position.y - 32), get_path('assets/test/egg.png'), True))
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")

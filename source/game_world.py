@@ -56,6 +56,8 @@ class GameWorld:
         def draw_ui():
             ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
             ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
+            ui_key = pg.image.load(get_path("assets/test/egg.png"))
+
             screen.blit(ui_bg, pg.Vector2())
 
             for i in range(self.player.player_lives):
@@ -66,6 +68,10 @@ class GameWorld:
                     break
                 letter = self.player.letters_collected[i]
                 screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
+
+            if self.player.has_key:
+                screen.blit(ui_key, UI_KEY_POSITION)
+
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True):
             depth: int = layer["depth"]
