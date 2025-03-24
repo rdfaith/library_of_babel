@@ -32,7 +32,7 @@ class GameWorld:
         for o in self.interactable_objects:
             o.update(delta, self)
 
-    def do_render(self, game_screen, ui_screen):
+    def do_render(self, screen):
 
         #region Functions
         def set_camera_position() -> None:
@@ -56,16 +56,16 @@ class GameWorld:
         def draw_ui():
             ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
             ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
-            ui_screen.blit(ui_bg, pg.Vector2())
+            screen.blit(ui_bg, pg.Vector2())
 
             for i in range(self.player.player_lives):
-                ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
+                screen.blit(ui_heart, UI_HEART_POSITIONS[i])
 
             for i in range(len(self.player.letters_collected)):
                 if i > 5:  # Break if more than 5 letters would have to be displayed
                     break
                 letter = self.player.letters_collected[i]
-                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
+                screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True):
             depth: int = layer["depth"]
@@ -79,7 +79,7 @@ class GameWorld:
             bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
 
             # Hintergrund zeichnen
-            game_screen.blit(layer["image"], bg_pos)
+            screen.blit(layer["image"], bg_pos)
 
         def draw_bg_parallax():
             """Draws the background parallax layers"""
@@ -100,7 +100,7 @@ class GameWorld:
             vignette = VIGNETTE.convert_alpha()
             player_position = self.player.get_rect().topleft - self.player.get_sprite_offset() - self.camera_pos
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
-            game_screen.blit(VIGNETTE, vignette_position)
+            screen.blit(VIGNETTE, vignette_position)
 
         #endregion
 
@@ -112,12 +112,12 @@ class GameWorld:
 
         # draw objects
         for o in self.static_objects + self.objects + self.interactable_objects:  # Static -> Deco -> Interactive
-            o.draw(game_screen, self.camera_pos)
+            o.draw(screen, self.camera_pos)
 
 
 
         # draw player
-        self.player.draw(game_screen, self.camera_pos)
+        self.player.draw(screen, self.camera_pos)
 
         # draw foreground parallax
         draw_fg_parallax()

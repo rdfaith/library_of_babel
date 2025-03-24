@@ -199,7 +199,7 @@ class Worm(Enemy):
         self.distance = 0
         self.max_distance = 50
         self.state = self.State.WALK
-        self.time_until_death = 1
+        self.time_until_death = 2
 
         self.walk = Animation("walk", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
         self.dead = Animation("dead", get_path('assets/test/worm.png'), 32, 16, 1, 10)
@@ -219,7 +219,6 @@ class Worm(Enemy):
             player.velocity.x = 0
             self.state = self.State.DEAD
             self.on_state_changed(self.State.DEAD)
-            #game_world.interactable_objects.remove(self)  # Remove enemy from the game
         else:
             player.on_hit_by_enemy(self, player.current_direction)
 
@@ -256,7 +255,6 @@ class Worm(Enemy):
                 game_world.interactable_objects.remove(self)
 
         else:
-
             self.velocity.x = self.current_direction * self.speed_x
 
             super().update(delta, game_world)
