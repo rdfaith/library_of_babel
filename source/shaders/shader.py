@@ -33,7 +33,7 @@ class Shader:
         self.game_screen: pg.Surface = game_screen
         self.ui_screen: pg.Surface = ui_screen
 
-    def update(self, light_map: LightMap = None):
+    def update(self, light_map: LightMap = LightMap()):
         def surf_to_texture(surf):
             tex = self.ctx.texture(surf.get_size(), 4)
             tex.filter = (moderngl.NEAREST, moderngl.NEAREST)
@@ -48,6 +48,12 @@ class Shader:
         game_tex = surf_to_texture(self.game_screen)
         game_tex.use(1)
         self.program['gameTex'] = 1
+
+        NUM_LIGHTS = 50  # Has to be the same as in frag_shader.glsl!!
+
+        self.program['lightPositions'] = [(pos.x, pos.y) for pos in light_map.get_positions(NUM_LIGHTS)]
+        self.program['lightColors'] = [(col.r, col.g, col.b) for col in light_map.get_colors(NUM_LIGHTS)]
+        self.program['lightIntensities'] = [i for i in light_map.get_intensities(NUM_LIGHTS)]
 
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
 

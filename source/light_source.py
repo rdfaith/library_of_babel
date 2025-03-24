@@ -17,3 +17,19 @@ class LightMap:
 
     def clear_sources(self):
         self.light_sources.clear()
+
+    def get_sources(self) -> list[LightSource]:
+        return self.light_sources.copy()
+
+    def get_positions(self, max_index: int) -> list[pg.Vector2]:
+        """Returns exactly max_index entries, filling up with empties if necessary"""
+        sources = [ls.position for ls in self.get_sources()]
+        return sources[:max_index] + [pg.Vector2(0, 0)] * (max_index - len(sources))
+
+    def get_colors(self, max_index: int) -> list[pg.Color]:
+        sources = [ls.color for ls in self.get_sources()]
+        return sources[:max_index] + [pg.Color(0, 0, 0, 0)] * (max_index - len(sources))
+
+    def get_intensities(self, max_index: int) -> list[float]:
+        sources = [ls.intensity for ls in self.get_sources()]
+        return sources[:max_index] + [0.0] * (max_index - len(sources))
