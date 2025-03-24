@@ -41,9 +41,12 @@ class Player(MovingObject):
 
         self.state = self.State.IDLE
 
-        self.is_jump_unlocked: bool = True
-        self.is_crouch_unlocked: bool = True
-
+        if DEBUG_MODE:
+            self.is_jump_unlocked: bool = True
+            self.is_crouch_unlocked: bool = True
+        else:
+            self.is_jump_unlocked: bool = False
+            self.is_crouch_unlocked: bool = False
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
@@ -76,8 +79,9 @@ class Player(MovingObject):
 
             if self.player_lives > 1:
                 print("Aua")
-                self.sound_manager.play_movement_sound("damage")
-                # self.player_lives -= 1
+                if not DEBUG_MODE:
+                    self.sound_manager.play_movement_sound("damage")
+                    self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")
 
