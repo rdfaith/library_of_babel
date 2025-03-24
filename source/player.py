@@ -62,7 +62,7 @@ class Player(MovingObject):
     def set_animation(self, animation: Animation) -> None:
         self.active_animation = animation
         self.animator = Animator(animation)
-        self.animator.reset_animation(animation)
+        self.animator.reset_animation()
 
     def on_player_death(self, reason: str):
         self.player_lives = 0
