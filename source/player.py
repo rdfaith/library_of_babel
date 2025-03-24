@@ -166,6 +166,9 @@ class Player(MovingObject):
         else:
             new_state = self.State.FALL
 
+
+        # Test 42
+
         # Not crouch -> crouch
         if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
             self.set_hitbox("crouch")
