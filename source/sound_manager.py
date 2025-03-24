@@ -1,5 +1,3 @@
-from time import sleep
-
 import pygame as pg
 from constants import *
 
