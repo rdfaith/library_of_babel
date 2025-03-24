@@ -135,7 +135,7 @@ class Player(MovingObject):
                 self.sound_manager.play_movement_sound("idle")
 
         # Change hitbox
-        if self.state == self.State.DUCK:
+        if self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK:
             self.set_hitbox("crouch")
         else:
             self.set_hitbox("default")
