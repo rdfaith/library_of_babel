@@ -37,7 +37,6 @@ class Player(MovingObject):
         self.jump_force = 400
         self.player_lives = 3
         self.bounce_velocity_x = 0
-        self.time_since_hit: float = 0.0
         self.invincibility_time: float = 0.7
         self.current_direction = 1
 
@@ -81,15 +80,16 @@ class Player(MovingObject):
         pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": reason}))
 
     def on_hit_by_enemy(self, enemy: GameObject, direction: int):
-        if self.time_since_hit != 0.0:
-            self.bounce_velocity_x = direction * 250
+        if self.invincibility_time == 0:
+            self.bounce_velocity_x = -direction * 250
+            print(self.bounce_velocity_x)
             self.velocity.y = -300
+            self.invincibility_time = 0.7
 
             if self.player_lives > 1:
                 print("Aua")
-                if not DEBUG_MODE:
-                    self.sound_manager.play_movement_sound("damage")
-                    self.player_lives -= 1
+                self.sound_manager.play_movement_sound("damage")
+                self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")
 
@@ -214,24 +214,23 @@ class Player(MovingObject):
             self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
-        #  Interact with interactable game elements and call their on_collide function
-
-        self.do_interaction(game_world)
 
         # get player movement
         keys = pygame.key.get_pressed()
 
+        # Check invincibility frames
+        if self.invincibility_time > 0:
+            self.invincibility_time -= delta
+            if self.invincibility_time <= 0:
+                self.invincibility_time = 0
+
+        #  Interact with interactable game elements and call their on_collide function
+        self.do_interaction(game_world)
+
         self.handle_movement(keys, game_world)
 
-        # Check invincibility frames
-        if self.time_since_hit < self.invincibility_time:
-            self.time_since_hit += delta
-        else:
-            self.bounce_velocity_x = 0
-            self.time_since_hit = 0.0
-
         if self.bounce_velocity_x != 0:
-            if self.check_is_grounded(game_world.static_objects):
+            if self.check_is_grounded(game_world.static_objects) and self.invincibility_time != 0.7:
                 self.bounce_velocity_x = 0
             else:
                 self.velocity.x = self.bounce_velocity_x

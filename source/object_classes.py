@@ -187,17 +187,18 @@ class Enemy(MovingObject):
         self.current_direction = 1
 
     def on_collide(self, player, game_world) -> None:
-        """Is called on collision with player and reduces lives."""
-        threshold = 5
+        """Is called on collision with player."""
+        # threshold = 5
 
-        if player.velocity.y < 0 and player.get_rect().bottom <= self.get_rect().top + threshold:
+        if player.velocity.y > 0 and not player.check_is_grounded(game_world.static_objects):
+                #and player.get_rect().bottom <= self.get_rect().top + 10)
             # If player jumps on top of it, enemy dies
             player.velocity.y = -250
             player.bounce_velocity_x = 0
             player.velocity.x = 0
             game_world.interactable_objects.remove(self)  # Remove enemy from the game
         else:
-            player.on_hit_by_enemy(self, self.current_direction)
+            player.on_hit_by_enemy(self, player.current_direction)
 
 
 class Worm(Enemy):
@@ -246,6 +247,7 @@ class Worm(Enemy):
         screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
         pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+
 class Monkey(Enemy):
     def __init__(self, position: pg.Vector2):
         super().__init__(position,pg.image.load(get_path("assets/test/monkey_test.png")), True)

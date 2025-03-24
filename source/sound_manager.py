@@ -42,6 +42,7 @@ class SoundManager:
         if self.current_movement_sound:
             self.current_movement_sound.play(loops=-1)
             self.current_movement_sound.set_volume(0.5)
+
     def play_system_sound(self, system_sound_name):
         if self.current_system_sound:
             self.current_system_sound.stop()
