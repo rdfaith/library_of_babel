@@ -246,3 +246,11 @@ class Worm(Enemy):
         screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
         pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+class Monkey(Enemy):
+    def __init__(self, position: pg.Vector2):
+        super().__init__(position,pg.image.load(get_path("assets/test/monkey_test.png")), True)
+        self.speed_x = 0
+        self.distance = 0
+        self.max_distance = 0
+
+        #

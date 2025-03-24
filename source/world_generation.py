@@ -79,6 +79,8 @@ def generate_world(map_file_path: str, tileset_file_path: str) -> GameWorld:
                     collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 2)))
                 case "worm":
                     interactable_objects.append(Worm(pos.copy()))
+                case "monkey":
+                    interactable_objects.append(Monkey(pos.copy()))
                 case "player":
                     player_start_pos = pg.Vector2(pos.x, pos.y)
                 case "deco_candle":
