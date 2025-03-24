@@ -7,11 +7,12 @@ from source.light_source import *
 
 
 class Shader:
-    def __init__(self, screen_width, screen_height,
-                 game_screen: pg.Surface,
-                 ui_screen: pg.Surface,
-                 light_source_screen: pg.Surface):
+    def __init__(self, screen_width, screen_height,):
         self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+
+        self.game_screen = pg.Surface((screen_width, screen_height))
+        self.ui_screen = pg.Surface((screen_width, screen_height))
+
         self.ctx = moderngl.create_context()
 
         self.quad_buffer = self.ctx.buffer(data=array('f', [
@@ -30,8 +31,11 @@ class Shader:
         self.program = self.ctx.program(vertex_shader=self.vert_shader, fragment_shader=self.frag_shader)
         self.render_object = self.ctx.vertex_array(self.program, [(self.quad_buffer, '2f 2f', 'vert', 'texcoord')])
 
-        self.game_screen: pg.Surface = game_screen
-        self.ui_screen: pg.Surface = ui_screen
+    def get_game_screen(self):
+        return self.game_screen
+
+    def get_ui_screen(self):
+        return self.ui_screen
 
     def update(self, camera_pos: pg.Vector2 = pg.Vector2(), light_map: LightMap = LightMap()):
         def surf_to_texture(surf):

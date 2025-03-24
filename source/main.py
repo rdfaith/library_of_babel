@@ -6,6 +6,7 @@ import world_generation
 from utils import *
 from constants import *
 from sound_manager import *
+from shaders.shader import Shader
 import os
 #from menus import *
 from enum import Enum
@@ -16,9 +17,10 @@ import menu
 
 # pygame setup
 pg.init()
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT),
-                             flags=pg.SCALED)  # SCALED flag automatically scales screen to highest possible resolution
-menu.main(True, screen)
+
+shader = Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
+menu.main(True, shader)
+
 # running = True
 # delta = 0.0
 # menu = True

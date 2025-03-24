@@ -8,6 +8,7 @@ from utils import *
 from constants import *
 from sound_manager import *
 import os
+from shaders.shader import Shader
 from enum import Enum
 
 # pygame setup
@@ -50,7 +51,8 @@ def display_levels(levels: int, selected_level, screen):
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
 
 
-def main(running: bool, screen):
+def main(running: bool, shader: Shader):
+
     # variablen
     selected_level = 0
     sound_manager = SoundManager()
@@ -61,17 +63,19 @@ def main(running: bool, screen):
     PLAYER_WON = pg.USEREVENT + 2
     clock = pg.time.Clock()
 
+    game_screen = shader.get_game_screen()
+    ui_screen = shader.get_ui_screen()
+
     while running:
 
         while game_state == GameState.START:
 
             sound_manager.play_bg_music("menu")
-            screen.fill((0, 0, 0))
+            ui_screen.fill((0, 0, 0))
             if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
-                pg.draw.rect(screen, (255, 255, 255), optionbutton, 50)
+                pg.draw.rect(ui_screen, (255, 255, 255), optionbutton, 50)
             else:
-                pg.draw.rect(screen, (0, 255, 255), optionbutton, 50)
-            pg.display.flip()
+                pg.draw.rect(ui_screen, (0, 255, 255), optionbutton, 50)
 
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
@@ -82,17 +86,18 @@ def main(running: bool, screen):
 
                 if event.type == pg.KEYDOWN:
                     game_state = GameState.LEVEL_SELECTION
+
+            # !!! Render with shader (use this instead of display.flip()!!!)
+            shader.update()
             clock.tick(60)
 
 
         while game_state == GameState.LEVEL_SELECTION:
 
-            screen.fill((0, 0, 0))
+            ui_screen.fill((0, 0, 0))
 
             levels = availible_levels(get_path("saves/unlocked_levels.sav"))
-            display_levels(levels, selected_level, screen)
-
-
+            display_levels(levels, selected_level, ui_screen)
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -109,7 +114,9 @@ def main(running: bool, screen):
                         current_level = levels[selected_level]
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
-            pg.display.flip()
+
+            # !!! Render with shader (use this instead of display.flip()!!!)
+            shader.update()
             clock.tick(60)
 
 
@@ -130,9 +137,10 @@ def main(running: bool, screen):
                     sys.exit()
 
             game_world.do_updates(delta)
-            game_world.do_render(screen)
-            # flip() the display to put your work on screen
-            pg.display.flip()
+            game_world.do_render(game_screen, ui_screen)
+
+            # !!! Render with shader (use this instead of display.flip()!!!)
+            shader.update(game_world.camera_pos, game_world.light_map)
 
             delta = clock.tick(60) / 1000
 
@@ -149,5 +157,6 @@ def main(running: bool, screen):
                     sys.exit()
 
             clock.tick(60)
+
     pg.quit()
     sys.exit()
