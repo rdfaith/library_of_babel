@@ -65,7 +65,7 @@ class GameWorld:
 
             ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png")).convert_alpha()
             ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png")).convert_alpha()
-            ui_key = pg.image.load(get_path("assets/test/egg.png"))
+            ui_key = pg.image.load(get_path("assets/test/key.png"))
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
 
             for i in range(self.player.player_lives):
@@ -78,7 +78,7 @@ class GameWorld:
                 ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
 
             if self.player.has_key:
-                ui.screen.blit(ui_key, UI_KEY_POSITION)
+                ui_screen.blit(ui_key, UI_KEY_POSITION)
 
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True):

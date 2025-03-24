@@ -61,7 +61,7 @@ class Player(MovingObject):
             self.is_crouch_unlocked: bool = False
             self.is_dash_unlocked: bool = False
 
-        # Does Player have key
+        # Does Player Have Key?
         self.has_key = False
 
         # Dash Values
@@ -147,7 +147,7 @@ class Player(MovingObject):
                 self.is_dash_unlocked = True
                 word_completed = True
             case "KEY":
-                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 16, self.position.y - 32), get_path('assets/test/egg.png'), True))
+                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64), pg.image.load(get_path('assets/test/key.png')), True))
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")

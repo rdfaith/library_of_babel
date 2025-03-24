@@ -186,6 +186,14 @@ class LetterPickUp(InteractableObject):
             game_world.interactable_objects.remove(self)
 
 
+class Door(InteractableObject):
+
+    def on_collide(self, player, game_world) -> None:
+        if player.has_key:
+            # remove hit box door hitbox
+            pass
+
+
 class KeyPickUp(MovingObject):
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
