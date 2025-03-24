@@ -110,9 +110,9 @@ while running:
         sound_manager.play_bg_music("game")
         for event in pg.event.get():
             if event.type == pg.USEREVENT + 1:
-                game_world = load_world(current_level)
+                #game_world = load_world(current_level)
                 clock = pg.time.Clock()
-                game_world.do_updates(delta)
+                #game_world.do_updates(delta)
                 print("test")
             if event.type == pg.USEREVENT + 2:
                 unlocked_level = f"{current_level[:-1]}{int(current_level[-1]) + 1}"
