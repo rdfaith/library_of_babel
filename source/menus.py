@@ -7,7 +7,6 @@ pg.init
 
 sound_manager = SoundManager()
 optionbutton = pg.Rect(120,70,80,40)
-FONT = pg.font.Font(None, 30)
 
 def start_screen(screen):
 

@@ -23,7 +23,10 @@ class SoundManager:
         self.current_bg_music = BG_MUSIC.get(menu_state)
 
         (self.current_bg_music.play(loops=-1))
-        self.current_bg_music.set_volume(0)
+        if DEBUG_MODE:
+            self.current_bg_music.set_volume(0)
+        else:
+            self.current_bg_music.set_volume(1)
 
     def play_movement_sound(self, movement_name):
         if movement_name == self.current_movement:
