@@ -36,7 +36,7 @@ class Player(MovingObject):
 
         self.light_source: LightSource = LightSource(
             self.position,
-            pg.Vector2(10, 12),
+            pg.Vector2(12, 12),
             pg.Color((100, 180, 250)),
             25.0,
             0.04

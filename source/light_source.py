@@ -10,7 +10,7 @@ class LightSource:
         self.intensity: float = intensity
 
     def set_position(self, pos: pg.Vector2):
-        self.position = pos + self.offset
+        self.position = pos + (self.offset.x, self.offset.y)
 
 
 class LightMap:
