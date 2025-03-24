@@ -27,10 +27,10 @@ class GameObject:
 class AnimatedObject(GameObject):
     """Base class for objects that are animated. No colliders or hitboxes. Used for decorative objects."""
 
-    def __init__(self, position: pg.Vector2, animation: Animation):
+    def __init__(self, position: pg.Vector2, animation: Animation, light_source: LightSource = None):
         self.animation: Animation = animation
         self.animator: Animator = Animator(animation)
-        super().__init__(position, self.animator.get_frame(1))
+        super().__init__(position, self.animator.get_frame(1), light_source)
 
     def draw(self, screen, camera_pos):
         self.animator.update()
