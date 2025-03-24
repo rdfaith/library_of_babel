@@ -2,7 +2,7 @@ import pygame as pg
 from utils import get_path
 import os
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 FRAME_SIZE = 16
 SCREEN_WIDTH = 320
@@ -98,3 +98,8 @@ BG_MUSIC = {
             "game": pg.mixer.Sound(get_path("assets/sounds/game.mp3")),
             "game_over": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
         }
+
+#SCREENS
+PAUSE_IMAGE = pg.image.load(get_path('assets/test/pause_test.png'))
+RESTART_IMAGE = pg.image.load(get_path('assets/sprites/ui/restart.png'))
+

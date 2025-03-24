@@ -72,6 +72,7 @@ class Player(MovingObject):
         self.on_state_changed(self.State.DEAD)
         # self.set_animation(self.dead) # uncomment when death animation implemented
         pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
+        self.player_lives = 3
 
     def on_player_win(self, reason: str):
         self.state = self.State.WIN
