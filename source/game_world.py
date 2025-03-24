@@ -12,6 +12,7 @@ class GameWorld:
         self.interactable_objects = interactable_objects
         self.player = Player(player_pos)
 
+
         self.light_map: LightMap = LightMap()  # object that stores all light sources
 
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
@@ -124,6 +125,8 @@ class GameWorld:
 
         # get light sources:
         self.light_map.clear_sources()
+        self.light_map.add_source(self.player.light_source)
+
         for o in self.objects:
             light_source = o.get_light_source()
             if light_source:

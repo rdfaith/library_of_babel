@@ -54,13 +54,15 @@ class Shader:
         light_positions = [(pos.x, pos.y) for pos in light_map.get_positions(NUM_LIGHTS)]
         light_colors = [(col.r, col.g, col.b) for col in light_map.get_colors(NUM_LIGHTS)]
         light_intensities = [i for i in light_map.get_intensities(NUM_LIGHTS)]
+        light_radii = [i for i in light_map.get_radii(NUM_LIGHTS)]
 
-        print(light_positions[0])
-        print(camera_pos)
+        print(light_map.light_sources)
+
 
         self.program['lightPositions'] = light_positions
         self.program['lightColors'] = light_colors
         self.program['lightIntensities'] = light_intensities
+        self.program['lightRadii'] = light_radii
 
         self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
 

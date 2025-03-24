@@ -16,6 +16,7 @@ uniform vec2 cameraPos;
 uniform vec2 lightPositions[NUM_LIGHTS];
 uniform vec3 lightColors[NUM_LIGHTS];
 uniform float lightIntensities[NUM_LIGHTS];
+uniform float lightRadii[NUM_LIGHTS];
 
 in vec2 fragTexCoord;
 out vec4 f_color;
@@ -32,14 +33,14 @@ vec2 getFragPos(vec2 _worldPos) {
 }
 
 float getLight() {
-    vec3 finalLight = vec3(0.3);
+    vec3 finalLight = vec3(0.05, 0.28, 0.32); // Base ambient light (moonlight)
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
         vec2 lightDir = lightPositions[i] - getWorldPos();
         float distance = length(lightDir);
 
         // Smoothstep falloff (less harsh than inverse square)
-        float attenuation = lightIntensities[i] * smoothstep(40.0, 0.1, distance) * 0.1;
+        float attenuation = lightIntensities[i] * smoothstep(lightRadii[i], 0.1, distance) * 0.1;
 
         finalLight += lightColors[i] * attenuation;
     }

@@ -43,6 +43,14 @@ class Player(MovingObject):
         self.is_jump_unlocked: bool = False
         self.is_crouch_unlocked: bool = False
 
+        self.light_source: LightSource = LightSource(
+            self.position,
+            pg.Vector2(10, 12),
+            pg.Color((100, 180, 250)),
+            25.0,
+            0.04
+        )
+
         # define animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
@@ -206,6 +214,7 @@ class Player(MovingObject):
         super().update(delta, game_world)
 
         self.animator.update()
+        self.light_source.set_position(self.position)  # update position of light source
 
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos

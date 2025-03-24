@@ -2,10 +2,15 @@ import pygame as pg
 
 
 class LightSource:
-    def __init__(self, position: pg.Vector2, color: pg.Color, intensity):
-        self.position: pg.Vector2 = position
+    def __init__(self, position: pg.Vector2, offset: pg.Vector2, color: pg.Color, radius: float, intensity: float):
+        self.position: pg.Vector2 = position + offset  # position of the light in world space
+        self.offset: pg.Vector2 = offset  # offset from top left corner of sprite to point in sprite from where light should be emitted
         self.color: pg.Color = color
+        self.radius: float = radius
         self.intensity: float = intensity
+
+    def set_position(self, pos: pg.Vector2):
+        self.position = pos + self.offset
 
 
 class LightMap:
@@ -32,4 +37,8 @@ class LightMap:
 
     def get_intensities(self, max_index: int) -> list[float]:
         sources = [ls.intensity for ls in self.get_sources()]
+        return sources[:max_index] + [0.0] * (max_index - len(sources))
+
+    def get_radii(self, max_index: int) -> list[float]:
+        sources = [ls.radius for ls in self.get_sources()]
         return sources[:max_index] + [0.0] * (max_index - len(sources))

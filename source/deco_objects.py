@@ -15,8 +15,10 @@ class Candle(AnimatedObject):
             10
         )
         light_source = LightSource(
-            position.copy() + pg.Vector2(9, 17),
+            position.copy(),
+            pg.Vector2(9, 17),
             pg.Color((240, 120, 30)),
+            40.0,
             0.1
         )
         super().__init__(position, animation, light_source)
