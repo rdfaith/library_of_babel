@@ -2,7 +2,7 @@ import pygame as pg
 import csv
 from object_classes import *
 from deco_objects import *
-from game_world import *
+from source.game_world import GameWorld
 from constants import *
 from utils import *
 

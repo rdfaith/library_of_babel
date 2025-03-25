@@ -2,7 +2,7 @@
 import sys
 import pygame as pg
 import object_classes
-import world_generation
+import source.world_generation as world_generation
 from utils import *
 from constants import *
 from sound_manager import *

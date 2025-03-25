@@ -118,14 +118,12 @@ class MovingObject(InteractableObject):
                  hitbox_image: pg.Surface = None, light_source=None):
         super().__init__(position, image, hitbox_image, light_source=light_source)
         self.max_y_velocity = 800.0
-        self.gravity = 22.0
+        self.gravity = 18.0
         self.speed_x = 75.0
         self.speed_y = 0.0
         self.velocity = pg.Vector2(0.0, 0.0)
         self.has_gravity = has_gravity
         self.has_collided = False
-        self.is_colliding_right = False
-        self.is_colliding_left = False
 
     def set_animation(self, animation) -> None:
         pass
@@ -162,18 +160,14 @@ class MovingObject(InteractableObject):
         rect.topleft = self.position
 
         self.has_collided = False
-        self.is_colliding_right = False
-        self.is_colliding_left = False
 
         colliding_object = self.check_collision(rect, game_world.static_objects)
         if colliding_object:
             self.has_collided = True
             if dx > 0:  # Moving right
                 rect.right = colliding_object.get_rect().left
-                self.is_colliding_right = True
             elif dx < 0:  # Moving left
                 rect.left = colliding_object.get_rect().right
-                self.is_colliding_left = True
             self.position.x, _ = rect.topleft  # Reset precise position
 
         # move y and check collisions

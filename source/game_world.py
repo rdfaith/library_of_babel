@@ -1,7 +1,7 @@
 import math
 
 import pygame as pg
-from player import Player
+from source.player import Player
 from object_classes import *
 from constants import *
 from utils import *
