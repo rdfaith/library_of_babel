@@ -140,6 +140,7 @@ def menu_main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
 
                 if event.type == pg.KEYDOWN:
@@ -166,6 +167,7 @@ def menu_main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_DOWN:
@@ -212,6 +214,7 @@ def menu_main(running: bool):
                     game_world.on_player_collected_light()
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
 
             game_world.do_updates(delta)
@@ -235,6 +238,7 @@ def menu_main(running: bool):
                         game_state = GameState.GAME
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
 
             clock.tick(60)
@@ -246,6 +250,7 @@ def menu_main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_DOWN:
