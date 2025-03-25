@@ -66,8 +66,14 @@ class Player(MovingObject):
 
         # Double Jump Values
         self.jump_counter = 0  # Counter for how many jumps since on ground
-        self.jump_cooldown_time = 0.4  # Cooldown time until next jump possible
+        self.jump_cooldown_time = 0.2  # Cooldown time until next jump possible
         self.jump_cooldown: float = 0.0  # Time left until cooldown
+
+        # Wall Jump Values
+        self.touching_wall_left = False
+        self.touching_wall_right = False
+        self.wall_jump_timer = 0.0  # Time left in current wall jump lock
+        self.wall_jump_lock_time = 0.2  # Time that player movement is supposed to be locked
 
         # Define Animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 18)
@@ -233,9 +239,17 @@ class Player(MovingObject):
             self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
             new_state = self.State.DASH
 
+        # Update Wall Jump Timer
+        if self.wall_jump_timer != 0.0:
+            self.wall_jump_timer -= delta
+            if self.wall_jump_timer <= 0:
+                self.wall_jump_timer = 0.0
+
         # Handle Input, input will be ignored if player is dashing
         if self.dash_timer > 0:  # if dashing
             self.velocity.y = 0  # no y velocity while dashing
+        elif self.wall_jump_timer != 0.0:
+            pass
         else:  # if not dashing
             if keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.velocity.x = -self.speed_x  # Move left
@@ -251,6 +265,20 @@ class Player(MovingObject):
 
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
+
+        # Wall Jump
+        if self.touching_wall_right or self.touching_wall_left:
+            self.jump_counter = 0
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                self.velocity.y = -self.jump_force
+                new_state = self.State.JUMP
+                self.jump_counter += 1
+                self.jump_cooldown = self.jump_cooldown_time
+                self.wall_jump_timer = self.wall_jump_lock_time
+                if self.touching_wall_right:
+                    self.velocity.x = -self.speed_x
+                else:
+                    self.velocity.x = self.speed_x
 
         # Jumping and Y-Velocity
         if self.jump_cooldown != 0.0:
@@ -340,8 +368,6 @@ class Player(MovingObject):
                 elif self.state == self.State.WIN:
                     pg.event.post(pg.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
                     # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
-
-
         else:
             # get player movement
             keys = pg.key.get_pressed()
@@ -359,6 +385,17 @@ class Player(MovingObject):
                     self.bounce_velocity_x = 0
                 else:
                     self.velocity.x = self.bounce_velocity_x
+
+            self.touching_wall_left = False
+            self.touching_wall_right = False
+
+            for obj in game_world.static_objects:
+                preview_rect_right = self.get_rect().move(1, 0)
+                preview_rect_left = self.get_rect().move(-1, 0)
+                if preview_rect_right.colliderect(obj.get_rect()):
+                    self.touching_wall_right = True
+                elif preview_rect_left.colliderect(obj.get_rect()):
+                    self.touching_wall_left = True
 
             #  Interact with interactable game elements and call their on_collide function
             self.do_interaction(game_world)
