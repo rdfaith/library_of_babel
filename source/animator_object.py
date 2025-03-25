@@ -42,7 +42,7 @@ class Animator:
     def reset_animation(self):
         self.current_frame = 0
 
-    def get_frame(self, current_direction):
+    def get_frame(self, current_direction = 1):
         """Return the current frame to be displayed."""
         if current_direction == 1:
             return self.frames[self.current_frame]

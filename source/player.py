@@ -39,13 +39,13 @@ class Player(MovingObject):
         )
 
         self.letters_collected: list[str] = []
-        self.speed_x = 70
-        self.jump_force = 400
+        self.speed_x = 90.0
+        self.jump_force = 300.0
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.invincibility_time: float = 0.7
         self.current_direction: int = 1
-        self.time_until_over = 5
+        self.time_until_over = 5.0
 
         self.state = self.State.IDLE
 
@@ -65,7 +65,7 @@ class Player(MovingObject):
         self.has_key = False
 
         # Dash Values
-        self.dash_speed = 400  # Dash speed multiplier
+        self.dash_speed = 450.0  # Dash speed multiplier
         self.dash_time: float = 0.2  # Dash duration in seconds
         self.dash_cooldown: float = 2.0  # Cooldown before dashing again
         self.dash_timer = 0  # Time left in current dash
@@ -230,7 +230,9 @@ class Player(MovingObject):
             new_state = self.State.DASH
 
         # Handle Input, input will be ignored if player is dashing
-        if self.dash_timer <= 0:
+        if self.dash_timer > 0:  # if dashing
+            self.velocity.y = 0  # no y velocity while dashing
+        else:  # if not dashing
             if keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.velocity.x = -self.speed_x  # Move left
                 self.current_direction = -1

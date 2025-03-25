@@ -36,7 +36,7 @@ HEART_POS_1: pg.Vector2 = pg.Vector2(35, 2)
 HEART_POS_2: pg.Vector2 = pg.Vector2(50, 2)
 UI_HEART_POSITIONS: list[pg.Vector2] = [HEART_POS_0, HEART_POS_1, HEART_POS_2]
 
-UI_KEY_POSITION: pg.Vector2 = pg.Vector2(0, 16)
+UI_KEY_POSITION: pg.Vector2 = pg.Vector2(20, 20)
 
 # LETTER_POS_0: pg.Vector2 = pg.Vector2(256, 0)
 UI_LETTER_POSITIONS: list[pg.Vector2] = []

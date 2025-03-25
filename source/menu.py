@@ -1,8 +1,6 @@
 # Example file showing a basic pygame "game loop"
 import sys
 import pygame as pg
-from pygame.display import update
-
 import object_classes
 from game_world import GameWorld
 import world_generation
@@ -12,6 +10,7 @@ from sound_manager import *
 import os
 from shaders.shader import Shader, FakeShader
 from enum import Enum
+from title_screen import TitleScreen
 
 # pygame setup
 class GameState(Enum):
@@ -126,6 +125,8 @@ def main(running: bool):
     in_game_menu = In_Game_Menu(SETTINGS, ui_screen)
     was_paused = False
 
+    title_screen: TitleScreen = TitleScreen()
+
     while running:
 
         while game_state == GameState.START:
@@ -148,7 +149,11 @@ def main(running: bool):
                     game_state = GameState.LEVEL_SELECTION
 
             # !!! Render with shader (use this instead of display.flip()!!!)
-            shader.update()
+
+            title_screen.do_updates(delta)
+            title_screen.do_render(shader)
+
+            shader.update(light_map=title_screen.light_map)
             clock.tick(60)
 
 
@@ -183,7 +188,6 @@ def main(running: bool):
         while game_state == GameState.GAME:
 
             sound_manager.play_bg_music("game")
-
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
@@ -224,7 +228,6 @@ def main(running: bool):
                     if event.key == pg.K_e:
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
-                        delta = 0.016
                 if event.type == pg.QUIT:
                     running = False
                     sys.exit()

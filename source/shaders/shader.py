@@ -17,7 +17,7 @@ class Shader:
         self.game_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
         self.game_normal_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
 
-        self.ui_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
+        self.ui_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA).convert_alpha()
 
         self.ctx = moderngl.create_context()
 
@@ -40,10 +40,14 @@ class Shader:
         self.render_object = self.ctx.vertex_array(self.program, [(self.quad_buffer, '2f 2f', 'vert', 'texcoord')])
 
         # Fun shader properties here:
-        self.moon_light_intensity: float = 0.0
+        self.moon_light_intensity: float = 1.0
+        self.moon_position: pg.Vector2 = pg.Vector2(62, 62)
 
     def set_moon_light_intensity(self, intensity: float):
         self.moon_light_intensity = intensity
+
+    def set_moon_position(self, position: pg.Vector2):
+        self.moon_position = position
 
     def get_game_screen(self):
         return self.game_screen
@@ -104,6 +108,7 @@ class Shader:
         self.program['lightRadii'] = light_radii
 
         self.program['moonLightIntensity'] = self.moon_light_intensity
+        self.program['moonPosition'] = (int(self.moon_position.x), int(self.moon_position.y))
 
         self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
         

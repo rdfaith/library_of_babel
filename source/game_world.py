@@ -30,7 +30,7 @@ class GameWorld:
 
         self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
-        self.time:float = 0.0
+        self.time: float = 0.0
 
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
@@ -110,7 +110,7 @@ class GameWorld:
             ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
             ui_key = pg.image.load(get_path("assets/test/key.png"))
             ui_question_mark = pg.image.load(get_path("assets/sprites/ui/ui_question_mark.png"))
-            ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png"))
+            ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png")).convert_alpha()
 
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
 
@@ -127,6 +127,8 @@ class GameWorld:
                 ui_screen.blit(ui_key, UI_KEY_POSITION)
 
             if self.player.check_is_wrong_word():
+                time = (math.sin(self.time * 3) + 1)
+                ui_backspace.set_alpha(int(time * 255))
                 ui_screen.blit(ui_question_mark, pg.Vector2(241, 2))
                 ui_screen.blit(ui_backspace, pg.Vector2(261, 20))
 
