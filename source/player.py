@@ -1,5 +1,6 @@
 import pygame
 import pygame as pg
+import menu
 
 from utils import *
 from object_classes import *
@@ -260,6 +261,19 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
+        # Wall Jump
+        if self.is_colliding_right or self.is_colliding_left:
+            self.jump_counter = 0
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                self.velocity.y = -self.jump_force
+                new_state = self.State.JUMP
+                self.jump_counter += 1
+                self.jump_cooldown = self.jump_cooldown_time
+                # if self.is_colliding_right:
+                #     self.velocity.x += -self.speed_x
+                # else:
+                #     self.velocity.x += self.speed_x
+
         # Jumping and Y-Velocity
         if self.jump_cooldown != 0.0:
             self.jump_cooldown -= delta
@@ -348,8 +362,6 @@ class Player(MovingObject):
                 elif self.state == self.State.WIN:
                     pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
                     # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
-
-
         else:
             # get player movement
             keys = pygame.key.get_pressed()
