@@ -17,7 +17,7 @@ class Shader:
         self.game_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
         self.game_normal_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
 
-        self.ui_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
+        self.ui_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA).convert_alpha()
 
         self.ctx = moderngl.create_context()
 
