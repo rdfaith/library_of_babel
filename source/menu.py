@@ -10,6 +10,7 @@ from sound_manager import *
 import os
 from shaders.shader import Shader
 from enum import Enum
+from title_screen import TitleScreen
 
 # pygame setup
 class GameState(Enum):
@@ -50,7 +51,6 @@ def display_levels(levels: int, selected_level, screen):
         text = FONT.render(option, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
 
-
 def main(running: bool, shader: Shader):
 
     # variablen
@@ -64,16 +64,12 @@ def main(running: bool, shader: Shader):
     game_screen = shader.get_game_screen()
     ui_screen = shader.get_ui_screen()
 
-    while running:
+    title_screen: TitleScreen = TitleScreen()
 
+    while running:
         while game_state == GameState.START:
 
             sound_manager.play_bg_music("menu")
-            ui_screen.fill((0, 0, 0))
-            if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
-                pg.draw.rect(ui_screen, (255, 255, 255), optionbutton, 50)
-            else:
-                pg.draw.rect(ui_screen, (0, 255, 255), optionbutton, 50)
 
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
@@ -86,7 +82,11 @@ def main(running: bool, shader: Shader):
                     game_state = GameState.LEVEL_SELECTION
 
             # !!! Render with shader (use this instead of display.flip()!!!)
-            shader.update()
+
+            title_screen.do_updates(delta)
+            title_screen.do_render(shader)
+
+            shader.update(light_map=title_screen.light_map)
             clock.tick(60)
 
 

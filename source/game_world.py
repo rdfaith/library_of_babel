@@ -29,7 +29,7 @@ class GameWorld:
 
         self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
-        self.time:float = 0.0
+        self.time: float = 0.0
 
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
