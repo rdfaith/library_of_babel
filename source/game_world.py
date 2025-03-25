@@ -121,7 +121,7 @@ class GameWorld:
                 ui_screen.blit(ui_key, UI_KEY_POSITION)
 
             if self.player.check_is_wrong_word():
-                time = (math.sin(self.time) + 1) * 3
+                time = (math.sin(self.time * 3) + 1)
                 ui_backspace.set_alpha(int(time * 255))
                 ui_screen.blit(ui_question_mark, pg.Vector2(241, 2))
                 ui_screen.blit(ui_backspace, pg.Vector2(261, 20))

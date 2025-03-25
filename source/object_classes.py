@@ -112,9 +112,9 @@ class MovingObject(InteractableObject):
                  hitbox_image: pg.Surface = None):
         super().__init__(position, image, hitbox_image)
         self.max_y_velocity = 800.0
-        self.gravity = 30.0
+        self.gravity = 15.0
         self.speed_x = 75.0
-        self.speed_y = 400.0
+        self.speed_y = 0.0
         self.velocity = pg.Vector2(0.0, 0.0)
         self.has_gravity = has_gravity
         self.has_collided = False
