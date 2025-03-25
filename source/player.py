@@ -34,10 +34,10 @@ class Player(MovingObject):
 
         self.light_source: LightSource = LightSource(
             self.position,
-            pg.Vector2(12, 12),
+            pg.Vector2(5, 5),
             pg.Color((100, 180, 250)),
             25.0,
-            0.04
+            0.03
         )
 
         self.letters_collected: list[str] = []
@@ -155,8 +155,7 @@ class Player(MovingObject):
                 self.is_dash_unlocked = True
                 word_completed = True
             case "KEY":
-                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64),
-                                                                 pg.image.load(get_path('assets/test/key.png')), True))
+                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64)))
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")

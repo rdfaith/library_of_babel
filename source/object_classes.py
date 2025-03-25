@@ -10,7 +10,7 @@ from light_source import LightSource
 class GameObject:
     def __init__(self, position: pg.Vector2, image: pg.Surface, normal: pg.Surface = None, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
-        self.normal: pg. Surface = normal.convert_alpha() if normal else image.copy().fill((0, 0, 0, 0)) # Sprite normal map
+        self.normal: pg. Surface = normal if normal else None
         self.position = position.copy()
         self.light_source = light_source  # Leave None if no light source
 
@@ -21,6 +21,12 @@ class GameObject:
         """Draw object on screen."""
         position = self.position - camera_pos
         screen.blit(self.image, position)
+
+    def draw_normal(self, screen, camera_pos):
+        """Draw normal of object on screen."""
+        if self.normal:
+            position = self.position - camera_pos
+            screen.blit(self.normal, position)
 
     def get_light_source(self):
         return self.light_source
@@ -46,8 +52,8 @@ class AnimatedObject(GameObject):
 class ColliderObject(GameObject):
     """Base class for all object with a collider"""
 
-    def __init__(self, position: pg.Vector2, image: pg.Surface, hitbox_image: pg.Surface = None, normal_image: pg.Surface = None):
-        super().__init__(position, image, normal=normal_image)
+    def __init__(self, position: pg.Vector2, image: pg.Surface, hitbox_image: pg.Surface = None, normal_image: pg.Surface = None, light_source=None):
+        super().__init__(position, image, normal=normal_image, light_source=light_source)
 
         # Use image to generate hitbox if no other hitbox is provided:
         if hitbox_image:
@@ -109,10 +115,10 @@ class MovingObject(InteractableObject):
     """Base class for all moving objects with physical collision handling"""
 
     def __init__(self, position: pg.Vector2, image: pg.Surface, has_gravity: bool,
-                 hitbox_image: pg.Surface = None):
-        super().__init__(position, image, hitbox_image)
+                 hitbox_image: pg.Surface = None, light_source=None):
+        super().__init__(position, image, hitbox_image, light_source=light_source)
         self.max_y_velocity = 800.0
-        self.gravity = 15.0
+        self.gravity = 22.0
         self.speed_x = 75.0
         self.speed_y = 0.0
         self.velocity = pg.Vector2(0.0, 0.0)
@@ -190,7 +196,16 @@ class LetterPickUp(InteractableObject):
     def __init__(self, position: pg.Vector2, letter: str):
         self.letter = letter
         image = LETTER_IMAGES[letter]
-        super().__init__(position, image, image)
+
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(4, 4),
+            COLOR_GOLD,
+            10.0,
+            0.05
+        )
+
+        super().__init__(position, image, image, light_source=light_source)
 
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
@@ -247,6 +262,19 @@ class Keyhole(InteractableObject):
 
 
 class KeyPickUp(MovingObject):
+
+    def __init__(self, position):
+        image = pg.image.load(get_path('assets/test/key.png'))
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(4, 4),
+            COLOR_GOLD,
+            10.0,
+            0.01
+        )
+        super().__init__(position.copy(), image, True, light_source=light_source)
+
+
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
         game_world.interactable_objects.remove(self)
