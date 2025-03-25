@@ -1,6 +1,4 @@
-import pygame as pg
-from constants import *
-from utils import *
+from source import *
 
 def load_settings(filename: str) -> dict:
     settings = dict()

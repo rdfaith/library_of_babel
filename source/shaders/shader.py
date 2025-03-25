@@ -1,9 +1,6 @@
-import pygame as pg
+from source import *
 import moderngl
 from array import array
-from source.utils import *
-from source.constants import *
-from source.light_source import *
 
 
 class Shader:

@@ -1,14 +1,5 @@
-import pygame
-import pygame as pg
-#import menu
-
-from utils import *
-from object_classes import *
-from animator_object import *
-from enum import Enum
-from sound_manager import *
-from light_source import LightSource
-
+from source import *
+from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy
 
 class Player(MovingObject):
     # Player states
@@ -23,7 +14,7 @@ class Player(MovingObject):
         DEAD = 8
         WIN = 9
 
-    def __init__(self, position: pygame.Vector2):
+    def __init__(self, position: pg.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert()
         hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert()
         hitbox_image_crouch = pg.image.load(get_path('assets/sprites/dino/test_hitbox_crouch.png')).convert()
@@ -144,6 +135,7 @@ class Player(MovingObject):
 
         if len(self.letters_collected) < 5:  # return True if can pick up
             self.letters_collected.append(letter)
+            self.sound_manager.play_movement_sound("collect")
             result = True
 
         word = "".join(self.letters_collected).upper()
@@ -168,14 +160,14 @@ class Player(MovingObject):
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht")
-                pg.event.post(pygame.event.Event(WORD_LIGHT))
+                pg.event.post(pg.event.Event(WORD_LIGHT))
                 word_completed = True
 
 
         if word_completed:
             self.letters_collected = []
 
-        if len(self.letters_collected) >= 5 and not word_completed:
+        if len(self.letters_collected) >= 5 and not word_completed and word != "BABEL":
             self.has_wrong_word = True
 
         return result
@@ -354,13 +346,13 @@ class Player(MovingObject):
             self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
-        # def check_highscore(level, time):
-        #     filename = get_path("saves/highscores.sav")
-        #     highscores = menu.load_settings(filename)
-        #     if highscores[level] > time:
-        #         highscores[level] = time
-        #         menu.update_settings(filename, highscores)
-        #         print(f"New best Time for {level} with {time}")
+        def check_highscore(level, time):
+            filename = get_path("saves/highscores.sav")
+            highscores = menu.load_settings(filename)
+            if highscores[level] > time:
+                highscores[level] = time
+                menu.update_settings(filename, highscores)
+                print(f"New best Time for {level} with {time}")
 
         if self.state == self.State.DEAD or self.state == self.State.WIN:
             self.velocity.x = 0
@@ -372,13 +364,13 @@ class Player(MovingObject):
                     self.time_until_over = 0
             else:
                 if self.state == self.State.DEAD:
-                    pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
+                    pg.event.post(pg.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
                 elif self.state == self.State.WIN:
-                    pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
+                    pg.event.post(pg.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
                     # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
         else:
             # get player movement
-            keys = pygame.key.get_pressed()
+            keys = pg.key.get_pressed()
 
             # Check invincibility frames
             if self.invincibility_time > 0:

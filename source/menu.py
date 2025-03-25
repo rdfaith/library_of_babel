@@ -1,18 +1,6 @@
-# Example file showing a basic pygame "game loop"
-import sys
-import pygame as pg
-import object_classes
-import source.world_generation as world_generation
-from utils import *
-from constants import *
-from sound_manager import *
-import os
-from shaders.shader import Shader, FakeShader
-from enum import Enum
-from title_screen import TitleScreen
-
-# pygame setup
-
+from source import *
+from source.shaders.shader import Shader
+from source.title_screen import TitleScreen
 
 class GameState(Enum):
     START = 1
@@ -123,7 +111,7 @@ def get_shader():
         shader = FakeShader(SCREEN_WIDTH, SCREEN_HEIGHT)
     return shader
 
-def main(running: bool):
+def menu_main(running: bool):
 
     # variablen
     selected_level = 0

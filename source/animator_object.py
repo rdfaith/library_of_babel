@@ -1,6 +1,4 @@
-import pygame as pg
-from utils import *
-
+from source import pg
 
 class Animation:
     def __init__(self, name, sprite_sheet, frame_width, frame_height, num_frames, frame_rate):

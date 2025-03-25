@@ -1,10 +1,5 @@
-import pygame as pg
-import csv
-from object_classes import *
-from deco_objects import *
-from source.game_world import GameWorld
-from constants import *
-from utils import *
+from source import *
+from source.object_classes import GameObject, ColliderObject
 
 
 def read_map(map_file_path: str) -> list[list[str]]:

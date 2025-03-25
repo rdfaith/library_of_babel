@@ -1,14 +1,4 @@
-import math
-
-import pygame as pg
-from source.player import Player
-from object_classes import *
-from constants import *
-from utils import *
-from light_source import *
-import math
-import sound_manager
-
+from source import *
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
