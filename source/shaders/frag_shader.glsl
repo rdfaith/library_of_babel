@@ -79,10 +79,12 @@ vec4 getParallaxLayersAt(vec2 texCoord) {
     vec4 bg1 = texture(bg1Tex, texCoord);
     vec4 bg2 = texture(bg2Tex, texCoord);
     vec4 bg3 = texture(bg3Tex, texCoord);
+    vec4 gameColor = texture(gameTex, texCoord);
 
     // Add parallax bgs on top of each other
     vec4 parallaxBG = addLayerColor(bg1, bg2);
     parallaxBG = addLayerColor(parallaxBG, bg3);
+    parallaxBG = addLayerColor(parallaxBG, gameColor);
 
     return parallaxBG;
 }
@@ -117,7 +119,7 @@ void main() {
 
     // If the mask is transparent, start raymarching
     if (parallaxBG.a > 0.5) {
-        vec2 offset = lightDirection * - 0.003;  // Small step size for the rays
+        vec2 offset = lightDirection * - 0.005;  // Small step size for the rays
         vec2 pos = fragTexCoord;
 
         for (int i = 0; i < 50; i++) {  // March outward in the light direction
