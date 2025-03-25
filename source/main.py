@@ -6,7 +6,7 @@ import world_generation
 from utils import *
 from constants import *
 from sound_manager import *
-from shaders.shader import Shader
+from shaders.shader import Shader, FakeShader
 import os
 #from menus import *
 from enum import Enum
@@ -19,6 +19,7 @@ import menu
 pg.init()
 
 shader = Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
+shader = FakeShader(SCREEN_WIDTH, SCREEN_HEIGHT)
 menu.main(True, shader)
 
 # running = True
