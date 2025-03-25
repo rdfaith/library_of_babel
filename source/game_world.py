@@ -1,9 +1,12 @@
+import math
+
 import pygame as pg
 from player import Player
 from object_classes import *
 from constants import *
 from utils import *
 from light_source import *
+import math
 
 
 class GameWorld:
@@ -26,6 +29,7 @@ class GameWorld:
 
         self.is_moonlight_on = False
         self.moon_light_intensity: float = 0.0
+        self.time:float = 0.0
 
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
@@ -58,6 +62,8 @@ class GameWorld:
 
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:
             self.moon_light_intensity += 0.3 * delta
+
+        self.time += delta
 
     def do_render(self, shader):
 
@@ -97,6 +103,9 @@ class GameWorld:
             ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
             ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
             ui_key = pg.image.load(get_path("assets/test/key.png"))
+            ui_question_mark = pg.image.load(get_path("assets/sprites/ui/ui_question_mark.png"))
+            ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png"))
+
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
 
             for i in range(self.player.player_lives):
@@ -110,6 +119,10 @@ class GameWorld:
 
             if self.player.has_key:
                 ui_screen.blit(ui_key, UI_KEY_POSITION)
+
+            if self.player.check_is_wrong_word():
+                ui_screen.blit(ui_question_mark, pg.Vector2(241, 2))
+                ui_screen.blit(ui_backspace, pg.Vector2(261, 20))
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]

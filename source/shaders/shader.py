@@ -8,6 +8,7 @@ from source.light_source import *
 
 class Shader:
     def __init__(self, screen_width, screen_height):
+        self.light_debug_mode = False
         self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
@@ -105,6 +106,8 @@ class Shader:
         self.program['moonLightIntensity'] = self.moon_light_intensity
 
         self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
+        
+        self.program['lightDebugMode'] = self.light_debug_mode
 
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
 

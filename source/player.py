@@ -7,6 +7,7 @@ from enum import Enum
 from sound_manager import *
 from light_source import LightSource
 
+
 class Player(MovingObject):
     # Player states
     class State(Enum):
@@ -56,6 +57,9 @@ class Player(MovingObject):
             self.is_jump_unlocked: bool = False
             self.is_crouch_unlocked: bool = False
             self.is_dash_unlocked: bool = False
+
+        # Does Player have nonsense word?
+        self.has_wrong_word = False
 
         # Does Player Have Key?
         self.has_key = False
@@ -124,10 +128,11 @@ class Player(MovingObject):
         """Called when player moves into collider of letter.
         Returns False if the letter can't be picked up, else True."""
 
-        if len(self.letters_collected) >= 5:  # Break and return False if can't pick up
-            return False
+        result = False
 
-        self.letters_collected.append(letter)
+        if len(self.letters_collected) < 5:  # return True if can pick up
+            self.letters_collected.append(letter)
+            result = True
 
         word = "".join(self.letters_collected).upper()
 
@@ -144,7 +149,8 @@ class Player(MovingObject):
                 self.is_dash_unlocked = True
                 word_completed = True
             case "KEY":
-                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64), pg.image.load(get_path('assets/test/key.png')), True))
+                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64),
+                                                                 pg.image.load(get_path('assets/test/key.png')), True))
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
@@ -154,11 +160,16 @@ class Player(MovingObject):
                 pg.event.post(pygame.event.Event(WORD_LIGHT))
                 word_completed = True
 
-
         if word_completed:
             self.letters_collected = []
 
-        return True
+        if len(self.letters_collected) >= 5 and not word_completed:
+            self.has_wrong_word = True
+
+        return result
+
+    def check_is_wrong_word(self) -> bool:
+        return self.has_wrong_word
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
@@ -259,10 +270,12 @@ class Player(MovingObject):
             self.dash_cooldown_timer -= delta
 
         # Not crouch -> crouch
-        if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
+        if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (
+                new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
             self.set_hitbox("crouch")
         # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
-        if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
+        if (
+                self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
                 new_state = self.state  # Set back to DUCK
 

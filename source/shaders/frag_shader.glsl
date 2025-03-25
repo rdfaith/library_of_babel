@@ -17,6 +17,8 @@ uniform sampler2D bg3Tex; // Parallax background (shelves)
 uniform float time;
 uniform float moonLightIntensity;
 
+uniform bool lightDebugMode;
+
 uniform vec2 cameraPos;
 
 // Light Sources:
@@ -127,6 +129,8 @@ void main() {
     vec4 color = vec4(0.0);
 
 
+    vec4 onlyLight = vec4(0.5, 0.5, 0.5, 1.0);
+
     vec4 parallaxBG = getParallaxLayersAt(fragTexCoord);
     // Adjust background lighting (general ambient lighting)
     parallaxBG = vec4(parallaxBG.rgb * 0.3 * moonLightIntensity, parallaxBG.a);
@@ -153,6 +157,8 @@ void main() {
     float intensity = 0.3 * moonLightIntensity;
     vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * intensity, parallaxBG.a);
 
+    onlyLight = vec4(onlyLight.rgb + lightColor * lightStrength * intensity, onlyLight.a);
+
     // Adjust skybox lighting
     bg0 = vec4(bg0.rgb * moonLightIntensity, bg0.a);
 
@@ -165,10 +171,13 @@ void main() {
     lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
     gameColor = vec4(gameColor.rgb * lighting, gameColor.a);
 
+    onlyLight = vec4(onlyLight.rgb * lighting, onlyLight.a);
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);
 
     // Add UI on top and return
     f_color = addLayerColor(color, uiColor);
+
+    if (lightDebugMode) f_color = onlyLight;
 }
