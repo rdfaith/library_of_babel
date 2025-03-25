@@ -129,7 +129,7 @@ class Player(MovingObject):
 
         if len(self.letters_collected) < 5:  # return True if can pick up
             self.letters_collected.append(letter)
-            self.sound_manager.play_movement_sound("collect")
+            self.sound_manager.play_system_sound("collect")
             result = True
 
         word = "".join(self.letters_collected).upper()
