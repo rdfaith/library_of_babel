@@ -11,6 +11,7 @@ SCREEN_HEIGHT = 180
 # pygame USEREVENTs
 PLAYER_DIED = pg.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
 PLAYER_WON = pg.USEREVENT + 2
+DOOR_UNLOCKED = pg.USEREVENT + 3
 WORD_LIGHT = pg.USEREVENT + 10
 
 # Game controls / User input
