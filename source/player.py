@@ -80,11 +80,14 @@ class Player(MovingObject):
         self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
         self.dash = Animation("dash", get_path('assets/test/dino-dash.png'), 32, 24, 1, 10)
         self.dead = Animation("dead", get_path('assets/test/dino-death-Sheet.png'), 24, 24, 8, 8)
+        self.win = Animation("win", get_path('assets/sprites/anim/dino-win-Sheet.png'), 24, 24, 4, 8)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
 
         self.sound_manager = SoundManager()
+
+        self.got_damage = False
 
     def set_animation(self, animation: Animation) -> None:
         self.active_animation = animation
@@ -95,15 +98,11 @@ class Player(MovingObject):
         self.player_lives = 0
         self.state = self.State.DEAD
         self.on_state_changed(self.State.DEAD)
-        self.set_animation(self.dead)  # uncomment when death animation implemented
-        # pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
         self.player_lives = 3
 
-    def on_player_win(self, reason: str):
+    def on_player_win(self):
         self.state = self.State.WIN
         self.on_state_changed(self.State.WIN)
-        # self.set_animation(self.won) # uncomment when win animation implemented
-        pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": reason}))
 
     def on_hit_by_enemy(self, enemy: GameObject, direction: int):
         if self.invincibility_time == 0:
@@ -154,11 +153,12 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
-                pg.event.post(pygame.event.Event(PLAYER_WON))
+                self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht")
                 pg.event.post(pygame.event.Event(WORD_LIGHT))
                 word_completed = True
+
 
         if word_completed:
             self.letters_collected = []
@@ -191,6 +191,10 @@ class Player(MovingObject):
                 self.set_animation(self.duck_walk)
             case self.State.DASH:
                 self.set_animation(self.dash)
+            case self.State.DEAD:
+                self.set_animation(self.dead)
+            case self.State.WIN:
+                self.set_animation(self.win)
             case _:
                 self.set_animation(self.idle)
                 self.sound_manager.play_movement_sound("idle")
@@ -245,6 +249,31 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
+        if is_grounded:
+            self.got_damage = False
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                self.velocity.y = -self.jump_force
+                new_state = self.State.JUMP
+            elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
+                if self.velocity.x != 0:
+                    new_state = self.State.DUCK_WALK
+                else:
+                    new_state = self.State.DUCK_IDLE
+        elif self.velocity.y <= 0:
+            new_state = self.State.JUMP
+        else:
+            new_state = self.State.FALL
+            if not self.got_damage:
+                if self.velocity.y > 600:
+                    if self.player_lives > 1:
+                        print("Aua")
+                        self.sound_manager.play_movement_sound("damage")
+                        self.player_lives -= 1
+                        self.got_damage = True
+                        self.invincibility_time = 0.7
+                    else:
+                        self.on_player_death("fell from block")
+                        self.got_damage = True
             if is_grounded:
                 if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                     self.velocity.y = -self.jump_force
@@ -295,7 +324,10 @@ class Player(MovingObject):
                 if self.time_until_over <= 0:
                     self.time_until_over = 0
             else:
-                pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
+                if self.state == self.State.DEAD:
+                    pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
+                elif self.state == self.State.WIN:
+                    pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
 
         else:
             # get player movement
@@ -307,9 +339,6 @@ class Player(MovingObject):
                 if self.invincibility_time <= 0:
                     self.invincibility_time = 0
 
-            #  Interact with interactable game elements and call their on_collide function
-            self.do_interaction(game_world)
-
             self.handle_movement(keys, delta, game_world)
 
             if self.bounce_velocity_x != 0:
@@ -317,6 +346,9 @@ class Player(MovingObject):
                     self.bounce_velocity_x = 0
                 else:
                     self.velocity.x = self.bounce_velocity_x
+
+            #  Interact with interactable game elements and call their on_collide function
+            self.do_interaction(game_world)
 
             # Check collision and apply movement or not
             super().update(delta, game_world)

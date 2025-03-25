@@ -19,6 +19,7 @@ class GameWorld:
 
         self.player = Player(player_pos)
 
+        self.level_timer: float = 0.0
 
         self.light_map: LightMap = LightMap()  # object that stores all light sources
 
@@ -49,6 +50,11 @@ class GameWorld:
         self.is_moonlight_on = True
 
     def do_updates(self, delta: float) -> None:
+
+        if delta > 0.025:
+            delta = 0.016
+
+        self.level_timer += delta
 
         # check if the player has fallen out of bounds
         if self.player.get_rect().y > self.level_height:

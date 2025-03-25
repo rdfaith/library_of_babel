@@ -124,11 +124,14 @@ class Shader:
 
 class FakeShader():
     def __init__(self, screen_width, screen_height):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.SCALED)
+        self.screen = pg.display.set_mode((screen_width,  screen_height), pg.DOUBLEBUF | pg.SCALED)
 
         self.light_map = None
 
     def set_moon_light_intensity(self, intensity: float):
+        pass
+
+    def set_moon_position(self, moon_pos):
         pass
 
     def get_game_screen(self):
