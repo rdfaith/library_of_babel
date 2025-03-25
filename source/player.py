@@ -86,6 +86,8 @@ class Player(MovingObject):
 
         self.sound_manager = SoundManager()
 
+        self.got_damage = False
+
     def set_animation(self, animation: Animation) -> None:
         self.active_animation = animation
         self.animator = Animator(animation)
@@ -159,6 +161,7 @@ class Player(MovingObject):
                 print("Es werde Licht")
                 pg.event.post(pygame.event.Event(WORD_LIGHT))
                 word_completed = True
+
 
         if word_completed:
             self.letters_collected = []
@@ -243,6 +246,31 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
+        if is_grounded:
+            self.got_damage = False
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                self.velocity.y = -self.jump_force
+                new_state = self.State.JUMP
+            elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
+                if self.velocity.x != 0:
+                    new_state = self.State.DUCK_WALK
+                else:
+                    new_state = self.State.DUCK_IDLE
+        elif self.velocity.y <= 0:
+            new_state = self.State.JUMP
+        else:
+            new_state = self.State.FALL
+            if not self.got_damage:
+                if self.velocity.y > 600:
+                    if self.player_lives > 1:
+                        print("Aua")
+                        self.sound_manager.play_movement_sound("damage")
+                        self.player_lives -= 1
+                        self.got_damage = True
+                        self.invincibility_time = 0.7
+                    else:
+                        self.on_player_death("fell from block")
+                        self.got_damage = True
             if is_grounded:
                 if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                     self.velocity.y = -self.jump_force

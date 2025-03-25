@@ -113,6 +113,19 @@ BG_MUSIC = {
         }
 
 #SCREENS
-PAUSE_IMAGE = pg.image.load(get_path('assets/test/pause_test.png'))
+PAUSE_IMAGE = pg.image.load(get_path('assets/sprites/ui/ui_toggle_off.png'))
 RESTART_IMAGE = pg.image.load(get_path('assets/sprites/ui/restart.png'))
 
+#Settings
+UI_WIDTH = 320
+UI_HEIGHT = 180
+BUTTON_WIDTH = 50
+BUTTON_HEIGHT = 20
+SLIDER_WIDTH = 100
+
+TRUE_BUTTON_IMAGE = pg.image.load(get_path('assets/sprites/ui/ui_toggle_on.png'))
+FALSE_BUTTON_IMAGE = pg.image.load(get_path('assets/sprites/ui/ui_toggle_off.png'))
+TRUE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggle_on_highlighted.png'))
+FALSE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggle_off_highlighted.png'))
+
+SETTINGS = get_path("saves/settings.sav")
