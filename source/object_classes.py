@@ -1,11 +1,4 @@
-import pygame as pg
-from utils import *
-from hitbox import Hitbox
-from animator_object import *
-from constants import *
-from enum import Enum
-from light_source import LightSource
-
+from source import *
 
 class GameObject:
     def __init__(self, position: pg.Vector2, image: pg.Surface, normal: pg.Surface = None, light_source: LightSource = None):

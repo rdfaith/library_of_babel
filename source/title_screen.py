@@ -1,9 +1,4 @@
-import pygame as pg
-import shaders.shader as Shader
-from animator_object import *
-from utils import *
-from light_source import *
-
+from source import *
 
 class TitleScreen:
 

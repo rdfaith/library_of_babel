@@ -1,6 +1,4 @@
-import pygame as pg
-import os
-import pathlib
+from source import pg, os, pathlib
 
 def get_path(file_name: str):
     ROOT_DIR = os.path.dirname(

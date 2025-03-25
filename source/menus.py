@@ -1,9 +1,4 @@
-import pygame as pg
-from utils import *
-from constants import *
-from sound_manager import *
-import os
-pg.init
+from source import *
 
 sound_manager = SoundManager()
 optionbutton = pg.Rect(120,70,80,40)

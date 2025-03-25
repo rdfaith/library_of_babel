@@ -1,5 +1,4 @@
-import pygame as pg
-
+from source import pg
 
 class Hitbox:
     @staticmethod  # Eine "statische Methode" gehört zur Klasse, aber nicht zu einer bestimmten Instanz der Klasse.

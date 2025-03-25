@@ -1,6 +1,6 @@
 import pygame as pg
-from utils import get_path
 import os
+from source.utils import get_path
 
 DEBUG_MODE = True
 
