@@ -22,6 +22,7 @@ CAMERA_DELAY_X, CAMERA_DELAY_Y = 50, 2
 
 DEFAULT_TILESET: str = "assets/sprites/tiles/autotile_tileset.png"
 DEFAULT_COLLIDER_TILESET: str = "assets/sprites/tiles/colliders_tileset.png"
+DEFAULT_NORMAL_TILESET: str = "assets/sprites/tiles/normals_tileset.png"
 
 #region UI Constants
 HEART_POS_0: pg.Vector2 = pg.Vector2(20, 2)

@@ -21,7 +21,7 @@ class Candle(AnimatedObject):
             40.0,
             0.1
         )
-        super().__init__(position, animation, light_source)
+        super().__init__(position, animation, light_source=light_source)
 
 
 class Hourglass(AnimatedObject):

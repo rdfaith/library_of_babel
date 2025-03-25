@@ -3,6 +3,8 @@
 #define NUM_LIGHTS 50  // Max number of lights
 #define VIGNETTE_STRENGTH 0.7
 
+#define MOONLIGHT_DIRECTION vec2(-0.5, 1.0)
+
 #define SCREEN_WIDTH 320.0
 #define SCREEN_HEIGHT 180.0
 
@@ -53,7 +55,9 @@ float getLight() {
     return finalLight;
 }
 
-vec4 applyVignette(vec4 baseColor, vec2 uv) {
+vec4 applyVignette(vec4 baseColor) {
+    // Normalize coordinates (0,0) -> (-1,-1) and (1,1) at the corners
+    vec2 uv = fragTexCoord * 2.0 - 1.0;
 
     // Compute vignette factor based on distance from center
     float dist = length(uv);  // Distance from center (0 at center, ~1.4 at corners)
@@ -68,23 +72,8 @@ vec4 addLayerColor(vec4 lowerLayerCol, vec4 higherLayerCol) {
     return higherLayerCol * higherLayerCol.a + lowerLayerCol * (1.0 - higherLayerCol.a);
 }
 
-vec4 getParallaxLayersAt(vec2 texCoord) {
-
-    vec4 bg1 = texture(bg1Tex, texCoord);
-    vec4 bg2 = texture(bg2Tex, texCoord);
-    vec4 bg3 = texture(bg3Tex, texCoord);
-
-    // Add parallax bgs on top of each other
-    vec4 parallaxBG = addLayerColor(bg1, bg2);
-    parallaxBG = addLayerColor(parallaxBG, bg3);
-
-    return parallaxBG;
-}
 
 void main() {
-
-    // Normalize coordinates (0,0) -> (-1,-1) and (1,1) at the corners
-    vec2 uv = fragTexCoord * 2.0 - 1.0;
 
     vec4 bg0 = texture(bg0Tex, fragTexCoord);
     vec4 bg1 = texture(bg1Tex, fragTexCoord);
@@ -96,34 +85,12 @@ void main() {
 
     vec4 color = vec4(0.0);
 
-
-    vec4 parallaxBG = getParallaxLayersAt(fragTexCoord);
+    // Add backgrounds on top of each other
+    color = addLayerColor(bg0, bg1);
+    color = addLayerColor(color, bg2);
+    color = addLayerColor(color, bg3);
     // Adjust background lighting (general ambient lighting)
-    parallaxBG = vec4(parallaxBG.rgb * 0.3, parallaxBG.a);
-
-    // Light rays from moonlight (raymarching)
-    vec2 lightDirection = vec2(0.7, 0.6); // direction for moonlight (hardcoded rn)
-    float lightStrength = 0.0;  // Start with no light
-
-    // If the mask is transparent, start raymarching
-    if (parallaxBG.a > 0.5) {
-        vec2 offset = lightDirection * - 0.003;  // Small step size for the rays
-        vec2 pos = fragTexCoord;
-
-        for (int i = 0; i < 50; i++) {  // March outward in the light direction
-            pos += offset;
-            if (pos.x < 0.0 || pos.x > 1.0 || pos.y < 0.0 || pos.y > 1.0) break;  // Stop if out of bounds
-            lightStrength += (1.0 - getParallaxLayersAt(pos).a) * 0.02;  // Accumulate light
-        }
-    }
-
-    // Apply the volumetric light effect
-    vec3 lightColor = vec3(0.5, 0.8, 0.95);  // Cold moonlight color
-    float intensity = 0.3;
-    vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * intensity, parallaxBG.a);
-
-    // Add parallax ontop of skybox
-    color = addLayerColor(bg0, finalParallax);
+    color = vec4(color.rgb * 0.3, color.a);
 
     // Do foreground lighting
     gameColor = vec4(gameColor.rgb * getLight(), gameColor.a);

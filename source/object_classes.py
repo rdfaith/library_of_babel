@@ -8,8 +8,9 @@ from light_source import LightSource
 
 
 class GameObject:
-    def __init__(self, position: pg.Vector2, image: pg.Surface, light_source: LightSource = None):
+    def __init__(self, position: pg.Vector2, image: pg.Surface, normal: pg.Surface = None, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
+        self.normal = normal.convert_alpha()  # Sprite normal map
         self.position = position.copy()
         self.light_source = light_source  # Leave None if no light source
 
