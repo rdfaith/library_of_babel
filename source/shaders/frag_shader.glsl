@@ -28,8 +28,8 @@ uniform float lightRadii[NUM_LIGHTS];
 in vec2 fragTexCoord;
 out vec4 f_color;
 
-vec2 getWorldPos() {
-    vec2 screenPos = vec2(fragTexCoord.x * SCREEN_WIDTH, fragTexCoord.y * SCREEN_HEIGHT);
+vec2 getWorldPos(vec2 uvCoord) {
+    vec2 screenPos = vec2(uvCoord.x * SCREEN_WIDTH, uvCoord.y * SCREEN_HEIGHT);
     vec2 worldPos = cameraPos + screenPos;
     return worldPos;
 }
@@ -39,7 +39,7 @@ vec2 getFragPos(vec2 _worldPos) {
                 (_worldPos.y - cameraPos.y) / SCREEN_HEIGHT);
 }
 
-float getLight(vec2 worldPos) {
+vec3 getLight(vec2 worldPos) {
     vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity; // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
@@ -89,13 +89,32 @@ vec4 getParallaxLayersAt(vec2 texCoord) {
     return parallaxBG;
 }
 
+ivec2 uvToPixel(vec2 uv) {
+    return ivec2(uv.x * 320.0, uv.y * 180.0);
+}
+
+vec2 pixelToUV(ivec2 pixel) {
+    return vec2(pixel.x / 320.0, pixel.y / 180.0);
+}
+
+vec3 quantizeColor(vec3 color, int levels) {
+    float factor = float(levels - 1);
+    return floor(color * factor + 0.5) / factor;
+}
+
+float quantizeLighting(float intensity, int levels) {
+    float step = 1.0 / float(levels);
+    return floor(intensity / step + 0.5) * step;
+}
+
 void main() {
 
     // Normalize coordinates (0,0) -> (-1,-1) and (1,1) at the corners
     vec2 uv = fragTexCoord * 2.0 - 1.0;
 
     // Get World Position
-    vec2 worldPos = getWorldPos();
+    vec2 fragCoords = pixelToUV(uvToPixel(fragTexCoord)); // clamped to nearest pixel for pixel perfect
+    vec2 worldPos = getWorldPos(fragCoords);
 
     vec4 bg0 = texture(bg0Tex, fragTexCoord);
     vec4 bg1 = texture(bg1Tex, fragTexCoord);
@@ -114,13 +133,13 @@ void main() {
 
     // Light rays from moonlight (raymarching)
     vec2 moonPosNormalised = vec2(0.25, 0.344);
-    vec2 lightDirection = (fragTexCoord - moonPosNormalised); // direction for moonlight
+    vec2 lightDirection = (fragCoords - moonPosNormalised); // direction for moonlight
     float lightStrength = 0.0;  // Start with no light
 
     // If the mask is transparent, start raymarching
     if (parallaxBG.a > 0.5) {
         vec2 offset = lightDirection * - 0.005;  // Small step size for the rays
-        vec2 pos = fragTexCoord;
+        vec2 pos = fragCoords;
 
         for (int i = 0; i < 50; i++) {  // March outward in the light direction
             pos += offset;
@@ -141,7 +160,11 @@ void main() {
     color = addLayerColor(bg0, finalParallax);
 
     // Do foreground lighting
-    gameColor = vec4(gameColor.rgb * getLight(worldPos), gameColor.a);
+    //float lighting = quantizeLighting(getLight(worldPos), 8);
+    vec3 lighting = getLight(worldPos);
+    lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
+    gameColor = vec4(gameColor.rgb * lighting, gameColor.a);
+
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);
