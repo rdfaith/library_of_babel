@@ -24,7 +24,7 @@ class GameWorld:
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
 
-        self.is_moonlight_on = True
+        self.is_moonlight_on = False
         self.moon_light_intensity: float = 0.0
 
     def get_all_objects(self):
