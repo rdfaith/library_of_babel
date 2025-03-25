@@ -114,7 +114,7 @@ class GameWorld:
 
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
             ui_screen.blit(ui_timer, pg.Vector2(131, 0))
-7*
+
             for i in range(self.player.player_lives):
                 ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
 
