@@ -2,7 +2,6 @@
 import sys
 import pygame as pg
 import object_classes
-from game_world import GameWorld
 import world_generation
 from utils import *
 from constants import *
@@ -207,6 +206,8 @@ def main(running: bool):
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         game_state = GameState.IN_GAME_MENU
+                    elif event.key == pg.K_BACKSPACE:
+                        game_world = load_world(current_level)
                 if event.type == PLAYER_DIED:  # Player Died
                     game_state = GameState.GAME_OVER
                 elif event.type == PLAYER_WON:  # Player Won
@@ -276,6 +277,8 @@ def main(running: bool):
                     elif event.key == pg.K_ESCAPE:
                         game_state = last_game_state
                         shader = get_shader()
+                    elif event.key == pg.K_BACKSPACE:
+                        game_state = GameState.LEVEL_SELECTION
 
 
             for keys in in_game_menu.settings.keys():

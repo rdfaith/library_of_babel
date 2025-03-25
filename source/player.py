@@ -1,5 +1,6 @@
 import pygame
 import pygame as pg
+
 from utils import *
 from object_classes import *
 from animator_object import *
@@ -192,14 +193,19 @@ class Player(MovingObject):
                 self.sound_manager.play_movement_sound("run")
             case self.State.DUCK_IDLE:
                 self.set_animation(self.duck_idle)
+                self.sound_manager.play_movement_sound("idle")
             case self.State.DUCK_WALK:
                 self.set_animation(self.duck_walk)
+                self.sound_manager.play_movement_sound("run")
             case self.State.DASH:
                 self.set_animation(self.dash)
+                self.sound_manager.play_movement_sound("run")
             case self.State.DEAD:
                 self.set_animation(self.dead)
+                self.sound_manager.play_movement_sound("idle")
             case self.State.WIN:
                 self.set_animation(self.win)
+                self.sound_manager.play_movement_sound("idle")
             case _:
                 self.set_animation(self.idle)
                 self.sound_manager.play_movement_sound("idle")
@@ -320,6 +326,13 @@ class Player(MovingObject):
             self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
+        def check_highscore(level, time):
+            filename = get_path("saves/highscores.sav")
+            highscores = menu.load_settings(filename)
+            if highscores[level] > time:
+                highscores[level] = time
+                menu.update_settings(filename, highscores)
+                print(f"New best Time for {level} with {time}")
 
         if self.state == self.State.DEAD or self.state == self.State.WIN:
             self.velocity.x = 0
@@ -334,6 +347,8 @@ class Player(MovingObject):
                     pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
                 elif self.state == self.State.WIN:
                     pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
+                    # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
+
 
         else:
             # get player movement

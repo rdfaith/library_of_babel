@@ -7,6 +7,7 @@ from constants import *
 from utils import *
 from light_source import *
 import math
+import sound_manager
 
 
 class GameWorld:
@@ -115,11 +116,20 @@ class GameWorld:
             ui_key = pg.image.load(get_path("assets/test/key.png"))
             ui_question_mark = pg.image.load(get_path("assets/sprites/ui/ui_question_mark.png"))
             ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png")).convert_alpha()
-            ui_timer = self.timer_animator.get_frame()
 
+            def draw_timer():
+                settings = sound_manager.load_settings(SETTINGS)
+                ui_timer = self.timer_animator.get_frame()
+                ui_font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
+                minutes = int(self.level_timer // 60)
+                seconds = int(self.level_timer % 60)
+                ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True, "#F2A81D")
+                if settings["TIMER"] == "True":
+                    ui_screen.blit(ui_timer, pg.Vector2(131, 0))
+                    ui_screen.blit(ui_time_text, pg.Vector2(151, 4))
 
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
-            ui_screen.blit(ui_timer, pg.Vector2(131, 0))
+            draw_timer()
 
             for i in range(self.player.player_lives):
                 ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
