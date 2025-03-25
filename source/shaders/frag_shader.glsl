@@ -7,6 +7,7 @@
 #define SCREEN_HEIGHT 180.0
 
 uniform sampler2D gameTex;
+//uniform sampler2D gameNormal;
 uniform sampler2D uiTex;
 uniform sampler2D bg0Tex; // Parallax background (moon sky)
 uniform sampler2D bg1Tex; // Parallax background (wall windows)
@@ -37,17 +38,21 @@ vec2 getFragPos(vec2 _worldPos) {
                 (_worldPos.y - cameraPos.y) / SCREEN_HEIGHT);
 }
 
-float getLight() {
-    vec3 finalLight = vec3(0.05, 0.28, 0.32); // Base ambient light (moonlight)
+float getLight(vec2 worldPos) {
+    vec3 finalLight = vec3(0.05, 0.28, 0.32); // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
-        vec2 lightDir = lightPositions[i] - getWorldPos();
+        vec2 lightDir = lightPositions[i] - worldPos;
         float distance = length(lightDir);
+        vec3 lightVec = normalize(vec3(lightDir, 1.0)); // Convert to 3D vector
 
-        // Smoothstep falloff (less harsh than inverse square)
+        // Compute normal influence (Lambertian reflection)
+//        float NdotL = max(dot(normal, lightVec), 0.0);
+
+        // Smoothstep falloff (soft edge falloff)
         float attenuation = lightIntensities[i] * smoothstep(lightRadii[i], 0.1, distance) * 0.1;
 
-        finalLight += lightColors[i] * attenuation;
+        finalLight += lightColors[i] * attenuation; // * NdotL; // Apply normal influence
     }
 
     return finalLight;
@@ -86,6 +91,9 @@ void main() {
     // Normalize coordinates (0,0) -> (-1,-1) and (1,1) at the corners
     vec2 uv = fragTexCoord * 2.0 - 1.0;
 
+    // Get World Position
+    vec2 worldPos = getWorldPos();
+
     vec4 bg0 = texture(bg0Tex, fragTexCoord);
     vec4 bg1 = texture(bg1Tex, fragTexCoord);
     vec4 bg2 = texture(bg2Tex, fragTexCoord);
@@ -102,7 +110,8 @@ void main() {
     parallaxBG = vec4(parallaxBG.rgb * 0.3, parallaxBG.a);
 
     // Light rays from moonlight (raymarching)
-    vec2 lightDirection = vec2(0.7, 0.6); // direction for moonlight (hardcoded rn)
+    vec2 moonPosNormalised = vec2(0.25, 0.344);
+    vec2 lightDirection = (fragTexCoord - moonPosNormalised); // direction for moonlight
     float lightStrength = 0.0;  // Start with no light
 
     // If the mask is transparent, start raymarching
@@ -126,7 +135,7 @@ void main() {
     color = addLayerColor(bg0, finalParallax);
 
     // Do foreground lighting
-    gameColor = vec4(gameColor.rgb * getLight(), gameColor.a);
+    gameColor = vec4(gameColor.rgb * getLight(worldPos), gameColor.a);
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);

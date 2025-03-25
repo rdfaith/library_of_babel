@@ -8,19 +8,20 @@ from source.light_source import *
 
 class Shader:
     def __init__(self, screen_width, screen_height,):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in BG_LAYERS]
 
-        self.bg0_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
-
-
         self.game_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
+        self.game_normal_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
+
         self.ui_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
 
 
 
         self.ctx = moderngl.create_context()
+
+        # self.ctx.viewport = (0, 0, 320, 180)
 
         self.quad_buffer = self.ctx.buffer(data=array('f', [
             # position (x, y), uv coordinates (x, y)
@@ -76,6 +77,10 @@ class Shader:
         self.program['gameTex'] = screen_number
         screen_number += 1
 
+        # game_normal = surf_to_texture(self.game_normal_screen)
+        # game_normal.use(screen_number)
+        # self.program['gameNormal'] = screen_number
+        # screen_number += 1
 
         NUM_LIGHTS = 50  # Has to be the same as in frag_shader.glsl!!
 

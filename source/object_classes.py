@@ -10,7 +10,7 @@ from light_source import LightSource
 class GameObject:
     def __init__(self, position: pg.Vector2, image: pg.Surface, normal: pg.Surface = None, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
-        self.normal = normal.convert_alpha()  # Sprite normal map
+        self.normal: pg. Surface = normal.convert_alpha() if normal else image.copy().fill((0, 0, 0, 0)) # Sprite normal map
         self.position = position.copy()
         self.light_source = light_source  # Leave None if no light source
 
@@ -25,6 +25,8 @@ class GameObject:
     def get_light_source(self):
         return self.light_source
 
+    def get_normal(self) -> pg.Surface:
+        return self.normal
 
 class AnimatedObject(GameObject):
     """Base class for objects that are animated. No colliders or hit boxes. Used for decorative objects."""
@@ -32,7 +34,7 @@ class AnimatedObject(GameObject):
     def __init__(self, position: pg.Vector2, animation: Animation, light_source: LightSource = None):
         self.animation: Animation = animation
         self.animator: Animator = Animator(animation)
-        super().__init__(position, self.animator.get_frame(1), light_source)
+        super().__init__(position, self.animator.get_frame(1), light_source=light_source)
 
     def draw(self, screen, camera_pos):
         self.animator.update()
@@ -43,8 +45,8 @@ class AnimatedObject(GameObject):
 class ColliderObject(GameObject):
     """Base class for all object with a collider"""
 
-    def __init__(self, position: pg.Vector2, image: pg.Surface, hitbox_image: pg.Surface = None):
-        super().__init__(position, image)
+    def __init__(self, position: pg.Vector2, image: pg.Surface, hitbox_image: pg.Surface = None, normal_image: pg.Surface = None):
+        super().__init__(position, image, normal=normal_image)
 
         # Use image to generate hitbox if no other hitbox is provided:
         if hitbox_image:

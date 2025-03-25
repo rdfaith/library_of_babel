@@ -11,6 +11,9 @@ class GameWorld:
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
+
+        self.world_normal_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pg.SRCALPHA)
+
         self.player = Player(player_pos)
 
         self.light_map: LightMap = LightMap()  # object that stores all light sources
@@ -19,6 +22,10 @@ class GameWorld:
                                                  self.player.get_rect().y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
+
+    def get_all_objects(self):
+        return self.static_objects + self.objects + self.interactable_objects
+
 
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
@@ -43,14 +50,14 @@ class GameWorld:
 
         ui_screen = shader.ui_screen
         game_screen = shader.game_screen
-        bg0_screen = shader.bg0_screen
+        normal_screen = shader.game_normal_screen
 
         bg_screens = shader.bg_screens
 
         for screen in bg_screens:
             screen.fill((0, 0, 0, 0))
 
-        bg0_screen.fill((0, 0, 0, 0))
+        normal_screen.fill((0, 0, 0, 0))
         game_screen.fill((0, 0, 0, 0))
         ui_screen.fill((0, 0, 0, 0))
 
@@ -138,6 +145,11 @@ class GameWorld:
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
             game_screen.blit(VIGNETTE, vignette_position)
 
+        def draw_normal_map(screen):
+            for o in self.get_all_objects():
+                if o.get_normal():
+                    screen.blit(o.get_normal(), o.position)
+
         #endregion
 
         # Kameraposition setzen
@@ -161,6 +173,9 @@ class GameWorld:
 
         # draw player
         self.player.draw(game_screen, self.camera_pos)
+
+        # draw normal maps
+        # draw_normal_map(normal_screen)
 
         # draw foreground parallax
         # draw_fg_parallax()
