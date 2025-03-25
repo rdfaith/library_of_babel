@@ -129,6 +129,7 @@ class Player(MovingObject):
 
         if len(self.letters_collected) < 5:  # return True if can pick up
             self.letters_collected.append(letter)
+            self.sound_manager.play_movement_sound("collect")
             result = True
 
         word = "".join(self.letters_collected).upper()
@@ -160,7 +161,7 @@ class Player(MovingObject):
         if word_completed:
             self.letters_collected = []
 
-        if len(self.letters_collected) >= 5 and not word_completed:
+        if len(self.letters_collected) >= 5 and not word_completed and word != "BABEL":
             self.has_wrong_word = True
 
         return result

@@ -183,7 +183,7 @@ class LetterPickUp(InteractableObject):
     def __init__(self, position: pg.Vector2, letter: str):
         self.letter = letter
         image = LETTER_IMAGES[letter]
-
+        offset = pg.Vector2(4, 4)
         light_source = LightSource(
             position.copy(),
             pg.Vector2(4, 4),
@@ -192,7 +192,7 @@ class LetterPickUp(InteractableObject):
             0.05
         )
 
-        super().__init__(position, image, image, light_source=light_source)
+        super().__init__(position.copy() + offset, image, image, light_source=light_source)
 
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
