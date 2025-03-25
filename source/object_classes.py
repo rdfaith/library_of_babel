@@ -234,6 +234,7 @@ class Keyhole(InteractableObject):
     def on_collide(self, player, game_world) -> None:
         if player.has_key:
             print("Door unlocked!")
+            player.has_key = False
             pg.event.post(pg.event.Event(DOOR_UNLOCKED))
         else:
             print("The door is locked. You need a key.")
