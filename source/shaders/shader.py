@@ -7,17 +7,16 @@ from source.light_source import *
 
 
 class Shader:
-    def __init__(self, screen_width, screen_height,):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
+    def __init__(self, screen_width, screen_height, ):
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
 
-        self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in BG_LAYERS]
+        self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
+                                             BG_LAYERS]
 
         self.game_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
         self.game_normal_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
 
         self.ui_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
-
-
 
         self.ctx = moderngl.create_context()
 
@@ -38,6 +37,12 @@ class Shader:
 
         self.program = self.ctx.program(vertex_shader=self.vert_shader, fragment_shader=self.frag_shader)
         self.render_object = self.ctx.vertex_array(self.program, [(self.quad_buffer, '2f 2f', 'vert', 'texcoord')])
+
+        # Fun shader properties here:
+        self.moon_light_intensity: float = 0.0
+
+    def set_moon_light_intensity(self, intensity: float):
+        self.moon_light_intensity = intensity
 
     def get_game_screen(self):
         return self.game_screen
@@ -89,14 +94,14 @@ class Shader:
         light_intensities = [i for i in light_map.get_intensities(NUM_LIGHTS)]
         light_radii = [i for i in light_map.get_radii(NUM_LIGHTS)]
 
-
         self.program['lightPositions'] = light_positions
         self.program['lightColors'] = light_colors
         self.program['lightIntensities'] = light_intensities
         self.program['lightRadii'] = light_radii
 
-        self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
+        self.program['moonLightIntensity'] = self.moon_light_intensity
 
+        self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
 
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
 

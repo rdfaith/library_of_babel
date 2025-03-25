@@ -15,6 +15,7 @@ uniform sampler2D bg2Tex; // Parallax background (columns)
 uniform sampler2D bg3Tex; // Parallax background (shelves)
 
 uniform float time;
+uniform float moonLightIntensity;
 
 uniform vec2 cameraPos;
 
@@ -39,7 +40,7 @@ vec2 getFragPos(vec2 _worldPos) {
 }
 
 float getLight(vec2 worldPos) {
-    vec3 finalLight = vec3(0.05, 0.28, 0.32); // Base ambient moonlight
+    vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity; // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
         vec2 lightDir = lightPositions[i] - worldPos;
@@ -107,7 +108,7 @@ void main() {
 
     vec4 parallaxBG = getParallaxLayersAt(fragTexCoord);
     // Adjust background lighting (general ambient lighting)
-    parallaxBG = vec4(parallaxBG.rgb * 0.3, parallaxBG.a);
+    parallaxBG = vec4(parallaxBG.rgb * 0.3 * moonLightIntensity, parallaxBG.a);
 
     // Light rays from moonlight (raymarching)
     vec2 moonPosNormalised = vec2(0.25, 0.344);
@@ -128,8 +129,11 @@ void main() {
 
     // Apply the volumetric light effect
     vec3 lightColor = vec3(0.5, 0.8, 0.95);  // Cold moonlight color
-    float intensity = 0.3;
+    float intensity = 0.3 * moonLightIntensity;
     vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * intensity, parallaxBG.a);
+
+    // Adjust skybox lighting
+    bg0 = vec4(bg0.rgb * moonLightIntensity, bg0.a);
 
     // Add parallax ontop of skybox
     color = addLayerColor(bg0, finalParallax);

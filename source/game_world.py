@@ -9,6 +9,7 @@ from light_source import *
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int]) -> None:
+
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
@@ -23,9 +24,11 @@ class GameWorld:
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
 
+        self.is_moonlight_on = False
+        self.moon_light_intensity: float = 0.0
+
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
-
 
     def set_player_position(self, pos: pg.Vector2) -> None:
         """Sets player position, used when initialising level"""
@@ -34,6 +37,9 @@ class GameWorld:
 
     def get_light_map(self) -> LightMap:
         return self.light_map
+
+    def on_player_collected_light(self):
+        self.is_moonlight_on = True
 
     def do_updates(self, delta: float) -> None:
 
@@ -50,7 +56,10 @@ class GameWorld:
             if isinstance(o, MovingPlatform):
                 o.update(delta, self)
 
-    def do_render(self, game_screen, ui_screen):
+        if self.is_moonlight_on and self.moon_light_intensity < 1.0:
+            self.moon_light_intensity += 0.3 * delta
+
+    def do_render(self, shader):
 
         ui_screen = shader.ui_screen
         game_screen = shader.game_screen
@@ -175,6 +184,8 @@ class GameWorld:
             if light_source:
                 self.light_map.add_source(light_source)
 
+        shader.set_moon_light_intensity(self.moon_light_intensity)
+
         # draw player
         self.player.draw(game_screen, self.camera_pos)
 
@@ -189,3 +200,6 @@ class GameWorld:
 
         # draw UI
         draw_ui()
+
+
+

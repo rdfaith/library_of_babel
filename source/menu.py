@@ -59,8 +59,6 @@ def main(running: bool, shader: Shader):
     game_state: GameState = GameState.START
     optionbutton = pg.Rect(120, 70, 80, 40)
     delta = 0.0
-    PLAYER_DIED = pg.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
-    PLAYER_WON = pg.USEREVENT + 2
     clock = pg.time.Clock()
 
     game_screen = shader.get_game_screen()
@@ -132,6 +130,8 @@ def main(running: bool, shader: Shader):
                     write_score(get_path("saves/unlocked_levels.sav"), unlocked_level)
                     game_world = load_world(current_level)
                     clock = pg.time.Clock()
+                elif event.type == WORD_LIGHT:  # player collected word 'LIGHT'
+                    game_world.on_player_collected_light()
                 if event.type == pg.QUIT:
                     running = False
                     sys.exit()

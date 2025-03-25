@@ -7,11 +7,6 @@ from enum import Enum
 from sound_manager import *
 from light_source import LightSource
 
-# Pygame event for player death
-PLAYER_DIED = pygame.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
-PLAYER_WON = pygame.USEREVENT + 2
-
-
 class Player(MovingObject):
     # Player states
     class State(Enum):
@@ -152,9 +147,12 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
+                pg.event.post(pygame.event.Event(PLAYER_WON))
             case "LIGHT":
                 print("Es werde Licht")
-                self.on_player_win("alle Buchstaben gesammelt")
+                pg.event.post(pygame.event.Event(WORD_LIGHT))
+                word_completed = True
+
 
         if word_completed:
             self.letters_collected = []

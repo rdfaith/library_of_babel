@@ -8,6 +8,11 @@ FRAME_SIZE = 16
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 180
 
+# pygame USEREVENTs
+PLAYER_DIED = pg.USEREVENT + 1  # Custom event ID 25 (USEREVENT starts at 24)
+PLAYER_WON = pg.USEREVENT + 2
+WORD_LIGHT = pg.USEREVENT + 10
+
 # Game controls / User input
 KEY_UP      = [pg.K_UP,     pg.K_w]
 KEY_JUMP    = [pg.K_SPACE]
