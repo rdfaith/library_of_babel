@@ -61,16 +61,16 @@ class GameWorld:
 
     def do_render(self, shader):
 
-        ui_screen = shader.ui_screen
-        game_screen = shader.game_screen
-        normal_screen = shader.game_normal_screen
+        ui_screen = shader.get_ui_screen()
+        game_screen = shader.get_game_screen()
+        # normal_screen = shader.game_normal_screen
 
-        bg_screens = shader.bg_screens
+        bg_screens = shader.get_bg_screens()
 
         for screen in bg_screens:
             screen.fill((0, 0, 0, 0))
 
-        normal_screen.fill((0, 0, 0, 0))
+        # normal_screen.fill((0, 0, 0, 0))
         game_screen.fill((0, 0, 0, 0))
         ui_screen.fill((0, 0, 0, 0))
 
@@ -142,7 +142,7 @@ class GameWorld:
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for i in range(len(BG_LAYERS)):
                 if BG_LAYERS[i]["depth"] > 0:
-                    draw_parallax_layer(BG_LAYERS[i], max_depth, True, shader.bg_screens[i])
+                    draw_parallax_layer(BG_LAYERS[i], max_depth, True, bg_screens[i])
 
         def draw_fg_parallax():
             """Draws the foreground parallax layers"""

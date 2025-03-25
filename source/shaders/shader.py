@@ -7,8 +7,8 @@ from source.light_source import *
 
 
 class Shader:
-    def __init__(self, screen_width, screen_height, ):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
+    def __init__(self, screen_width, screen_height):
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
                                              BG_LAYERS]
@@ -49,6 +49,9 @@ class Shader:
 
     def get_ui_screen(self):
         return self.ui_screen
+
+    def get_bg_screens(self):
+        return self.bg_screens
 
     def update(self, camera_pos: pg.Vector2 = pg.Vector2(), light_map: LightMap = LightMap()):
         def surf_to_texture(surf):
@@ -109,3 +112,26 @@ class Shader:
 
         ui_tex.release()
         game_tex.release()
+
+
+class FakeShader():
+    def __init__(self, screen_width, screen_height):
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.SCALED)
+
+        self.light_map = None
+
+    def set_moon_light_intensity(self, intensity: float):
+        pass
+
+    def get_game_screen(self):
+        return self.screen
+
+    def get_ui_screen(self):
+        return self.screen
+
+    def get_bg_screens(self):
+        return [self.screen for _ in BG_LAYERS]
+
+    def update(self, camera_pos: pg.Vector2 = pg.Vector2(), light_map: LightMap = LightMap()):
+
+        pg.display.flip()
