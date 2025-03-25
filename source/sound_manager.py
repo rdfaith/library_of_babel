@@ -45,7 +45,8 @@ class SoundManager:
     def play_movement_sound(self, movement_name):
         self.settings = load_settings(SETTINGS)
         if self.current_movement == movement_name and self.settings["SFX"] == "True":
-            self.current_movement_sound.set_volume(0.5)
+            if self.current_movement_sound:
+                self.current_movement_sound.set_volume(0.5)
             return
         elif self.settings["SFX"] == "False":
             if self.current_movement_sound:

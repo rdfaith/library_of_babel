@@ -21,8 +21,7 @@ class GameState(Enum):
     IN_GAME_MENU = 5
 
 class In_Game_Menu:
-    def __init__(self, settings_filename: str, screen):
-        self.screen = screen
+    def __init__(self, settings_filename: str):
         self.value = False
         self.rect = None
         self.image = None
@@ -30,7 +29,7 @@ class In_Game_Menu:
         self.options = list(self.settings.keys())
         print(self.settings)
 
-    def draw_button(self, name, selected_name):
+    def draw_button(self, name, selected_name, screen):
         self.value = self.settings[name]
         if selected_name == name:
             if self.value == "True":
@@ -45,7 +44,7 @@ class In_Game_Menu:
         self.image_width = self.image.get_width()
         self.image_height = self.image.get_height()
         self.pos = ((UI_WIDTH - self.image_width) // 2, 10 + (self.options.index(name)) * (self.image_height + 5))
-        return self.screen.blit(self.image, self.pos)
+        return screen.blit(self.image, self.pos)
 
     def update(self, name):
         # Hier wird der Wert immer zwischen "True" und "False" gewechselt
@@ -120,9 +119,7 @@ def main(running: bool):
     delta = 0.0
     clock = pg.time.Clock()
     shader = get_shader()
-    game_screen = shader.get_game_screen()
-    ui_screen = shader.get_ui_screen()
-    in_game_menu = In_Game_Menu(SETTINGS, ui_screen)
+    in_game_menu = In_Game_Menu(SETTINGS)
     was_paused = False
 
     title_screen: TitleScreen = TitleScreen()
@@ -132,11 +129,11 @@ def main(running: bool):
         while game_state == GameState.START:
 
             sound_manager.play_bg_music("menu")
-            ui_screen.fill((0, 0, 0))
+            shader.get_ui_screen().fill((0, 0, 0))
             if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
-                pg.draw.rect(ui_screen, (255, 255, 255), optionbutton, 50)
+                pg.draw.rect(shader.get_ui_screen(), (255, 255, 255), optionbutton, 50)
             else:
-                pg.draw.rect(ui_screen, (0, 255, 255), optionbutton, 50)
+                pg.draw.rect(shader.get_ui_screen(), (0, 255, 255), optionbutton, 50)
 
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
@@ -159,10 +156,10 @@ def main(running: bool):
 
         while game_state == GameState.LEVEL_SELECTION:
 
-            ui_screen.fill((0, 0, 0))
+            shader.get_ui_screen().fill((0, 0, 0))
 
             levels = availible_levels(get_path("saves/unlocked_levels.sav"))
-            display_levels(levels, selected_level, ui_screen)
+            display_levels(levels, selected_level, shader.get_ui_screen())
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -210,10 +207,8 @@ def main(running: bool):
                     running = False
                     sys.exit()
 
-            game_world.do_updates(delta if not was_paused else 0.016)
+            game_world.do_updates(delta)
             game_world.do_render(shader)
-            if was_paused:
-                was_paused = False
 
             # !!! Render with shader (use this instead of display.flip()!!!)
             shader.update(game_world.camera_pos, game_world.light_map)
@@ -234,7 +229,10 @@ def main(running: bool):
 
             clock.tick(60)
         while game_state == GameState.IN_GAME_MENU:
-            was_paused = True
+            sound_manager.play_bg_music("menu")
+            sound_manager.play_movement_sound("idle")
+            shader.get_ui_screen().fill((30, 30, 30))
+
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -253,13 +251,17 @@ def main(running: bool):
                         sound_manager.play_bg_music("menu")
                         sound_manager.play_system_sound("selection")
                         for keys in in_game_menu.settings.keys():
-                            in_game_menu.draw_button(keys, in_game_menu.options[selected_button])
-                    elif event.key == pg.K_ESCAPE:
-                        game_state = GameState.GAME
+                            in_game_menu.draw_button(keys, in_game_menu.options[selected_button], shader.get_ui_screen())
 
-            ui_screen.fill((30, 30, 30))
+
+                    elif event.key == pg.K_ESCAPE:
+
+                        game_state = GameState.GAME
+                        shader = get_shader()
+
+
             for keys in in_game_menu.settings.keys():
-                in_game_menu.draw_button(keys,in_game_menu.options[selected_button])
+                in_game_menu.draw_button(keys,in_game_menu.options[selected_button], shader.get_ui_screen())
 
             shader.update()
 
