@@ -16,6 +16,7 @@ uniform sampler2D bg3Tex; // Parallax background (shelves)
 
 uniform float time;
 uniform float moonLightIntensity;
+uniform ivec2 moonPosition;
 
 uniform bool lightDebugMode;
 
@@ -136,7 +137,7 @@ void main() {
     parallaxBG = vec4(parallaxBG.rgb * 0.3 * moonLightIntensity, parallaxBG.a);
 
     // Light rays from moonlight (raymarching)
-    vec2 moonPosNormalised = vec2(0.25, 0.344);
+    vec2 moonPosNormalised = pixelToUV(moonPosition);
     vec2 lightDirection = (fragCoords - moonPosNormalised); // direction for moonlight
     float lightStrength = 0.0;  // Start with no light
 
