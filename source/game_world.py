@@ -31,6 +31,9 @@ class GameWorld:
         self.moon_light_intensity: float = 0.0
         self.time: float = 0.0
 
+        self.timer_anim: Animation = Animation("timer", get_path('assets/sprites/ui/ui_timer_anim.png'), 58, 16, 4, 8)
+        self.timer_animator: Animator = Animator(self.timer_anim)
+
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
 
@@ -63,6 +66,7 @@ class GameWorld:
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:
             self.moon_light_intensity += 0.3 * delta
 
+        self.timer_animator.update()
         self.time += delta
 
     def do_render(self, shader):
@@ -105,9 +109,12 @@ class GameWorld:
             ui_key = pg.image.load(get_path("assets/test/key.png"))
             ui_question_mark = pg.image.load(get_path("assets/sprites/ui/ui_question_mark.png"))
             ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png")).convert_alpha()
+            ui_timer = self.timer_animator.get_frame()
+
 
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
-
+            ui_screen.blit(ui_timer, pg.Vector2(131, 0))
+7*
             for i in range(self.player.player_lives):
                 ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
 
