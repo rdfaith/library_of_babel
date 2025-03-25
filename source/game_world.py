@@ -1,5 +1,6 @@
 import pygame as pg
 from player import Player
+from object_classes import *
 from constants import *
 from utils import *
 from light_source import *
@@ -12,9 +13,8 @@ class GameWorld:
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
 
-        self.world_normal_screen = pg.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), flags=pg.SRCALPHA)
-
         self.player = Player(player_pos)
+
 
         self.light_map: LightMap = LightMap()  # object that stores all light sources
 
@@ -46,7 +46,11 @@ class GameWorld:
         for o in self.interactable_objects:
             o.update(delta, self)
 
-    def do_render(self, shader):
+        for o in self.static_objects:
+            if isinstance(o, MovingPlatform):
+                o.update(delta, self)
+
+    def do_render(self, game_screen, ui_screen):
 
         ui_screen = shader.ui_screen
         game_screen = shader.game_screen
@@ -83,7 +87,7 @@ class GameWorld:
         def draw_ui():
             ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
             ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
-            ui_key = pg.image.load(get_path("assets/test/egg.png"))
+            ui_key = pg.image.load(get_path("assets/test/key.png"))
             ui_screen.blit(ui_bg, pg.Vector2(0, 0))
 
             for i in range(self.player.player_lives):

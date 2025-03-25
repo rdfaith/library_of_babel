@@ -86,14 +86,14 @@ class ColliderObject(GameObject):
 
         for col_obj in collider_objects:
             if rect.colliderect(col_obj.get_rect()):  # Check collision
-                return col_obj
+                if self != col_obj:
+                    return col_obj
         return None
 
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
-        rect = self.get_rect()
         sprite_offset = self.get_sprite_offset()
-        position = rect.topleft - camera_pos
+        position = self.position - camera_pos
         screen.blit(self.image, position - sprite_offset)
 
 
@@ -121,20 +121,21 @@ class MovingObject(InteractableObject):
     def set_animation(self, animation) -> None:
         pass
 
-    def does_collide(self, rect, objects: list) -> bool:
+    def does_collide(self, rect, objects: list) -> GameObject:
         """Check if hit box collides with another object."""
         for o in objects:
             if rect.colliderect(o.get_rect()):
-                return True
-        return False
+                return o
+        return None
 
-    def check_is_grounded(self, objects: list) -> bool:
+    def check_is_grounded(self, objects: list) -> GameObject:
         """Check if element is on the floor."""
         preview_rect = self.get_rect().move(0, 1)
-        if self.does_collide(preview_rect, objects):
-            return True
+        obj_below = self.does_collide(preview_rect, objects)
+        if obj_below:
+            return obj_below
         else:
-            return False
+            return None
 
     def update(self, delta: float, game_world):
         """update hit box and position depending on collision"""
@@ -189,10 +190,40 @@ class LetterPickUp(InteractableObject):
             game_world.interactable_objects.remove(self)
 
 
+class Door(InteractableObject):
+
+    def on_collide(self, player, game_world) -> None:
+        if player.has_key:
+            # remove hit box door hitbox
+            pass
+
+
 class KeyPickUp(MovingObject):
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
         game_world.interactable_objects.remove(self)
+
+
+class MovingPlatform(MovingObject):
+    def __init__(self, position: pg.Vector2):
+        super().__init__(position, pg.image.load(get_path('assets/sprites/tiles/platform.png')), False, pg.image.load(get_path("assets/sprites/tiles/platform_collider.png")))
+        self.speed_x = 20
+        self.distance = 0
+        self.max_distance = 90
+        self.current_direction = 1
+
+    def update(self, delta: float, game_world):
+        self.velocity.x = self.current_direction * self.speed_x
+
+        super().update(delta, game_world)
+
+        if not self.has_collided:
+            self.distance += abs(self.velocity.x * delta)
+
+        if self.distance >= self.max_distance or self.has_collided:
+            self.current_direction *= (-1)
+            self.distance = 0
+            self.has_collided = False
 
 
 class Enemy(MovingObject):
@@ -245,12 +276,6 @@ class Worm(Enemy):
                 self.set_animation(self.walk)
             case self.State.DEAD:
                 self.set_animation(self.dead)
-
-        # Change hit box
-        # if self.state == self.State.WALK:
-        #     normal hit box
-        # else: meaning, if dead
-        #     remove hit box
 
     def set_animation(self, animation):
         if self.active_animation.name != animation.name:
