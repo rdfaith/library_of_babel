@@ -9,7 +9,7 @@ from source.light_source import *
 class Shader:
     def __init__(self, screen_width, screen_height):
         self.light_debug_mode = False
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
                                              BG_LAYERS]

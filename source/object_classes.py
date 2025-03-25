@@ -270,8 +270,8 @@ class MovingPlatform(MovingObject):
 
 class Enemy(MovingObject):
 
-    def __init__(self, position: pg.Vector2, image: pg.Surface, gravity: bool):
-        super().__init__(position, image, gravity)
+    def __init__(self, position: pg.Vector2, image: pg.Surface, gravity: bool, hitbox_image = None):
+        super().__init__(position, image, gravity, hitbox_image=hitbox_image)
         self.current_direction = 1
 
 
@@ -361,6 +361,95 @@ class Worm(Enemy):
         # screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
         # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+
+
+class FlyingBook(Enemy):
+
+    class State(Enum):
+        FLY = 1
+        DEAD = 2
+
+    def __init__(self, position: pg.Vector2):
+        hitbox_image = pg.image.load(get_path("assets/sprites/anim/flying_book_hitbox.png"))
+
+        super().__init__(position, hitbox_image, False, hitbox_image=hitbox_image)
+        self.speed_y = 20
+        self.distance = 0
+        self.max_distance = 100
+        self.state = self.State.FLY
+        self.time_until_death = 3.5
+
+        self.fly = Animation("fly", get_path('assets/sprites/anim/flying_book-fly-Sheet.png'), 43, 22, 10, 10)
+        self.dead = Animation("dead", get_path('assets/sprites/anim/flying_book-dead-Sheet.png'), 52, 32, 1, 10)
+
+        self.active_animation = self.fly
+        self.animator = Animator(self.active_animation)
+
+    def on_collide(self, player, game_world) -> None:
+        """Is called on collision with player."""
+        if self.state != self.State.DEAD:
+            if player.velocity.y > 0 and not player.check_is_grounded(game_world.static_objects):
+                # If player jumps on top of it, enemy dies
+                player.velocity.y = -250
+                player.bounce_velocity_x = 0
+                player.velocity.x = 0
+                self.state = self.State.DEAD
+                self.on_state_changed(self.State.DEAD)
+            else:
+                player.on_hit_by_enemy(self, player.current_direction)
+
+    def on_state_changed(self, state: Enum):
+        """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
+
+        # Change animation:
+        match state:
+            case self.State.FLY:
+                self.set_animation(self.fly)
+            case self.State.DEAD:
+                self.set_animation(self.dead)
+
+    def set_animation(self, animation):
+        if self.active_animation.name != animation.name:
+            self.active_animation = animation
+            self.animator = Animator(animation)
+            self.animator.reset_animation()
+
+    def update(self, delta: float, game_world):
+
+        if self.state == self.State.DEAD:
+            self.has_gravity = True
+            super().update(delta, game_world)
+            self.animator.update()
+            if self.time_until_death != 0:
+                self.time_until_death -= delta
+                if self.time_until_death <= 0:
+                    self.time_until_death = 0
+            else:
+                game_world.interactable_objects.remove(self)
+
+        else:
+            self.velocity.y = self.current_direction * self.speed_y
+
+            super().update(delta, game_world)
+
+            if not self.has_collided:
+                self.distance += abs(self.velocity.y * delta)
+
+            if self.distance >= self.max_distance or self.has_collided:
+                self.current_direction *= (-1)
+                self.distance = 0
+                self.has_collided = False
+
+            self.animator.update()
+
+    def draw(self, screen, camera_pos):
+        position = self.get_rect().topleft - camera_pos
+
+        frame = self.animator.get_frame(self.current_direction)
+        if self.state == self.State.DEAD and self.time_until_death <= 2:
+            frame.set_alpha(255 - (2 - self.time_until_death) * 255)
+
+        screen.blit(frame, position)
 
 
 class Monkey(Enemy):
