@@ -44,6 +44,7 @@ class Player(MovingObject):
         self.bounce_velocity_x = 0
         self.invincibility_time: float = 0.7
         self.current_direction: int = 1
+        self.time_until_over = 5
 
         self.state = self.State.IDLE
 
@@ -67,7 +68,7 @@ class Player(MovingObject):
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
         # Define Animations
-        self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 14)
+        self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 18)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
         self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
         self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
@@ -90,8 +91,8 @@ class Player(MovingObject):
         self.player_lives = 0
         self.state = self.State.DEAD
         self.on_state_changed(self.State.DEAD)
-        self.set_animation(self.dead) # uncomment when death animation implemented
-        pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
+        self.set_animation(self.dead)  # uncomment when death animation implemented
+        # pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": reason}))
         self.player_lives = 3
 
     def on_player_win(self, reason: str):
@@ -271,31 +272,42 @@ class Player(MovingObject):
 
     def update(self, delta: float, game_world):
 
-        # get player movement
-        keys = pygame.key.get_pressed()
-
-        # Check invincibility frames
-        if self.invincibility_time > 0:
-            self.invincibility_time -= delta
-            if self.invincibility_time <= 0:
-                self.invincibility_time = 0
-
-        #  Interact with interactable game elements and call their on_collide function
-        self.do_interaction(game_world)
-
-        self.handle_movement(keys, delta, game_world)
-
-        if self.bounce_velocity_x != 0:
-            if self.check_is_grounded(game_world.static_objects) and self.invincibility_time != 0.7:
-                self.bounce_velocity_x = 0
+        if self.state == self.State.DEAD or self.state == self.State.WIN:
+            if self.time_until_over != 0:
+                self.time_until_over -= delta
+                super().update(delta, game_world)
+                self.animator.update()
+                if self.time_until_over <= 0:
+                    self.time_until_over = 0
             else:
-                self.velocity.x = self.bounce_velocity_x
+                pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
 
-        # Check collision and apply movement or not
-        super().update(delta, game_world)
+        else:
+            # get player movement
+            keys = pygame.key.get_pressed()
 
-        self.animator.update()
-        self.light_source.set_position(self.position)  # update position of light source
+            # Check invincibility frames
+            if self.invincibility_time > 0:
+                self.invincibility_time -= delta
+                if self.invincibility_time <= 0:
+                    self.invincibility_time = 0
+
+            #  Interact with interactable game elements and call their on_collide function
+            self.do_interaction(game_world)
+
+            self.handle_movement(keys, delta, game_world)
+
+            if self.bounce_velocity_x != 0:
+                if self.check_is_grounded(game_world.static_objects) and self.invincibility_time != 0.7:
+                    self.bounce_velocity_x = 0
+                else:
+                    self.velocity.x = self.bounce_velocity_x
+
+            # Check collision and apply movement or not
+            super().update(delta, game_world)
+
+            self.animator.update()
+            self.light_source.set_position(self.position)  # update position of light source
 
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos
