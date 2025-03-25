@@ -85,6 +85,8 @@ def generate_world(map_file_path: str) -> GameWorld:
                     collision_objects.append(Door(pos))
                 case "worm":
                     interactable_objects.append(Worm(pos.copy()))
+                case "flying_book":
+                    interactable_objects.append(FlyingBook(pos.copy()))
                 case "monkey":
                     interactable_objects.append(Monkey(pos.copy()))
                 case "player":
