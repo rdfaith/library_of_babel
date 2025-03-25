@@ -7,7 +7,7 @@
 #define SCREEN_HEIGHT 180.0
 
 uniform sampler2D gameTex;
-uniform sampler2D gameNormal;
+//uniform sampler2D gameNormal;
 uniform sampler2D uiTex;
 uniform sampler2D bg0Tex; // Parallax background (moon sky)
 uniform sampler2D bg1Tex; // Parallax background (wall windows)
@@ -137,7 +137,7 @@ void main() {
     vec4 gameColor = texture(gameTex, fragTexCoord);
     vec4 uiColor = texture(uiTex, fragTexCoord);
 
-    vec4 normal = texture(gameNormal, fragTexCoord);
+//    vec4 normal = texture(gameNormal, fragTexCoord);
 
     vec4 color = vec4(0.0);
 

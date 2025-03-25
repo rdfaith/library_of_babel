@@ -96,10 +96,10 @@ class Shader:
         self.program['fgTex'] = screen_number
         screen_number += 1
 
-        game_normal = surf_to_texture(self.game_normal_screen)
-        game_normal.use(screen_number)
-        self.program['gameNormal'] = screen_number
-        screen_number += 1
+        # game_normal = surf_to_texture(self.game_normal_screen)
+        # game_normal.use(screen_number)
+        # self.program['gameNormal'] = screen_number
+        # screen_number += 1
 
         NUM_LIGHTS = 25  # Has to be the same as in frag_shader.glsl!!
 

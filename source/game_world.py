@@ -225,7 +225,7 @@ class GameWorld:
             if light_source:
                 self.light_map.add_source(light_source)
             # draw normal
-            o.draw_normal(normal_screen, camera_pos=self.camera_pos)
+            # o.draw_normal(normal_screen, camera_pos=self.camera_pos)
 
         shader.set_moon_light_intensity(self.moon_light_intensity)
 
