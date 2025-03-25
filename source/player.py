@@ -71,6 +71,10 @@ class Player(MovingObject):
         self.dash_timer = 0  # Time left in current dash
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
+        # Double Jump Values
+        self.jump_counter = 0
+        self.jump_cooldown: float = 0.0
+
         # Define Animations
         self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 18)
         self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
@@ -249,11 +253,27 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
-        if is_grounded:
+        # Jumping and Y-Velocity
+        if self.jump_cooldown != 0.0:
+            self.jump_cooldown -= delta
+            if self.jump_cooldown <= 0:
+                self.jump_cooldown = 0.0
+
+        if self.jump_counter == 1 and self.jump_cooldown == 0.0:
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                self.velocity.y = -self.jump_force
+                new_state = self.State.JUMP
+                self.jump_counter += 1
+                print(f"double jump at {self.jump_counter}")
+        elif is_grounded:
+            self.jump_counter = 0
             self.got_damage = False
             if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
+                self.jump_counter += 1
+                self.jump_cooldown = 0.3
+                print(f"jump at {self.jump_counter}")
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 if self.velocity.x != 0:
                     new_state = self.State.DUCK_WALK
@@ -274,19 +294,6 @@ class Player(MovingObject):
                     else:
                         self.on_player_death("fell from block")
                         self.got_damage = True
-            if is_grounded:
-                if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
-                    self.velocity.y = -self.jump_force
-                    new_state = self.State.JUMP
-                elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
-                    if self.velocity.x != 0:
-                        new_state = self.State.DUCK_WALK
-                    else:
-                        new_state = self.State.DUCK_IDLE
-            elif self.velocity.y <= 0:
-                new_state = self.State.JUMP
-            else:
-                new_state = self.State.FALL
 
         # Handle Dash Duration
         if self.dash_timer > 0:
