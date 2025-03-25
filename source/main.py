@@ -19,7 +19,7 @@ import menu
 pg.init()
 
 shader = Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
-shader = FakeShader(SCREEN_WIDTH, SCREEN_HEIGHT)
+# shader = FakeShader(SCREEN_WIDTH, SCREEN_HEIGHT)
 menu.main(True, shader)
 
 # running = True

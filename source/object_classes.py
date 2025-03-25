@@ -28,6 +28,7 @@ class GameObject:
     def get_normal(self) -> pg.Surface:
         return self.normal
 
+
 class AnimatedObject(GameObject):
     """Base class for objects that are animated. No colliders or hit boxes. Used for decorative objects."""
 
@@ -190,12 +191,52 @@ class LetterPickUp(InteractableObject):
             game_world.interactable_objects.remove(self)
 
 
-class Door(InteractableObject):
+class Door(ColliderObject):
+
+    class State(Enum):
+        LOCKED = 1
+        UNLOCKED = 2
+
+    def __init__(self, position: pg.Vector2):
+        super().__init__(position, pg.image.load(get_path('assets/sprites/tiles/door.png')), pg.image.load(get_path('assets/sprites/tiles/door_collider.png')))
+        self.unlocking = Animation("unlocking", get_path('assets/test/door-unlocking-Sheet.png'), 16, 32, 17, 6)
+        self.animator = Animator(self.unlocking)
+        self.current_direction = 1
+        self.state = self.State.LOCKED
+        self.time_until_open = 2.5
+
+    def unlock(self, game_world):
+        """Remove the door's hit box when unlocked."""
+        self.state = self.State.UNLOCKED
+
+    def update(self, delta, game_world):
+        if self.state == self.State.UNLOCKED:
+            self.animator.update()
+            if self.time_until_open != 0:
+                self.time_until_open -= delta
+                if self.time_until_open <= 0:
+                    self.time_until_open = 0
+            else:
+                game_world.static_objects.remove(self)
+
+    def draw(self, screen, camera_pos):
+        if self.state == self.State.UNLOCKED:
+            position = self.get_rect().topleft - camera_pos
+            screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
+        else:
+            super().draw(screen, camera_pos)
+
+
+class Keyhole(InteractableObject):
+    def __init__(self, position: pg.Vector2):
+        super().__init__(position, pg.image.load(get_path('assets/sprites/tiles/keyhole.png')))
 
     def on_collide(self, player, game_world) -> None:
         if player.has_key:
-            # remove hit box door hitbox
-            pass
+            print("Door unlocked!")
+            pg.event.post(pg.event.Event(DOOR_UNLOCKED))
+        else:
+            print("The door is locked. You need a key.")
 
 
 class KeyPickUp(MovingObject):

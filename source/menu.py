@@ -130,6 +130,10 @@ def main(running: bool, shader: Shader):
                     write_score(get_path("saves/unlocked_levels.sav"), unlocked_level)
                     game_world = load_world(current_level)
                     clock = pg.time.Clock()
+                elif event.type == DOOR_UNLOCKED:  # unlock door
+                    for o in game_world.static_objects:
+                        if isinstance(o, object_classes.Door):
+                            o.unlock(game_world)
                 elif event.type == WORD_LIGHT:  # player collected word 'LIGHT'
                     game_world.on_player_collected_light()
                 if event.type == pg.QUIT:

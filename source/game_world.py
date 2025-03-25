@@ -24,7 +24,7 @@ class GameWorld:
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
 
-        self.is_moonlight_on = False
+        self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
 
     def get_all_objects(self):
@@ -53,7 +53,7 @@ class GameWorld:
             o.update(delta, self)
 
         for o in self.static_objects:
-            if isinstance(o, MovingPlatform):
+            if isinstance(o, MovingPlatform) or isinstance(o, Door):
                 o.update(delta, self)
 
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:

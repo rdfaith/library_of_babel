@@ -7,6 +7,7 @@ from enum import Enum
 from sound_manager import *
 from light_source import LightSource
 
+
 class Player(MovingObject):
     # Player states
     class State(Enum):
