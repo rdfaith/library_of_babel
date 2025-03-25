@@ -77,6 +77,8 @@ def generate_world(map_file_path: str) -> GameWorld:
                     collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 1)))
                 case "pillar":
                     collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 2)))
+                case "moving_platform":
+                    collision_objects.append(MovingPlatform(pos.copy()))
                 case "worm":
                     interactable_objects.append(Worm(pos.copy()))
                 case "monkey":

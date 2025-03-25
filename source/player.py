@@ -78,8 +78,8 @@ class Player(MovingObject):
         self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
         self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
         self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
-        self.dash = Animation("dash", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 10)
-        self.dead = Animation("dead", get_path('assets/test/egg.png'), 24, 24, 1, 10)
+        self.dash = Animation("dash", get_path('assets/test/dino-dash.png'), 32, 24, 1, 10)
+        self.dead = Animation("dead", get_path('assets/test/dino-death-Sheet.png'), 24, 24, 8, 8)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)
@@ -206,6 +206,7 @@ class Player(MovingObject):
 
         new_state = self.state
         is_grounded = self.check_is_grounded(game_world.static_objects)
+        obj_below = self.check_is_grounded(game_world.static_objects)
 
         # Dash
         if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:
@@ -228,6 +229,9 @@ class Player(MovingObject):
             elif is_grounded:
                 self.velocity.x = 0
                 new_state = self.State.IDLE
+
+            if isinstance(obj_below, MovingPlatform):
+                self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
             if is_grounded:
                 if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):

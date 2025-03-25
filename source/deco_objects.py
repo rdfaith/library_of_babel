@@ -4,6 +4,7 @@ from animator_object import Animation
 from utils import *
 from light_source import LightSource
 
+
 class Candle(AnimatedObject):
     def __init__(self, position):
         animation = Animation(

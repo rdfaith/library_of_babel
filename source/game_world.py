@@ -1,5 +1,6 @@
 import pygame as pg
 from player import Player
+from object_classes import *
 from constants import *
 from utils import *
 from light_source import *
@@ -11,7 +12,6 @@ class GameWorld:
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
         self.player = Player(player_pos)
-
 
         self.light_map: LightMap = LightMap()  # object that stores all light sources
 
@@ -38,6 +38,10 @@ class GameWorld:
 
         for o in self.interactable_objects:
             o.update(delta, self)
+
+        for o in self.static_objects:
+            if isinstance(o, MovingPlatform):
+                o.update(delta, self)
 
     def do_render(self, game_screen, ui_screen):
 
@@ -79,7 +83,6 @@ class GameWorld:
 
             if self.player.has_key:
                 ui_screen.blit(ui_key, UI_KEY_POSITION)
-
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True):
             depth: int = layer["depth"]

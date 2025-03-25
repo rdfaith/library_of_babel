@@ -2,7 +2,7 @@ import pygame as pg
 from utils import get_path
 import os
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 FRAME_SIZE = 16
 SCREEN_WIDTH = 320
