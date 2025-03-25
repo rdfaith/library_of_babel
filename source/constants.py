@@ -121,7 +121,7 @@ UI_WIDTH = 320
 UI_HEIGHT = 180
 BUTTON_WIDTH = 50
 BUTTON_HEIGHT = 20
-SLIDER_WIDTH = 100
+TEXT_WIDTH = 60
 
 TRUE_BUTTON_IMAGE = pg.image.load(get_path('assets/sprites/ui/ui_toggle_on.png'))
 FALSE_BUTTON_IMAGE = pg.image.load(get_path('assets/sprites/ui/ui_toggle_off.png'))

@@ -30,6 +30,7 @@ class In_Game_Menu:
         print(self.settings)
 
     def draw_button(self, name, selected_name, screen):
+        self.font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
         self.value = self.settings[name]
         if selected_name == name:
             if self.value == "True":
@@ -43,8 +44,20 @@ class In_Game_Menu:
                 self.image = FALSE_BUTTON_IMAGE
         self.image_width = self.image.get_width()
         self.image_height = self.image.get_height()
-        self.pos = ((UI_WIDTH - self.image_width) // 2, 10 + (self.options.index(name)) * (self.image_height + 5))
-        return screen.blit(self.image, self.pos)
+
+        self.lable = self.font.render(name, True, (244,204,161))
+        self.lable_width = self.lable.get_width()
+        self.lable_height = self.lable.get_height()
+
+        self.option_index = self.options.index(name)
+        self.y_offset = 20 + self.option_index * (self.image_height + 10)  # Mehr Abstand zwischen den Optionen
+
+        self.x_base = (UI_WIDTH - TEXT_WIDTH - self.image_width - 50) // 2
+
+        self.lable_pos = (self.x_base, self.y_offset + (self.image_height - self.lable_height) // 2)
+        self.img_pos = (self.x_base + 120, self.y_offset)
+
+        return screen.blit(self.image, self.img_pos), screen.blit(self.lable, self.lable_pos)
 
     def update(self, name):
         # Hier wird der Wert immer zwischen "True" und "False" gewechselt
@@ -95,9 +108,9 @@ def availible_levels(filename: str) -> list:
     return levels
 
 def display_levels(levels: int, selected_level, screen):
-    FONT = pg.font.Font(None, 30)
+    FONT = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
     for i, option in enumerate(levels):
-        color: str = BLUE if i == selected_level else WHITE
+        color = '#a05b53' if i == selected_level else (244,204,161)
         text = FONT.render(option, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
 def get_shader():
@@ -115,12 +128,11 @@ def main(running: bool):
     selected_button = 0
     sound_manager = SoundManager()
     game_state: GameState = GameState.START
-    optionbutton = pg.Rect(120, 70, 80, 40)
     delta = 0.0
     clock = pg.time.Clock()
     shader = get_shader()
     in_game_menu = In_Game_Menu(SETTINGS)
-    was_paused = False
+    last_game_state = GameState.START
 
     title_screen: TitleScreen = TitleScreen()
 
@@ -129,11 +141,9 @@ def main(running: bool):
         while game_state == GameState.START:
 
             sound_manager.play_bg_music("menu")
+            last_game_state = GameState.START
             shader.get_ui_screen().fill((0, 0, 0))
-            if pg.Rect.collidepoint(optionbutton, pg.mouse.get_pos()) == True:
-                pg.draw.rect(shader.get_ui_screen(), (255, 255, 255), optionbutton, 50)
-            else:
-                pg.draw.rect(shader.get_ui_screen(), (0, 255, 255), optionbutton, 50)
+
 
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
@@ -145,6 +155,7 @@ def main(running: bool):
                 if event.type == pg.KEYDOWN:
                     game_state = GameState.LEVEL_SELECTION
 
+
             # !!! Render with shader (use this instead of display.flip()!!!)
 
             title_screen.do_updates(delta)
@@ -155,8 +166,9 @@ def main(running: bool):
 
 
         while game_state == GameState.LEVEL_SELECTION:
+            last_game_state = GameState.LEVEL_SELECTION
 
-            shader.get_ui_screen().fill((0, 0, 0))
+            shader.get_ui_screen().fill((57, 49, 75))
 
             levels = availible_levels(get_path("saves/unlocked_levels.sav"))
             display_levels(levels, selected_level, shader.get_ui_screen())
@@ -176,6 +188,8 @@ def main(running: bool):
                         current_level = levels[selected_level]
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
+                    elif event.key == pg.K_ESCAPE:
+                        game_state = GameState.IN_GAME_MENU
 
             # !!! Render with shader (use this instead of display.flip()!!!)
             shader.update()
@@ -183,6 +197,7 @@ def main(running: bool):
 
 
         while game_state == GameState.GAME:
+            last_game_state = GameState.GAME
 
             sound_manager.play_bg_music("game")
             for event in pg.event.get():
@@ -216,11 +231,14 @@ def main(running: bool):
             delta = clock.tick(60) / 1000
 
         while game_state == GameState.GAME_OVER:
+            last_game_state = GameState.GAME_OVER
             #screen.fill((0, 0, 0))
             #screen.blit(RESTART_IMAGE, optionbutton)
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_e:
+                    if event.key == pg.K_ESCAPE:
+                        game_state = GameState.IN_GAME_MENU
+                    elif event.key == pg.K_e:
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
                 if event.type == pg.QUIT:
@@ -231,7 +249,7 @@ def main(running: bool):
         while game_state == GameState.IN_GAME_MENU:
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
-            shader.get_ui_screen().fill((30, 30, 30))
+            shader.get_ui_screen().fill((57, 49, 75))
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -252,11 +270,8 @@ def main(running: bool):
                         sound_manager.play_system_sound("selection")
                         for keys in in_game_menu.settings.keys():
                             in_game_menu.draw_button(keys, in_game_menu.options[selected_button], shader.get_ui_screen())
-
-
                     elif event.key == pg.K_ESCAPE:
-
-                        game_state = GameState.GAME
+                        game_state = last_game_state
                         shader = get_shader()
 
 

@@ -1,4 +1,4 @@
-SFX=True
+SFX=False
 MUSIC=False
 TIMER=False
 SHADER=False
