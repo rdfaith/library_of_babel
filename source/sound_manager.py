@@ -57,9 +57,9 @@ class SoundManager:
 
             return channel  # Return sound channel for directional audio
 
-    def play_movement_sound(self, movement_name):
+    def play_movement_sound(self, movement_name, loop=True, interrupt=False):
         self.settings = load_file(SETTINGS)
-        if self.current_movement == movement_name and self.settings["SFX"] == "True":
+        if self.current_movement == movement_name and self.settings["SFX"] == "True" and not interrupt:
             if self.current_movement_sound:
                 self.current_movement_sound.set_volume(0.5)
             return
@@ -76,7 +76,8 @@ class SoundManager:
             self.current_movement_sound = PLAYER_SOUNDS.get(movement_name)
 
             if self.current_movement_sound:
-                self.current_movement_sound.play(loops=-1)
+                loops = -1 if loop else 0
+                self.current_movement_sound.play(loops=loops)
 
     def play_system_sound(self, system_sound_name):
         self.settings = load_file(SETTINGS)

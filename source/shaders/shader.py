@@ -6,7 +6,7 @@ from array import array
 class Shader:
     def __init__(self, screen_width, screen_height):
         self.light_debug_mode = LIGHT_DEBUG_MODE
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
                                              range(NUM_BG_LAYERS)]  # 4 Parallax BG screens

@@ -2,7 +2,7 @@ import pygame as pg
 import os
 from source.utils import get_path
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 # Shader Settings
 LIGHT_DEBUG_MODE = False
@@ -109,10 +109,10 @@ MAP_FOLDER = "assets/levels/"
 pg.mixer.init()
 PLAYER_SOUNDS = {
             "run": pg.mixer.Sound(get_path("assets/sounds/run.wav")),
-            "jump_up": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
+            "jump": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
             "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
             "damage": pg.mixer.Sound(get_path("assets/sounds/damage.wav")),
-
+            "dash": pg.mixer.Sound(get_path("assets/sounds/dash.wav"))
         }
 ENEMY_SOUNDS = {
             "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
