@@ -81,8 +81,8 @@ class Player(MovingObject):
         self.wall_jump_lock_time = 0.2  # Time that player movement is supposed to be locked
 
         # Define Animations
-        self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 18)
-        self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
+        self.run = Animation("run", get_path('assets/sprites/anim/dino-run-Sheet.png'), 24, 24, 9, 18)
+        self.idle = Animation("idle", get_path('assets/sprites/anim/dino-idle-Sheet.png'), 24, 24, 6, 10)
         self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
         self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
         self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
