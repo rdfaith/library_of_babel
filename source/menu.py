@@ -15,7 +15,7 @@ class In_Game_Menu:
         self.value = False
         self.rect = None
         self.image = None
-        self.settings = load_settings(settings_filename)
+        self.settings = load_file(settings_filename)
         self.options = list(self.settings.keys())
         print(self.settings)
 
@@ -71,40 +71,33 @@ def load_score(filename: str) -> list:
         scores = [line.rstrip("\n") for line in file]
     return scores
 
-def load_settings(filename: str) -> dict:
-    settings = dict()
-
-    with open(filename, 'r') as file:
-        for line in file:
-            key, value = line.strip().split('=')
-            settings[key] = value
-    return settings
-
-def update_settings(filename: str, settings: dict):
-    with open(filename, 'w') as file:
-        for key, value in settings.items():
-            file.write(f"{key}={value}\n")
-
 def load_world(level_name: str):
-    return world_generation.generate_world(f"{MAP_FOLDER + level_name}.csv")
-
+    return world_generation.generate_world(f"{MAP_FOLDER + level_name}")
 def availible_levels(filename: str) -> list:
-    unlocked_level = load_score(get_path(filename))
-    levels: list[str] = []
-    for f in os.listdir(get_path(MAP_FOLDER)):
-        for level in unlocked_level:
-            if f.startswith(level) and f.endswith(".csv") and os.path.isfile(os.path.join(get_path(MAP_FOLDER), f)):
-                levels.append(os.path.splitext(f)[0])
-    return levels
+    levels = load_file(filename)
+    unlocked_levels = [key for key, value in levels.items() if value != "None"]
+    return unlocked_levels
 
-def display_levels(levels: int, selected_level, screen):
+def display_levels(levels, selected_level, screen):
     FONT = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
     for i, option in enumerate(levels):
         color = '#a05b53' if i == selected_level else (244,204,161)
-        text = FONT.render(option, True, color)
+        text = FONT.render(option[:-4], True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
+
+def unlock_levels(filename, current_level):
+    levels = load_file(filename)
+    all_levels = list(levels.keys())  # Jetzt ist es eine echte Liste
+
+    if current_level in all_levels:
+        current_index = all_levels.index(current_level)
+
+        if current_index + 1 < len(all_levels):  # Prüfen, ob es ein nächstes Level gibt
+            levels[all_levels[current_index + 1]] = "99.99"
+    update_file(filename, levels)
+
 def get_shader():
-    settings = load_settings(get_path(SETTINGS))
+    settings = load_file(get_path(SETTINGS))
     if settings['SHADER'] == "True":
         shader = Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
     elif settings['SHADER'] == "False":
@@ -161,8 +154,8 @@ def menu_main(running: bool):
 
             shader.get_ui_screen().fill((57, 49, 75))
 
-            levels = availible_levels(get_path("saves/unlocked_levels.sav"))
-            display_levels(levels, selected_level, shader.get_ui_screen())
+            unlocked_levels = availible_levels(get_path("saves/levels.sav"))
+            display_levels(unlocked_levels, selected_level, shader.get_ui_screen())
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -171,13 +164,13 @@ def menu_main(running: bool):
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_DOWN:
-                        selected_level = (selected_level + 1) % len(levels)
+                        selected_level = (selected_level + 1) % len(unlocked_levels)
                         sound_manager.play_system_sound("selection")
                     elif event.key == pg.K_UP:
-                        selected_level = (selected_level - 1) % len(levels)
+                        selected_level = (selected_level - 1) % len(unlocked_levels)
                         sound_manager.play_system_sound("selection")
                     elif event.key == pg.K_RETURN:
-                        current_level = levels[selected_level]
+                        current_level = unlocked_levels[selected_level]
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
                     elif event.key == pg.K_ESCAPE:
@@ -201,10 +194,9 @@ def menu_main(running: bool):
                 if event.type == PLAYER_DIED:  # Player Died
                     game_state = GameState.GAME_OVER
                 elif event.type == PLAYER_WON:  # Player Won
-                    unlocked_level = f"{current_level[:-1]}{int(current_level[-1]) + 1}"
-                    current_level = unlocked_level
-                    write_score(get_path("saves/unlocked_levels.sav"), unlocked_level)
-                    game_world = load_world(current_level)
+                    unlock_levels(get_path("saves/levels.sav"), current_level)
+                    unlocked_levels = availible_levels(get_path("saves/levels.sav"))
+                    game_world = load_world(unlocked_levels[-1])
                     clock = pg.time.Clock()
                 elif event.type == DOOR_UNLOCKED:  # unlock door
                     for o in game_world.static_objects:
@@ -261,8 +253,7 @@ def menu_main(running: bool):
                         sound_manager.play_system_sound("selection")
                     elif event.key == pg.K_RETURN:
 
-                        update_settings(SETTINGS, in_game_menu.update(in_game_menu.options[selected_button]))
-                        print(in_game_menu.settings)
+                        update_file(SETTINGS, in_game_menu.update(in_game_menu.options[selected_button]))
                         sound_manager.play_bg_music("menu")
                         sound_manager.play_system_sound("selection")
                         for keys in in_game_menu.settings.keys():

@@ -2,7 +2,7 @@ from source import *
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
-                 level_size: tuple[int, int]) -> None:
+                 level_size: tuple[int, int], level_name: str) -> None:
 
         self.objects = objects
         self.static_objects = collision_objects
@@ -25,6 +25,9 @@ class GameWorld:
 
         self.timer_anim: Animation = Animation("timer", get_path('assets/sprites/ui/ui_timer_anim.png'), 58, 16, 4, 8)
         self.timer_animator: Animator = Animator(self.timer_anim)
+
+        self.level_name: str = level_name
+        self.highscores = load_file(get_path("saves/levels.sav"))
 
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
@@ -109,12 +112,15 @@ class GameWorld:
             ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png")).convert_alpha()
 
             def draw_timer():
-                settings = sound_manager.load_settings(SETTINGS)
+                settings = sound_manager.load_file(SETTINGS)
+                current_highscore = self.highscores.get(self.level_name)
                 ui_timer = self.timer_animator.get_frame()
                 ui_font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
-                minutes = int(self.level_timer // 60)
-                seconds = int(self.level_timer % 60)
-                ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True, "#F2A81D")
+                minutes = int(self.time // 60)  # Ganze Minuten
+                seconds = int(self.time % 60)  # Sekunden als Dezimalanteil korrigiert
+                current_time = minutes + round(seconds / 100, 2)
+                current_highscore = 99.99 if self.highscores[self.level_name] == "None" else current_highscore
+                ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True, "#F2A81D" if current_time > float(current_highscore) else "#36733F")
                 if settings["TIMER"] == "True":
                     ui_screen.blit(ui_timer, pg.Vector2(131, 0))
                     ui_screen.blit(ui_time_text, pg.Vector2(151, 4))

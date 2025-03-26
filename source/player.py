@@ -132,6 +132,24 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
+    def check_highscore(self, level, time):
+        print(time)
+        filename = get_path("saves/levels.sav")
+        highscores = load_file(filename)
+        minutes = int(time // 60)  # Ganze Minuten
+        seconds = round((time % 60) / 100, 2)  # Sekunden als Dezimalanteil korrigiert
+        current_time = minutes + seconds
+        print(current_time)
+        if highscores[level] != "None":
+            if float(highscores[level]) > current_time:
+                highscores[level] = current_time
+                update_file(filename, highscores)
+                print(f"New best Time for {level[:-4]} with {current_time}")
+        else:
+            highscores[level] = current_time
+            update_file(filename, highscores)
+            print(f"New best Time for {level[:-4]} with {current_time}")
+
     def on_pickup_key(self):
         self.has_key = True
 
@@ -165,6 +183,7 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
+                self.check_highscore(game_world.level_name, game_world.level_timer)
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht")
@@ -369,13 +388,6 @@ class Player(MovingObject):
             self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
-        def check_highscore(level, time):
-            filename = get_path("saves/highscores.sav")
-            highscores = menu.load_settings(filename)
-            if highscores[level] > time:
-                highscores[level] = time
-                menu.update_settings(filename, highscores)
-                print(f"New best Time for {level} with {time}")
 
         if self.state == self.State.DEAD or self.state == self.State.WIN:
             self.velocity.x = 0
