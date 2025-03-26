@@ -262,6 +262,7 @@ class KeyPickUp(MovingObject):
         )
         super().__init__(position.copy(), image, True, light_source=light_source)
 
+
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
         game_world.interactable_objects.remove(self)
@@ -295,6 +296,10 @@ class Enemy(MovingObject):
         super().__init__(position, image, gravity, hitbox_image=hitbox_image)
         self.current_direction = 1
         self.time_until_death = 3.5
+        self.sound_manager = SoundManager()
+
+        self.is_playing_sound = False
+        self.audio_channel = None
 
     class State(Enum):
         ALIVE = 1
@@ -359,9 +364,17 @@ class Worm(Enemy):
             case self.State.DEAD:
                 self.set_animation(self.dead)
 
+
     def update(self, delta: float, game_world):
 
         if self.state == self.State.DEAD:
+            # switch off sounds
+            if self.is_playing_sound:
+                self.sound_manager.play_enemy_sound("idle")
+                self.sound_manager.play_system_sound("squish")
+                self.is_playing_sound = False
+                self.audio_channel =  None
+
             if self.time_until_death != 0:
                 self.time_until_death -= delta
                 if self.time_until_death <= 0:
@@ -371,6 +384,22 @@ class Worm(Enemy):
 
         else:
             self.velocity.x = self.current_direction * self.speed_x
+
+            #region Do sound stuff
+            player_pos = game_world.player.position
+            if self.position.distance_to(player_pos) < 150 and not self.is_playing_sound:
+                self.audio_channel = self.sound_manager.play_enemy_sound("bug_scuttle")
+                self.is_playing_sound = True
+            elif self.position.distance_to(player_pos) > 150 and self.is_playing_sound:
+                self.sound_manager.play_enemy_sound("idle")
+                self.is_playing_sound = False
+                self.audio_channel = None
+            if self.audio_channel:
+                panning: float = (self.position.x - player_pos.x) / self.position.distance_to(player_pos)
+                left_volume: float = 1.0 - (panning + 1.0) / 2.0
+                right_volume: float = (panning + 1.0) / 2.0
+                self.audio_channel.set_volume(left_volume, right_volume)
+            #endregion sound stuff
 
             super().update(delta, game_world)
 

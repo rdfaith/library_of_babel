@@ -1,5 +1,6 @@
 from source import *
 
+
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int], level_name: str) -> None:
@@ -12,22 +13,57 @@ class GameWorld:
 
         self.level_timer: float = 0.0
 
-        self.light_map: LightMap = LightMap()  # object that stores all light sources
-
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
                                                  self.player.get_rect().y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
+        # self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
         self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
         self.time: float = 0.0
+
+        self.word_animation_timer = 0.0
 
         self.timer_anim: Animation = Animation("timer", get_path('assets/sprites/ui/ui_timer_anim.png'), 58, 16, 4, 8)
         self.timer_animator: Animator = Animator(self.timer_anim)
 
         self.level_name: str = level_name
         self.highscores = load_file(get_path("saves/levels.sav"))
+
+        # Initialise Light Map
+        self.light_map = LightMap()
+        self.light_map.add_source(self.player.light_source)
+        for o in self.get_all_objects():
+            # get light source
+            light_source = o.get_light_source()
+            if light_source:
+                self.light_map.add_source(light_source)
+
+        # Initialise Parallax bgs
+        self.BG_LAYERS = [
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0,
+             "depth": 20},
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100,
+             "depth": 16},
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100,
+             "depth": 12},
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,
+             "depth": 5},
+        ]
+
+        self.FG_LAYERS = [
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 30,
+             "depth": -5}
+        ]
+
+        self.SPRITES = {
+            "ui_bg": pg.image.load(get_path("assets/sprites/ui/ui_bg.png")),
+            "ui_heart": pg.image.load(get_path("assets/sprites/ui/ui_heart.png")),
+            "ui_key": pg.image.load(get_path("assets/test/key.png")),
+            "ui_question_mark": pg.image.load(get_path("assets/sprites/ui/ui_question_mark.png")),
+            "ui_backspace": pg.image.load(get_path("assets/sprites/ui/ui_backspace.png")).convert_alpha()
+        }
 
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects
@@ -55,6 +91,7 @@ class GameWorld:
             self.player.on_fell_out_of_bounds()
 
         self.player.update(delta, self)
+        self.light_map.get_first_source().set_position(self.player.position)
 
         for o in self.interactable_objects:
             o.update(delta, self)
@@ -85,12 +122,19 @@ class GameWorld:
         game_screen.fill((0, 0, 0, 0))
         ui_screen.fill((0, 0, 0, 0))
 
+        sprites = self.SPRITES
+        BG_LAYERS = self.BG_LAYERS
+        FG_LAYERS = self.FG_LAYERS
+
         #region Functions
         def set_camera_position() -> None:
             """Sets self.camera_pos to the correct position for this frame"""
 
             def smooth_movement(current_pos: float, target_pos: float, delay: float) -> float:
-                return current_pos + (target_pos - current_pos) * (delay / 100)
+                # Berechne nur dann, wenn sich die Position signifikant verändert hat
+                if abs(target_pos - current_pos) > 1:
+                    return current_pos + (target_pos - current_pos) * (delay / 100)
+                return current_pos
 
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
@@ -105,12 +149,6 @@ class GameWorld:
             self.camera_pos.y = max(0, min(self.camera_pos.y, self.level_height - SCREEN_HEIGHT))
 
         def draw_ui():
-            ui_bg = pg.image.load(get_path("assets/sprites/ui/ui_bg.png"))
-            ui_heart = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
-            ui_key = pg.image.load(get_path("assets/test/key.png"))
-            ui_question_mark = pg.image.load(get_path("assets/sprites/ui/ui_question_mark.png"))
-            ui_backspace = pg.image.load(get_path("assets/sprites/ui/ui_backspace.png")).convert_alpha()
-
             def draw_timer():
                 settings = sound_manager.load_file(SETTINGS)
                 current_highscore = self.highscores.get(self.level_name)
@@ -120,31 +158,44 @@ class GameWorld:
                 seconds = int(self.time % 60)  # Sekunden als Dezimalanteil korrigiert
                 current_time = minutes + round(seconds / 100, 2)
                 current_highscore = 99.99 if self.highscores[self.level_name] == "None" else current_highscore
-                ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True, "#F2A81D" if current_time > float(current_highscore) else "#36733F")
+                ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True,
+                                              "#F2A81D" if current_time > float(current_highscore) else "#36733F")
                 if settings["TIMER"] == "True":
                     ui_screen.blit(ui_timer, pg.Vector2(131, 0))
                     ui_screen.blit(ui_time_text, pg.Vector2(151, 4))
 
-            ui_screen.blit(ui_bg, pg.Vector2(0, 0))
+            ui_screen.blit(sprites["ui_bg"], pg.Vector2(0, 0))
             draw_timer()
 
             for i in range(self.player.player_lives):
-                ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
+                ui_screen.blit(sprites["ui_heart"], UI_HEART_POSITIONS[i])
 
-            for i in range(len(self.player.letters_collected)):
+            lerp_value = 0
+            if self.player.word_animation_timer > 0:
+                print(self.player.word_animation_timer)
+                letters = self.player.last_word_completed
+                min_offset = pg.Vector2()
+                max_offset = pg.Vector2(120, -50)
+                lerp_value: float = 1 - self.player.word_animation_timer
+                offset = min_offset.lerp(max_offset, lerp_value)
+            else:
+                letters = self.player.letters_collected
+                offset = pg.Vector2()
+
+            for i in range(len(letters)):
                 if i > 5:  # Break if more than 5 letters would have to be displayed
                     break
-                letter = self.player.letters_collected[i]
-                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
+                letter = letters[i]
+                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i] - offset)
 
             if self.player.has_key:
-                ui_screen.blit(ui_key, UI_KEY_POSITION)
+                ui_screen.blit(sprites["ui_keys"], UI_KEY_POSITION)
 
             if self.player.check_is_wrong_word():
                 time = (math.sin(self.time * 3) + 1)
-                ui_backspace.set_alpha(int(time * 255))
-                ui_screen.blit(ui_question_mark, pg.Vector2(241, 2))
-                ui_screen.blit(ui_backspace, pg.Vector2(261, 20))
+                sprites["ui_backspace"].set_alpha(int(time * 255))
+                ui_screen.blit(sprites["ui_question_mark"], pg.Vector2(241, 2))
+                ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]
@@ -152,28 +203,20 @@ class GameWorld:
 
             # Berechnung der versetzten Hintergrundposition (x und y)
             offset_y: int = layer["offset_y"]
-
-            x_pos = -self.camera_pos.x * parallax_factor
-            y_pos = offset_y - self.camera_pos.y * parallax_factor / 2 if y_parallax else offset_y - self.camera_pos.y
-            bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
-
+            print(self.camera_pos.x)
+            bg_pos: pg.Vector2 = pg.Vector2(
+                (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
+                offset_y - self.camera_pos.y * parallax_factor / 2)
+            bg_width = layer["image"].get_width()
+            mod_x = bg_pos.x % bg_width
+            print(bg_pos)
             # Hintergrund zeichnen
-            screen.blit(layer["image"], bg_pos)
+
+            screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
+            screen.blit(layer["image"], pg.Vector2(mod_x - bg_width, bg_pos.y))
 
         def draw_bg_parallax():
             """Draws the background parallax layers"""
-
-            BG_LAYERS = [
-                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0,
-                 "depth": 20},
-                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100,
-                 "depth": 16},
-                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100,
-                 "depth": 12},
-                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,
-                 "depth": 5},
-            ]
-
 
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for i in range(len(BG_LAYERS)):
@@ -183,21 +226,10 @@ class GameWorld:
         def draw_fg_parallax():
             """Draws the foreground parallax layers"""
 
-            FG_LAYERS = [
-                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 30,
-                 "depth": -5}
-            ]
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for layer in FG_LAYERS:
                 if layer["depth"] <= 0:
                     draw_parallax_layer(layer, max_depth, False, screen=fg_screen)
-
-        def draw_post_processing():
-            """Adds visual effects and post-processing"""
-            vignette = VIGNETTE
-            player_position = self.player.get_rect().topleft - self.player.get_sprite_offset() - self.camera_pos
-            vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
-            game_screen.blit(VIGNETTE, vignette_position)
 
         #endregion
 
@@ -209,19 +241,9 @@ class GameWorld:
 
         # draw objects
         for o in self.static_objects + self.objects + self.interactable_objects:  # Static -> Deco -> Interactive
-            o.draw(game_screen, self.camera_pos)
-
-        # get light sources:
-        self.light_map.clear_sources()
-        self.light_map.add_source(self.player.light_source)
-
-        for o in self.get_all_objects():
-            # get light source
-            light_source = o.get_light_source()
-            if light_source:
-                self.light_map.add_source(light_source)
-            # draw normal
-            # o.draw_normal(normal_screen, camera_pos=self.camera_pos)
+            if self.camera_pos.x - 16 < o.position.x < self.camera_pos.x + SCREEN_WIDTH + 32:  # Only draw if within camera bounds + 64px
+                if self.camera_pos.y - 16 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 32:
+                    o.draw(game_screen, self.camera_pos)
 
         shader.set_moon_light_intensity(self.moon_light_intensity)
 
@@ -236,6 +258,3 @@ class GameWorld:
 
         # draw UI
         draw_ui()
-
-
-

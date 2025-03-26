@@ -5,11 +5,11 @@ from array import array
 
 class Shader:
     def __init__(self, screen_width, screen_height):
-        self.light_debug_mode = False
+        self.light_debug_mode = LIGHT_DEBUG_MODE
         self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.SCALED)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
-                                             BG_LAYERS]
+                                             range(NUM_BG_LAYERS)]  # 4 Parallax BG screens
         self.fg_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)  # screen for foreground parallax
         self.game_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
         self.game_normal_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
@@ -36,7 +36,10 @@ class Shader:
         self.program = self.ctx.program(vertex_shader=self.vert_shader, fragment_shader=self.frag_shader)
         self.render_object = self.ctx.vertex_array(self.program, [(self.quad_buffer, '2f 2f', 'vert', 'texcoord')])
 
+        self.light_map: LightMap = LightMap()
+
         # Fun shader properties here:
+        self.time: float = 0.0  # for effects varying over time
         self.moon_light_intensity: float = 1.0
         self.moon_position: pg.Vector2 = pg.Vector2(62, 62)
 
@@ -69,6 +72,8 @@ class Shader:
             tex.write(surf.get_view('1'))
             return tex
 
+        self.time += 0.016
+
         screen_number = 0
 
         # Create background screen uniforms
@@ -98,21 +103,24 @@ class Shader:
         # self.program['gameNormal'] = screen_number
         # screen_number += 1
 
-        NUM_LIGHTS = 25  # Has to be the same as in frag_shader.glsl!!
+        num_lights = NUM_LIGHTS  # Has to be the same as in frag_shader.glsl!!
 
-        light_positions = [(pos.x, pos.y) for pos in light_map.get_positions(NUM_LIGHTS)]
-        light_colors = [(col.r, col.g, col.b) for col in light_map.get_colors(NUM_LIGHTS)]
-        light_intensities = [i for i in light_map.get_intensities(NUM_LIGHTS)]
-        light_radii = [i for i in light_map.get_radii(NUM_LIGHTS)]
+        light_positions = [(pos.x, pos.y) for pos in light_map.get_positions(num_lights)]
+        light_colors = [(col.r, col.g, col.b) for col in light_map.get_colors(num_lights)]
+        light_intensities = [i for i in light_map.get_intensities(num_lights)]
+        light_radii = [i for i in light_map.get_radii(num_lights)]
+        light_flicker = [f for f in light_map.get_flickers(num_lights)]
 
         self.program['lightPositions'] = light_positions
         self.program['lightColors'] = light_colors
         self.program['lightIntensities'] = light_intensities
         self.program['lightRadii'] = light_radii
+        self.program['lightFlicker'] = light_flicker
 
         self.program['moonLightIntensity'] = self.moon_light_intensity
         self.program['moonPosition'] = (int(self.moon_position.x), int(self.moon_position.y))
 
+        self.program['time'] = self.time
         self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
         
         self.program['lightDebugMode'] = self.light_debug_mode
@@ -144,7 +152,7 @@ class FakeShader():
         return self.screen
 
     def get_bg_screens(self):
-        return [self.screen for _ in BG_LAYERS]
+        return [self.screen for _ in range(NUM_BG_LAYERS)]
 
     def get_fg_screen(self):
         return self.screen

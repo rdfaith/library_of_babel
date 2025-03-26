@@ -16,7 +16,8 @@ class Candle(AnimatedObject):
             pg.Vector2(9, 17),
             pg.Color((240, 120, 30)),
             40.0,
-            0.1
+            0.1,
+            flicker=True
         )
         super().__init__(position, animation, light_source=light_source)
 
