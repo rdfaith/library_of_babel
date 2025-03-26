@@ -163,12 +163,13 @@ class GameWorld:
 
         def draw_ui():
             def draw_timer():
+                time = self.level_timer
                 settings = sound_manager.load_file(SETTINGS)
                 current_highscore = self.highscores.get(self.level_name)
                 ui_timer = self.timer_animator.get_frame()
                 ui_font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
-                minutes = int(self.time // 60)  # Ganze Minuten
-                seconds = int(self.time % 60)  # Sekunden als Dezimalanteil korrigiert
+                minutes = int(time // 60)  # Ganze Minuten
+                seconds = int(time % 60)  # Sekunden als Dezimalanteil korrigiert
                 current_time = minutes + round(seconds / 100, 2)
                 current_highscore = 99.99 if self.highscores[self.level_name] == "None" else current_highscore
                 ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True,
@@ -259,6 +260,7 @@ class GameWorld:
         if self.egg:
             if self.egg.is_animation_over:
                 self.egg = None
+                self.level_timer = 0.0
                 self.is_light_sources_on = True
             else:
                 self.egg.draw(game_screen, self.camera_pos)
