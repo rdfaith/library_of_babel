@@ -1,5 +1,6 @@
 from source import *
 
+
 class GameObject:
     def __init__(self, position: pg.Vector2, image: pg.Surface, normal: pg.Surface = None, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
@@ -95,6 +96,9 @@ class ColliderObject(GameObject):
         sprite_offset = self.get_sprite_offset()
         position = self.position - camera_pos
         screen.blit(self.image, position - sprite_offset)
+
+        # Draw hit box, just for debugging:
+        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
 
 
 class InteractableObject(ColliderObject):
@@ -261,7 +265,6 @@ class KeyPickUp(MovingObject):
         )
         super().__init__(position.copy(), image, True, light_source=light_source)
 
-
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
         game_world.interactable_objects.remove(self)
@@ -347,8 +350,8 @@ class Worm(Enemy):
         self.max_distance = 50
         self.state = self.State.ALIVE
 
-        self.walk = Animation("walk", get_path('assets/sprites/anim/worm_walk.png'), 32, 16, 5, 10)
-        self.dead = Animation("dead", get_path('assets/test/worm_dead-Sheet.png'), 32, 16, 1, 10)
+        self.walk = Animation("walk", get_path('assets/sprites/anim/worm-walk-Sheet.png'), 32, 16, 6, 10)
+        self.dead = Animation("dead", get_path('assets/sprites/anim/worm-dead-Sheet.png'), 32, 16, 1, 10)
 
         self.active_animation = self.walk
         self.animator = Animator(self.active_animation)

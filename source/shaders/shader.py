@@ -171,3 +171,5 @@ class FakeShader():
     def update(self, camera_pos: pg.Vector2 = pg.Vector2(), light_map: LightMap = LightMap()):
 
         pg.display.flip()
+
+warnings.filterwarnings("ignore", category=FutureWarning, message=".*SCALED|OPENGL.*")
