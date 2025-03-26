@@ -131,7 +131,10 @@ class GameWorld:
             """Sets self.camera_pos to the correct position for this frame"""
 
             def smooth_movement(current_pos: float, target_pos: float, delay: float) -> float:
-                return current_pos + (target_pos - current_pos) * (delay / 100)
+                # Berechne nur dann, wenn sich die Position signifikant verändert hat
+                if abs(target_pos - current_pos) > 1:
+                    return current_pos + (target_pos - current_pos) * (delay / 100)
+                return current_pos
 
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
@@ -200,13 +203,17 @@ class GameWorld:
 
             # Berechnung der versetzten Hintergrundposition (x und y)
             offset_y: int = layer["offset_y"]
-
-            x_pos = -self.camera_pos.x * parallax_factor
-            y_pos = offset_y - self.camera_pos.y * parallax_factor / 2 if y_parallax else offset_y - self.camera_pos.y
-            bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
-
+            print(self.camera_pos.x)
+            bg_pos: pg.Vector2 = pg.Vector2(
+                (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
+                offset_y - self.camera_pos.y * parallax_factor / 2)
+            bg_width = layer["image"].get_width()
+            mod_x = bg_pos.x % bg_width
+            print(bg_pos)
             # Hintergrund zeichnen
-            screen.blit(layer["image"], bg_pos)
+
+            screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
+            screen.blit(layer["image"], pg.Vector2(mod_x - bg_width, bg_pos.y))
 
         def draw_bg_parallax():
             """Draws the background parallax layers"""
