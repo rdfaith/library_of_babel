@@ -124,9 +124,10 @@ class Player(MovingObject):
             self.velocity.y = -200
             self.invincibility_time = 0.7
 
+            self.sound_manager.play_movement_sound("damage")
+
             if self.player_lives > 1:
                 print("Aua")
-                self.sound_manager.play_movement_sound("damage")
                 self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")
@@ -218,17 +219,21 @@ class Player(MovingObject):
     def check_is_wrong_word(self) -> bool:
         return self.has_wrong_word
 
-    def on_state_changed(self, state: Enum):
+    def on_state_changed(self, state: Enum, old_state=0):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
+
+        # Fall landing sound if previous state FALL
+        if old_state == self.State.FALL and state in {self.State.IDLE, self.State.RUN, self.State.DEAD}:
+            self.sound_manager.play_movement_sound("fall")
 
         # Change animation:
         match state:
             case self.State.FALL:
                 self.set_animation(self.fall)
-                self.sound_manager.play_movement_sound("fall")
+                self.sound_manager.play_movement_sound("idle")
             case self.State.JUMP:
                 self.set_animation(self.jump_up)
-                self.sound_manager.play_movement_sound("jump_up")
+                self.sound_manager.play_movement_sound("jump", loop=False, interrupt=True)
             case self.State.RUN:
                 self.set_animation(self.run)
                 self.sound_manager.play_movement_sound("run")
@@ -240,7 +245,7 @@ class Player(MovingObject):
                 self.sound_manager.play_movement_sound("run")
             case self.State.DASH:
                 self.set_animation(self.dash)
-                self.sound_manager.play_movement_sound("run")
+                self.sound_manager.play_movement_sound("dash", False)
             case self.State.DEAD:
                 self.set_animation(self.dead)
                 self.sound_manager.play_movement_sound("idle")
@@ -264,7 +269,7 @@ class Player(MovingObject):
                 o.on_collide(self, game_world)
 
     def handle_movement(self, delta, game_world):
-        """Sets player movement and state according to input and switches animation if necessary"""
+        """Updates the player's movement state based on input and game conditions."""
 
         # If dead, do nothing
         if self.state == self.State.DEAD or game_world.egg:
@@ -312,7 +317,8 @@ class Player(MovingObject):
         # Wall Jump
         if (self.touching_wall_right or self.touching_wall_left) and not is_grounded and self.wall_jump_timer == 0.0:
             self.jump_counter = 0
-            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
+            if self.is_wall_jump_unlocked and (
+                    keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_cooldown = self.jump_cooldown_time
@@ -347,27 +353,28 @@ class Player(MovingObject):
                     new_state = self.State.DUCK_WALK
                 else:
                     new_state = self.State.DUCK_IDLE
-        elif self.jump_counter == 1 and self.jump_cooldown == 0.0:
-            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
-                self.velocity.y = -self.jump_force
-                new_state = self.State.JUMP
-                self.jump_lock = True
-                has_jumped = True
-        elif self.velocity.y <= 0:
-            new_state = self.State.JUMP
         else:
-            new_state = self.State.FALL
-            if not self.got_damage:
-                if self.velocity.y > 600:
-                    if self.player_lives > 1:
-                        print("Aua")
-                        self.sound_manager.play_movement_sound("damage")
-                        self.player_lives -= 1
-                        self.got_damage = True
-                        self.invincibility_time = 0.7
-                    else:
-                        self.on_player_death("fell from block")
-                        self.got_damage = True
+            if self.jump_counter == 1 and self.jump_cooldown == 0.0 and self.is_double_jump_unlocked and (
+                        keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
+                    self.velocity.y = -self.jump_force
+                    new_state = self.State.JUMP
+                    self.jump_lock = True
+                    has_jumped = True
+            elif self.velocity.y < 0:
+                new_state = self.State.JUMP
+            else:
+                new_state = self.State.FALL
+                if not self.got_damage:
+                    if self.velocity.y > 600:
+                        if self.player_lives > 1:
+                            print("Aua")
+                            self.sound_manager.play_movement_sound("damage")
+                            self.player_lives -= 1
+                            self.got_damage = True
+                            self.invincibility_time = 0.7
+                        else:
+                            self.on_player_death("fell from block")
+                            self.got_damage = True
 
         if has_jumped:
             self.jump_counter += 1
@@ -401,16 +408,17 @@ class Player(MovingObject):
                 new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
             self.set_hitbox("crouch")
         # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
-        if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
+        if (
+                self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
                 new_state = self.state  # Set back to DUCK
 
         if self.dash_timer != 0:
             new_state = self.State.DASH
 
-        if new_state != self.state:
+        if new_state != self.state or has_jumped:
+            self.on_state_changed(new_state, self.state)
             self.state = new_state
-            self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
 

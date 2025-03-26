@@ -191,7 +191,7 @@ void main() {
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);
-    color = addLayerColor(color, vec4(fg0.rgb * 0.2, fg0.a));
+    color = addLayerColor(color, vec4(fg0.rgb * 0.2, fg0.a * 0.5));
 
     // Add UI on top and return
     f_color = addLayerColor(color, uiColor);

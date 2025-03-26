@@ -84,16 +84,16 @@ class ColliderObject(GameObject):
     def check_collision(self, rect, collider_objects):
         """Checks for collision and returns the GameObject of the first collision it finds.
         If there are no collisions detected, returns None."""
-
         for col_obj in collider_objects:
-            if rect.colliderect(col_obj.get_rect()):  # Check collision
-                if self != col_obj:
-                    return col_obj
+            if col_obj.position.distance_to(self.position) < 70:
+                if rect.colliderect(col_obj.get_rect()):  # Check collision
+                    if self != col_obj:
+                        return col_obj
         return None
 
     def draw_debug_hitbox(self, screen, camera_pos):
         # Draw hit box, just for debugging:
-        if DEBUG_MODE:
+        if DEBUG_HITBOXES:
             rect = self.get_rect().move(-camera_pos)
             pg.draw.rect(screen, (255, 0, 0), rect, 2)
 
@@ -133,8 +133,9 @@ class MovingObject(InteractableObject):
     def does_collide(self, rect, objects: list) -> GameObject:
         """Check if hit box collides with another object."""
         for o in objects:
-            if rect.colliderect(o.get_rect()):
-                return o
+            if o.position.distance_to(self.position) < 70:
+                if rect.colliderect(o.get_rect()):
+                    return o
         return None
 
     def check_is_grounded(self, objects: list) -> GameObject:

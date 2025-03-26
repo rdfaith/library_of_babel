@@ -19,7 +19,7 @@ class GameWorld:
         self.play_start_position = player_pos
         # self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
-        self.is_moonlight_on = True
+        self.is_moonlight_on = level_name != "hex_1.csv"
         self.moon_light_intensity: float = 0.0
         self.is_light_sources_on = True
         self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
@@ -33,6 +33,8 @@ class GameWorld:
         self.level_name: str = level_name
         self.highscores = load_file(get_path("saves/levels.sav"))
 
+        self.sound_manager: SoundManager = SoundManager()
+
         # Initialise Light Map
         self.light_map = LightMap()
         self.light_map.add_source(self.player.light_source)
@@ -41,6 +43,7 @@ class GameWorld:
             light_source = o.get_light_source()
             if light_source:
                 self.light_map.add_source(light_source)
+
 
         # Initialise Parallax bgs
         self.BG_LAYERS = [
@@ -94,18 +97,20 @@ class GameWorld:
         self.level_timer += delta
 
         # check if the player has fallen out of bounds
-        if self.player.get_rect().y > self.level_height:
+        if self.player.position.y > self.level_height:
             self.player.on_fell_out_of_bounds()
 
         self.player.update(delta, self)
         self.light_map.get_first_source().set_position(self.player.position)
 
         for o in self.interactable_objects:
-            o.update(delta, self)
+            if o.position.distance_to(self.player.position) < 400:
+                o.update(delta, self)
 
         for o in self.static_objects:
-            if isinstance(o, MovingPlatform) or isinstance(o, Door):
-                o.update(delta, self)
+            if o.position.distance_to(self.player.position) < 400:
+                if isinstance(o, MovingPlatform) or isinstance(o, Door):
+                    o.update(delta, self)
 
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:
             self.moon_light_intensity += 0.3 * delta
@@ -213,16 +218,17 @@ class GameWorld:
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]
             parallax_factor: float = 1 - (depth / max_depth)  # Dynamische Berechnung des Parallax-Faktors
+            y_parallax_factor: float = 0.1  # Größer -> stärkeres Y-parallax, niedriger -> schwächeres Y-parallax
 
             # Berechnung der versetzten Hintergrundposition (x und y)
             offset_y: int = layer["offset_y"]
-            bg_pos: pg.Vector2 = pg.Vector2(
-                (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
-                offset_y - self.camera_pos.y * parallax_factor / 2)
+            x_pos = (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor
+            y_pos = offset_y - self.camera_pos.y * parallax_factor * y_parallax_factor if y_parallax else offset_y - self.camera_pos.y
+            bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
             bg_width = layer["image"].get_width()
             mod_x = bg_pos.x % bg_width
-            # Hintergrund zeichnen
 
+            # Hintergrund zeichnen
             screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
             screen.blit(layer["image"], pg.Vector2(mod_x - bg_width, bg_pos.y))
 
@@ -258,6 +264,7 @@ class GameWorld:
 
         # Draw egg and return if egg animation is running
         if self.egg:
+
             if self.egg.is_animation_over:
                 self.egg = None
                 self.level_timer = 0.0

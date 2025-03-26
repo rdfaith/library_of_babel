@@ -2,10 +2,12 @@ import pygame as pg
 import os
 from source.utils import get_path
 
-DEBUG_MODE = False
+# Debug Settings
+DEBUG_MODE = True
+DEBUG_HITBOXES = False
+LIGHT_DEBUG_MODE = False
 
 # Shader Settings
-LIGHT_DEBUG_MODE = False
 NUM_LIGHTS = 25  # Has to be the same as NUM_LIGHTS in frag_shader.glsl!
 
 FRAME_SIZE = 16
@@ -108,11 +110,11 @@ MAP_FOLDER = "assets/levels/"
 #Sounds
 pg.mixer.init()
 PLAYER_SOUNDS = {
-            "run": pg.mixer.Sound(get_path("assets/sounds/run.wav")),
-            "jump_up": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
+            "run": pg.mixer.Sound(get_path("assets/sounds/run_slower.wav")),
+            "jump": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
             "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
             "damage": pg.mixer.Sound(get_path("assets/sounds/damage.wav")),
-
+            "dash": pg.mixer.Sound(get_path("assets/sounds/dash.wav"))
         }
 ENEMY_SOUNDS = {
             "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
@@ -122,7 +124,9 @@ SYSTEM_SOUNDS = {
             "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
             "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
-            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3"))
+            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3")),
+            "egg": pg.mixer.Sound(get_path("assets/sounds/egg_animation.mp3")),
+            "eye_animation": pg.mixer.Sound(get_path("assets/sounds/eye_animation.mp3"))
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
