@@ -36,7 +36,7 @@ class Player(MovingObject):
         self.jump_force = 300.0
         self.player_lives = 3
         self.bounce_velocity_x = 0
-        self.invincibility_time: float = 0.7
+        self.invincibility_time: float = 0.0
         self.current_direction: int = 1
         self.time_until_over = 5.0
 
@@ -270,8 +270,6 @@ class Player(MovingObject):
         if self.state == self.State.DEAD or game_world.egg:
             return
 
-        print("jump unlocked") if self.is_jump_unlocked else print("nope")
-
         keys = pg.key.get_pressed()
 
         new_state = self.state
@@ -379,6 +377,7 @@ class Player(MovingObject):
             self.has_gravity = False
             self.dash_timer = self.dash_time  # Start dash duration
             self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
+            self.invincibility_time = 2 * self.dash_time
             self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
             new_state = self.State.DASH
 
@@ -473,4 +472,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        self.draw_debug_hitbox(screen, camera_pos)
+        # self.draw_debug_hitbox(screen, camera_pos)

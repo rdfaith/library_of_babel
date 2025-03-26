@@ -74,6 +74,8 @@ def generate_world(map_file_path: str) -> GameWorld:
                     collision_objects.append(ColliderObject(pos, *get_sprites(tile_index, 2, spritesheets)))
                 case "moving_platform" | "mp":
                     collision_objects.append(MovingPlatform(pos.copy()))
+                case "moving_platform2" | "mp2":
+                    collision_objects.append(MovingPlatform(pos.copy(), has_max_distance=False))
                 case "keyhole":
                     interactable_objects.append(Keyhole(pos))
                 case "door":
