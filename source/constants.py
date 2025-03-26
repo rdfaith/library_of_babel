@@ -2,7 +2,7 @@ import pygame as pg
 import os
 from source.utils import get_path
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 # Shader Settings
 LIGHT_DEBUG_MODE = False
