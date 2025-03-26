@@ -90,7 +90,10 @@ class GameWorld:
             """Sets self.camera_pos to the correct position for this frame"""
 
             def smooth_movement(current_pos: float, target_pos: float, delay: float) -> float:
-                return current_pos + (target_pos - current_pos) * (delay / 100)
+                # Berechne nur dann, wenn sich die Position signifikant verändert hat
+                if abs(target_pos - current_pos) > 1:
+                    return current_pos + (target_pos - current_pos) * (delay / 100)
+                return current_pos
 
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
