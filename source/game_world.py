@@ -27,7 +27,7 @@ class GameWorld:
         self.timer_animator: Animator = Animator(self.timer_anim)
 
         self.level_name: str = level_name
-        self.highscores = load_file(get_path("saves/highscores.sav"))
+        self.highscores = load_file(get_path("saves/levels.sav"))
 
     def get_all_objects(self):
         return self.static_objects + self.objects + self.interactable_objects

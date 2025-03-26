@@ -131,7 +131,7 @@ class Player(MovingObject):
 
     def check_highscore(self, level, time):
         print(time)
-        filename = get_path("saves/highscores.sav")
+        filename = get_path("saves/levels.sav")
         highscores = load_file(filename)
         minutes = int(time // 60)  # Ganze Minuten
         seconds = round((time % 60) / 100, 2)  # Sekunden als Dezimalanteil korrigiert
@@ -141,11 +141,11 @@ class Player(MovingObject):
             if float(highscores[level]) > current_time:
                 highscores[level] = current_time
                 update_file(filename, highscores)
-                print(f"New best Time for {level} with {current_time}")
+                print(f"New best Time for {level[:-4]} with {current_time}")
         else:
             highscores[level] = current_time
             update_file(filename, highscores)
-            print(f"New best Time for {level} with {current_time}")
+            print(f"New best Time for {level[:-4]} with {current_time}")
 
     def on_pickup_key(self):
         self.has_key = True

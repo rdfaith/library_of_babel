@@ -49,7 +49,7 @@ def generate_world(map_file_path: str) -> GameWorld:
     objects: list[GameObject] = []  # unused currently
     player_start_pos: pg.Vector2
     level_size: tuple[int, int] = (len(map_data[0]) * FRAME_SIZE, len(map_data) * FRAME_SIZE)
-    level_name = map_file_path[14:-4]
+    level_name = map_file_path[14:]
 
     # # Level Dictionary für Tiles
     # # Frame, Position_list, collidable, interactive, enemy
