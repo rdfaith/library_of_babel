@@ -1,6 +1,7 @@
 from source import *
 from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy
 
+
 class Player(MovingObject):
     # Player states
     class State(Enum):
@@ -45,10 +46,14 @@ class Player(MovingObject):
             self.is_jump_unlocked: bool = True
             self.is_crouch_unlocked: bool = True
             self.is_dash_unlocked: bool = True
+            self.is_wall_jump_unlocked: bool = True
+            self.is_double_jump_unlocked: bool = True
         else:
             self.is_jump_unlocked: bool = False
             self.is_crouch_unlocked: bool = False
             self.is_dash_unlocked: bool = False
+            self.is_wall_jump_unlocked: bool = True
+            self.is_double_jump_unlocked: bool = False
 
         self.letters_collected: list[str] = []
         self.word_animation_timer = 0.0
@@ -165,7 +170,6 @@ class Player(MovingObject):
                 pg.event.post(pg.event.Event(WORD_LIGHT))
                 word_completed = True
 
-
         if word_completed:
             self.word_animation_timer = 1.0
             self.last_word_completed = self.letters_collected.copy()
@@ -252,7 +256,7 @@ class Player(MovingObject):
             if self.wall_jump_timer <= 0:
                 self.wall_jump_timer = 0.0
 
-        # Handle Input, input will be ignored if player is dashing
+        # Handle Input, input will be ignored if player is dashing or wall jumping
         if self.dash_timer > 0:  # if dashing
             self.velocity.y = 0  # no y velocity while dashing
         elif self.wall_jump_timer != 0.0:
@@ -274,17 +278,18 @@ class Player(MovingObject):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
         # Wall Jump
-        if self.touching_wall_right or self.touching_wall_left:
-            self.jump_counter = 0
-            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+        if (self.touching_wall_right or self.touching_wall_left) and not is_grounded and self.wall_jump_timer == 0.0:
+            self.jump_counter = 2
+            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
-                self.jump_counter += 1
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
                 if self.touching_wall_right:
+                    self.current_direction = -1
                     self.velocity.x = -self.speed_x
                 else:
+                    self.current_direction = 1
                     self.velocity.x = self.speed_x
 
         # Jumping and Y-Velocity
@@ -294,7 +299,7 @@ class Player(MovingObject):
                 self.jump_cooldown = 0.0
 
         if self.jump_counter == 1 and self.jump_cooldown == 0.0:
-            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_counter += 1
@@ -306,6 +311,7 @@ class Player(MovingObject):
                 new_state = self.State.JUMP
                 self.jump_counter += 1
                 self.jump_cooldown = self.jump_cooldown_time
+                self.wall_jump_timer = self.wall_jump_lock_time
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 if self.velocity.x != 0:
                     new_state = self.State.DUCK_WALK
