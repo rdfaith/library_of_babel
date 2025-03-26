@@ -1,7 +1,6 @@
 from source import *
 from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy, KeyPickUp
 
-
 class Player(MovingObject):
     # Player states
     class State(Enum):
@@ -143,22 +142,32 @@ class Player(MovingObject):
         self.on_player_death("fell out of bounds")
 
     def check_highscore(self, level, time):
-        print(time)
-        filename = get_path("saves/levels.sav")
+        filename = LEVELS
         highscores = load_file(filename)
         minutes = int(time // 60)  # Ganze Minuten
         seconds = round((time % 60) / 100, 2)  # Sekunden als Dezimalanteil korrigiert
         current_time = minutes + seconds
-        print(current_time)
-        if highscores[level] != "None":
+        highscore_text = None
+        if highscores[level] != "False":
             if float(highscores[level]) > current_time:
                 highscores[level] = current_time
                 update_file(filename, highscores)
-                print(f"New best Time for {level[:-4]} with {current_time}")
+                self.sound_manager.play_system_sound("new_highscore")
+                highscore_text = FONT_8_BOLD.render(f"NEW HIGHSCORE! ({current_time})", True, (255, 255, 255))
+                #print(f"New best Time for {level[:-4]} with {current_time}")
+
         else:
             highscores[level] = current_time
             update_file(filename, highscores)
-            print(f"New best Time for {level[:-4]} with {current_time}")
+            self.sound_manager.play_system_sound("new_highscore")
+            highscore_text = FONT_8_BOLD.render(f"NEW HIGHSCORE! ({current_time})", True, (255, 255, 255))
+            #print(f"New best Time for {level[:-4]} with {current_time}")
+        return highscore_text
+
+    def draw_highscore(self, highscore_text: str, screen):
+        if highscore_text is not None:
+            screen.blit(highscore_text, pg.Vector2((SCREEN_WIDTH - highscore_text.get_width()) // 2,
+                                               (SCREEN_HEIGHT - highscore_text.get_height()) // 2))
 
     def on_pickup_key(self):
         self.has_key = True
@@ -180,7 +189,6 @@ class Player(MovingObject):
     def on_pickup_letter(self, letter: str, game_world) -> bool:
         """Called when player moves into collider of letter.
         Returns False if the letter can't be picked up, else True."""
-
         result = False
         self.completed_word = False
 
@@ -215,7 +223,8 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
-                self.check_highscore(game_world.level_name, game_world.level_timer)
+                self.highscore_text = self.check_highscore(game_world.level_name, game_world.level_timer)
+                self.sound_manager.play_system_sound("wining")
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht!")
@@ -466,7 +475,6 @@ class Player(MovingObject):
                     pg.event.post(pg.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
                 elif self.state == self.State.WIN:
                     pg.event.post(pg.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
-                    # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
         else:
 
             # Check invincibility frames
@@ -507,5 +515,10 @@ class Player(MovingObject):
     def draw(self, screen, camera_pos):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
+        #HIGHSCORE
+        if self.state == self.State.WIN:
+            if self.time_until_over < 4:
+                self.draw_highscore(self.highscore_text, screen)
+                #self.sound_manager.play_system_sound("new_highscore")
         # Draw hit box, just for debugging:
         # self.draw_debug_hitbox(screen, camera_pos)

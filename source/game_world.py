@@ -21,7 +21,7 @@ class GameWorld:
         self.play_start_position = player_pos
         # self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
-        self.is_moonlight_on = level_name != "hex_1.csv"
+        self.is_moonlight_on = level_name != "HEX_1.csv"
         self.moon_light_intensity: float = 0.0
         self.is_light_sources_on = True
         self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
@@ -60,7 +60,7 @@ class GameWorld:
         ]
 
         self.FG_LAYERS = [
-            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 30,
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 100,
              "depth": -5}
         ]
 
@@ -177,12 +177,11 @@ class GameWorld:
                 settings = sound_manager.load_file(SETTINGS)
                 current_highscore = self.highscores.get(self.level_name)
                 ui_timer = self.timer_animator.get_frame()
-                ui_font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
                 minutes = int(time // 60)  # Ganze Minuten
                 seconds = int(time % 60)  # Sekunden als Dezimalanteil korrigiert
                 current_time = minutes + round(seconds / 100, 2)
                 current_highscore = 99.99 if self.highscores[self.level_name] == "None" else current_highscore
-                ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True,
+                ui_time_text = FONT_8.render(f"{minutes:02}:{seconds:02}", True,
                                               "#F2A81D" if current_time > float(current_highscore) else "#36733F")
                 if settings["TIMER"] == "True":
                     ui_screen.blit(ui_timer, pg.Vector2(131, 0))

@@ -61,7 +61,7 @@ class SoundManager:
         self.settings = load_file(SETTINGS)
         if self.current_movement == movement_name and self.settings["SFX"] == "True" and not interrupt:
             if self.current_movement_sound:
-                self.current_movement_sound.set_volume(0.5)
+                self.current_movement_sound.set_volume(0.3)
             return
         elif self.settings["SFX"] == "False":
             if self.current_movement_sound:
@@ -86,13 +86,16 @@ class SoundManager:
             self.current_system_sound.stop()
 
         self.current_system_sound = SYSTEM_SOUNDS.get(system_sound_name)
+        if self.current_system_sound:
+            if self.settings["SFX"] == "True":
+                if system_sound_name[:3] == "egg":
+                    self.current_system_sound.set_volume(1)
+                else:
+                    self.current_system_sound.set_volume(0.5)
+            elif self.settings["SFX"] == "False":
+                self.current_system_sound.set_volume(0)
 
-        if self.settings["SFX"] == "True":
-            self.current_system_sound.set_volume(0.5)
-        elif self.settings["SFX"] == "False":
-            self.current_system_sound.set_volume(0)
-
-        self.current_system_sound.play()
+            self.current_system_sound.play()
 
 
 
