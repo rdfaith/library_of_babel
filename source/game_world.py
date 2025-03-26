@@ -241,7 +241,9 @@ class GameWorld:
 
         # draw objects
         for o in self.static_objects + self.objects + self.interactable_objects:  # Static -> Deco -> Interactive
-            o.draw(game_screen, self.camera_pos)
+            if self.camera_pos.x - 16 < o.position.x < self.camera_pos.x + SCREEN_WIDTH + 32:  # Only draw if within camera bounds + 64px
+                if self.camera_pos.y - 16 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 32:
+                    o.draw(game_screen, self.camera_pos)
 
         shader.set_moon_light_intensity(self.moon_light_intensity)
 
