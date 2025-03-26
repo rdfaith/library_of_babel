@@ -41,10 +41,14 @@ class Shader:
         # Fun shader properties here:
         self.time: float = 0.0  # for effects varying over time
         self.moon_light_intensity: float = 1.0
+        self.light_source_intensity: float = 1.0
         self.moon_position: pg.Vector2 = pg.Vector2(62, 62)
 
     def set_moon_light_intensity(self, intensity: float):
         self.moon_light_intensity = intensity
+
+    def set_light_source_intensity(self, intensity: float):
+        self.light_source_intensity = intensity
 
     def set_moon_position(self, position: pg.Vector2):
         self.moon_position = position
@@ -117,6 +121,7 @@ class Shader:
         self.program['lightRadii'] = light_radii
         self.program['lightFlicker'] = light_flicker
 
+        self.program['lightSourceIntensity'] = self.light_source_intensity
         self.program['moonLightIntensity'] = self.moon_light_intensity
         self.program['moonPosition'] = (int(self.moon_position.x), int(self.moon_position.y))
 
@@ -140,6 +145,9 @@ class FakeShader():
         self.light_map = None
 
     def set_moon_light_intensity(self, intensity: float):
+        pass
+
+    def set_light_source_intensity(self, intensity: float):
         pass
 
     def set_moon_position(self, moon_pos):

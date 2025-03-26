@@ -3,14 +3,14 @@ from source import *
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
-                 level_size: tuple[int, int], level_name: str) -> None:
+                 level_size: tuple[int, int], level_name: str, egg_pos=None) -> None:
 
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
 
         self.player = Player(player_pos)
-
+        self.egg = Egg(egg_pos) if egg_pos else None
         self.level_timer: float = 0.0
 
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
@@ -21,6 +21,8 @@ class GameWorld:
 
         self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
+        self.is_light_sources_on = True
+        self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
         self.time: float = 0.0
 
         self.word_animation_timer = 0.0
@@ -74,7 +76,12 @@ class GameWorld:
         self.player.get_rect().y = pos.y
 
     def get_light_map(self) -> LightMap:
-        return self.light_map
+        if self.egg:
+            light_map = LightMap()
+            light_map.add_source(self.egg.light_source)
+            return light_map
+        else:
+            return self.light_map
 
     def on_player_collected_light(self):
         self.is_moonlight_on = True
@@ -103,30 +110,13 @@ class GameWorld:
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:
             self.moon_light_intensity += 0.3 * delta
 
+        if self.is_light_sources_on and self.light_source_intensity < 1.0:
+            self.light_source_intensity += 0.1 * delta
+
         self.timer_animator.update()
         self.time += delta
 
     def do_render(self, shader):
-
-        ui_screen = shader.get_ui_screen()
-        game_screen = shader.get_game_screen()
-        normal_screen = shader.get_normal_screen()
-
-        bg_screens = shader.get_bg_screens()
-        fg_screen = shader.get_fg_screen()
-
-        for screen in bg_screens:
-            screen.fill((0, 0, 0, 0))
-        fg_screen.fill((0, 0, 0, 0))
-        normal_screen.fill((0, 0, 0, 0))
-        game_screen.fill((0, 0, 0, 0))
-        ui_screen.fill((0, 0, 0, 0))
-
-        sprites = self.SPRITES
-        BG_LAYERS = self.BG_LAYERS
-        FG_LAYERS = self.FG_LAYERS
-
-        #region Functions
         def set_camera_position() -> None:
             """Sets self.camera_pos to the correct position for this frame"""
 
@@ -148,14 +138,38 @@ class GameWorld:
             self.camera_pos.x = max(0, min(self.camera_pos.x, self.level_width - SCREEN_WIDTH))
             self.camera_pos.y = max(0, min(self.camera_pos.y, self.level_height - SCREEN_HEIGHT))
 
+        ui_screen = shader.get_ui_screen()
+        game_screen = shader.get_game_screen()
+        normal_screen = shader.get_normal_screen()
+
+        bg_screens = shader.get_bg_screens()
+        fg_screen = shader.get_fg_screen()
+
+        for screen in bg_screens:
+            screen.fill((0, 0, 0, 0))
+        fg_screen.fill((0, 0, 0, 0))
+        normal_screen.fill((0, 0, 0, 0))
+        game_screen.fill((0, 0, 0, 0))
+        ui_screen.fill((0, 0, 0, 0))
+
+        set_camera_position()
+
+        self.render_game(shader, ui_screen, game_screen, normal_screen, bg_screens, fg_screen)
+
+    def render_game(self, shader, ui_screen, game_screen, normal_screen, bg_screens, fg_screen):
+        sprites = self.SPRITES
+        BG_LAYERS = self.BG_LAYERS
+        FG_LAYERS = self.FG_LAYERS
+
         def draw_ui():
             def draw_timer():
+                time = self.level_timer
                 settings = sound_manager.load_file(SETTINGS)
                 current_highscore = self.highscores.get(self.level_name)
                 ui_timer = self.timer_animator.get_frame()
                 ui_font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
-                minutes = int(self.time // 60)  # Ganze Minuten
-                seconds = int(self.time % 60)  # Sekunden als Dezimalanteil korrigiert
+                minutes = int(time // 60)  # Ganze Minuten
+                seconds = int(time % 60)  # Sekunden als Dezimalanteil korrigiert
                 current_time = minutes + round(seconds / 100, 2)
                 current_highscore = 99.99 if self.highscores[self.level_name] == "None" else current_highscore
                 ui_time_text = ui_font.render(f"{minutes:02}:{seconds:02}", True,
@@ -172,7 +186,6 @@ class GameWorld:
 
             lerp_value = 0
             if self.player.word_animation_timer > 0:
-                print(self.player.word_animation_timer)
                 letters = self.player.last_word_completed
                 min_offset = pg.Vector2()
                 max_offset = pg.Vector2(120, -50)
@@ -203,13 +216,11 @@ class GameWorld:
 
             # Berechnung der versetzten Hintergrundposition (x und y)
             offset_y: int = layer["offset_y"]
-            print(self.camera_pos.x)
             bg_pos: pg.Vector2 = pg.Vector2(
                 (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
                 offset_y - self.camera_pos.y * parallax_factor / 2)
             bg_width = layer["image"].get_width()
             mod_x = bg_pos.x % bg_width
-            print(bg_pos)
             # Hintergrund zeichnen
 
             screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
@@ -231,10 +242,6 @@ class GameWorld:
                 if layer["depth"] <= 0:
                     draw_parallax_layer(layer, max_depth, False, screen=fg_screen)
 
-        #endregion
-
-        # Kameraposition setzen
-        set_camera_position()
 
         # draw background parallax
         draw_bg_parallax()
@@ -245,10 +252,25 @@ class GameWorld:
                 if self.camera_pos.y - 16 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 32:
                     o.draw(game_screen, self.camera_pos)
 
-        shader.set_moon_light_intensity(self.moon_light_intensity)
-
         # draw player
         self.player.draw(game_screen, self.camera_pos)
+
+
+        # Draw egg and return if egg animation is running
+        if self.egg:
+            if self.egg.is_animation_over:
+                self.egg = None
+                self.level_timer = 0.0
+                self.is_light_sources_on = True
+            else:
+                self.egg.draw(game_screen, self.camera_pos)
+                shader.set_moon_light_intensity(0.0)
+                shader.set_light_source_intensity(0.0)
+                return
+
+        shader.set_moon_light_intensity(self.moon_light_intensity)
+        shader.set_light_source_intensity(self.light_source_intensity)
+
 
         # draw foreground parallax
         draw_fg_parallax()

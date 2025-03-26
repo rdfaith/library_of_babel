@@ -52,3 +52,6 @@ class Animator:
             return self.frames[self.current_frame]
         else:
             return pg.transform.flip(self.frames[self.current_frame], True, False)
+
+    def is_last_frame(self) -> bool:
+        return self.current_frame == self.num_frames - 1
