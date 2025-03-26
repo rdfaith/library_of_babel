@@ -159,6 +159,14 @@ class Player(MovingObject):
     def on_pickup_key(self):
         self.has_key = True
 
+    def on_pickup_heart(self):
+        if self.player_lives < 3:
+            self.player_lives += 1
+            self.sound_manager.play_system_sound("collect")
+            return True
+        else:
+            return False
+
     def on_pickup_letter(self, letter: str, game_world) -> bool:
         """Called when player moves into collider of letter.
         Returns False if the letter can't be picked up, else True."""

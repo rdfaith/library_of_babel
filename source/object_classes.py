@@ -208,6 +208,25 @@ class LetterPickUp(InteractableObject):
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
             game_world.interactable_objects.remove(self)
 
+class HeartPickUp(InteractableObject):
+    def __init__(self, position: pg.Vector2):
+        self.letter = letter
+        image = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
+        offset = pg.Vector2(4, 4)
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(4, 4) + offset,
+            COLOR_GOLD,
+            10.0,
+            0.05
+        )
+
+        super().__init__(position.copy() + offset, image, light_source=light_source)
+
+    def on_collide(self, player, game_world) -> None:
+        if player.on_pickup_heart():  # If player picks up (doesn't pick up if inventory full)
+            game_world.interactable_objects.remove(self)
+
 
 class Door(ColliderObject):
 

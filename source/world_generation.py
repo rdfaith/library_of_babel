@@ -1,5 +1,5 @@
 from source import *
-from source.object_classes import GameObject, ColliderObject
+from source.object_classes import GameObject, ColliderObject, HeartPickUp
 
 
 def load_spritesheets():
@@ -96,6 +96,8 @@ def generate_world(map_file_path: str) -> GameWorld:
                     objects.append(GameObject(pos.copy(), pg.image.load(get_path("assets/sprites/deco/books1.png"))))
                 case "egg":
                     egg_pos = pos.copy() - pg.Vector2(17, 0)
+                case "heart" | "ht":
+                    interactable_objects.append(HeartPickUp(pos))
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:
