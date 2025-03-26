@@ -38,7 +38,7 @@ class Player(MovingObject):
         self.max_y_velocity = 400.0
         self.player_lives = 3
         self.bounce_velocity_x = 0
-        self.invincibility_time: float = 0.7
+        self.invincibility_time: float = 0.0
         self.current_direction: int = 1
         self.time_until_over = 5.0
 
@@ -86,7 +86,8 @@ class Player(MovingObject):
         self.touching_wall_left = False
         self.touching_wall_right = False
         self.wall_jump_timer = 0.0  # Time left in current wall jump lock
-        self.wall_jump_lock_time = 0.3  # Time that player movement is supposed to be locked
+        self.wall_jump_lock_time = 0.4  # Time that player movement is supposed to be locked
+        self.is_wall_jumping = False
 
         # Define Animations
         self.run = Animation("run", get_path('assets/sprites/anim/dino-run-Sheet.png'), 24, 24, 9, 18)
@@ -286,7 +287,7 @@ class Player(MovingObject):
         # Handle Input, input will be ignored if player is dashing or wall jumping
         if self.dash_timer > 0:  # if dashing
             self.velocity.y = 0  # no y velocity while dashing
-        elif self.wall_jump_timer != 0.0:
+        elif self.is_wall_jumping:
             pass
         else:  # if not dashing and not wall jumping
             if keys[pg.K_a] or keys[pg.K_LEFT]:
@@ -313,6 +314,7 @@ class Player(MovingObject):
             self.wall_jump_timer -= delta
             if self.wall_jump_timer <= 0:
                 self.wall_jump_timer = 0.0
+                self.is_wall_jumping = False
 
         has_jumped = False
 
@@ -325,6 +327,7 @@ class Player(MovingObject):
                 new_state = self.State.JUMP
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
+                self.is_wall_jumping = True
                 self.jump_lock = True
                 has_jumped = True
                 if self.touching_wall_right:
@@ -386,6 +389,7 @@ class Player(MovingObject):
             self.has_gravity = False
             self.dash_timer = self.dash_time  # Start dash duration
             self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
+            self.invincibility_time = 2 * self.dash_time
             self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
             new_state = self.State.DASH
 
@@ -441,7 +445,6 @@ class Player(MovingObject):
                     pg.event.post(pg.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
                     # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
         else:
-            # get player movement
 
             # Check invincibility frames
             if self.invincibility_time > 0:
@@ -449,6 +452,7 @@ class Player(MovingObject):
                 if self.invincibility_time <= 0:
                     self.invincibility_time = 0
 
+            # get player movement
             self.handle_movement(delta, game_world)
 
             if self.bounce_velocity_x != 0:
@@ -481,4 +485,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        self.draw_debug_hitbox(screen, camera_pos)
+        # self.draw_debug_hitbox(screen, camera_pos)

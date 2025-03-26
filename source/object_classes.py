@@ -106,7 +106,6 @@ class ColliderObject(GameObject):
         self.draw_debug_hitbox(screen, camera_pos)
 
 
-
 class InteractableObject(ColliderObject):
     """Base class for all objects that define special behaviour when colliding with player"""
 
@@ -283,11 +282,15 @@ class KeyPickUp(MovingObject):
 
 
 class MovingPlatform(MovingObject):
-    def __init__(self, position: pg.Vector2):
+    def __init__(self, position: pg.Vector2, has_max_distance: bool = True):
         super().__init__(position, pg.image.load(get_path('assets/sprites/tiles/platform.png')), False, pg.image.load(get_path("assets/sprites/tiles/platform_collider.png")))
         self.speed_x = 20
         self.distance = 0
-        self.max_distance = 90
+        self.has_max_distance = has_max_distance
+        if self.has_max_distance:
+            self.max_distance = 90
+        else:
+            self.has_max_distance = 100000
         self.current_direction = 1
 
     def update(self, delta: float, game_world):
