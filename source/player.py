@@ -71,22 +71,22 @@ class Player(MovingObject):
 
         # Double Jump Values
         self.jump_counter = 0  # Counter for how many jumps since on ground
-        self.jump_cooldown_time = 0.2  # Cooldown time until next jump possible
+        self.jump_cooldown_time = 0.35  # Cooldown time until next jump possible
         self.jump_cooldown: float = 0.0  # Time left until cooldown
 
         # Wall Jump Values
         self.touching_wall_left = False
         self.touching_wall_right = False
         self.wall_jump_timer = 0.0  # Time left in current wall jump lock
-        self.wall_jump_lock_time = 0.2  # Time that player movement is supposed to be locked
+        self.wall_jump_lock_time = 0.3  # Time that player movement is supposed to be locked
 
         # Define Animations
         self.run = Animation("run", get_path('assets/sprites/anim/dino-run-Sheet.png'), 24, 24, 9, 18)
         self.idle = Animation("idle", get_path('assets/sprites/anim/dino-idle-Sheet.png'), 24, 24, 6, 10)
-        self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
-        self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
-        self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
-        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
+        self.jump_up = Animation("jump_up", get_path('assets/sprites/anim/dino-jump-Sheet.png'), 24, 24, 3, 6, True)
+        self.fall = Animation("fall", get_path('assets/sprites/anim/dino-fall-Sheet.png'), 24, 24, 3, 24, True)
+        self.duck_walk = Animation("duck_run", get_path('assets/sprites/anim/dino-duck-walk-Sheet.png'), 24, 24, 6, 14)
+        self.duck_idle = Animation("duck_idle", get_path('assets/sprites/anim/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
         self.dash = Animation("dash", get_path('assets/test/dino-dash.png'), 32, 24, 1, 10)
         self.dead = Animation("dead", get_path('assets/sprites/anim/dino-death-Sheet.png'), 24, 24, 8, 8)
         self.win = Animation("win", get_path('assets/sprites/anim/dino-win-Sheet.png'), 24, 24, 4, 8)
