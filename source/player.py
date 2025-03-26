@@ -34,6 +34,8 @@ class Player(MovingObject):
 
         self.speed_x = 90.0
         self.jump_force = 300.0
+        self.gravity = 22.0
+        self.max_y_velocity = 400.0
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.invincibility_time: float = 0.7
@@ -279,7 +281,7 @@ class Player(MovingObject):
 
         new_state = self.state
         is_grounded = self.check_is_grounded(game_world.static_objects)
-        obj_below = self.check_is_grounded(game_world.static_objects)
+        obj_below = is_grounded
 
         # Handle Input, input will be ignored if player is dashing or wall jumping
         if self.dash_timer > 0:  # if dashing
