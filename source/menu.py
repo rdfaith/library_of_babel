@@ -18,7 +18,6 @@ class In_Game_Menu:
         self.settings = load_file(settings_filename)
         self.options = list(self.settings.keys())
         self.font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)  # Einmalige Initialisierung
-        print(self.settings)
 
     def draw_button(self, name, selected_name, screen):
         self.value = self.settings[name]
