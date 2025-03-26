@@ -2,7 +2,7 @@ import pygame as pg
 import os
 from source.utils import get_path
 
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 # Shader Settings
 LIGHT_DEBUG_MODE = False
@@ -122,7 +122,8 @@ SYSTEM_SOUNDS = {
             "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
             "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
-            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3"))
+            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3")),
+            "egg": pg.mixer.Sound(get_path("assets/sounds/egg_animation.mp3"))
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),

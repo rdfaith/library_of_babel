@@ -74,3 +74,7 @@ class Hitbox:
     def add_offset(self, diff: pg.Vector2):
         offset = self._hitboxes[self._current_hitbox]["offset"]
         self._hitboxes[self._current_hitbox]["offset"] = offset + diff
+
+    def add_offset(self, diff: pg.Vector2):
+        offset = self._hitboxes[self._current_hitbox]["offset"]
+        self._hitboxes[self._current_hitbox]["offset"] = offset + diff
