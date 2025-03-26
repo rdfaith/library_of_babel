@@ -88,9 +88,6 @@ class GameWorld:
 
     def do_updates(self, delta: float) -> None:
 
-        if self.egg:  # Don't do updates if egg animation is active
-            return
-
         if delta > 0.025:
             delta = 0.016
 
@@ -254,6 +251,9 @@ class GameWorld:
                 if self.camera_pos.y - 16 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 32:
                     o.draw(game_screen, self.camera_pos)
 
+        # draw player
+        self.player.draw(game_screen, self.camera_pos)
+
 
         # Draw egg and return if egg animation is running
         if self.egg:
@@ -269,8 +269,6 @@ class GameWorld:
         shader.set_moon_light_intensity(self.moon_light_intensity)
         shader.set_light_source_intensity(self.light_source_intensity)
 
-        # draw player
-        self.player.draw(game_screen, self.camera_pos)
 
         # draw foreground parallax
         draw_fg_parallax()

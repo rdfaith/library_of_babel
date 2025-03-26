@@ -254,7 +254,7 @@ class Player(MovingObject):
         """Sets player movement and state according to input and switches animation if necessary"""
 
         # If dead, do nothing
-        if self.state == self.State.DEAD:
+        if self.state == self.State.DEAD or game_world.egg:
             return
 
         keys = pg.key.get_pressed()

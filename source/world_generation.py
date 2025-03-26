@@ -85,7 +85,7 @@ def generate_world(map_file_path: str) -> GameWorld:
                 case "monkey":
                     interactable_objects.append(Monkey(pos.copy()))
                 case "player":
-                    player_start_pos = pg.Vector2(pos.x, pos.y)
+                    player_start_pos = pg.Vector2(pos.x - 4, pos.y - 8)
                 case "deco_candle" | "dc":
                     objects.append(Candle(pos))
                 case "deco_hourglass" | "dh":
@@ -93,7 +93,7 @@ def generate_world(map_file_path: str) -> GameWorld:
                 case "deco_books" | "db":
                     objects.append(GameObject(pos.copy(), pg.image.load(get_path("assets/sprites/deco/books1.png"))))
                 case "egg":
-                    egg_pos = pos.copy() - pg.Vector2(11, 0)
+                    egg_pos = pos.copy() - pg.Vector2(17, 0)
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:
