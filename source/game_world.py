@@ -19,7 +19,7 @@ class GameWorld:
         self.play_start_position = player_pos
         # self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
-        self.is_moonlight_on = True
+        self.is_moonlight_on = level_name != "hex_1.csv"
         self.moon_light_intensity: float = 0.0
         self.is_light_sources_on = True
         self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
@@ -94,18 +94,20 @@ class GameWorld:
         self.level_timer += delta
 
         # check if the player has fallen out of bounds
-        if self.player.get_rect().y > self.level_height:
+        if self.player.position.y > self.level_height:
             self.player.on_fell_out_of_bounds()
 
         self.player.update(delta, self)
         self.light_map.get_first_source().set_position(self.player.position)
 
         for o in self.interactable_objects:
-            o.update(delta, self)
+            if o.position.distance_to(self.player.position) < 400:
+                o.update(delta, self)
 
         for o in self.static_objects:
-            if isinstance(o, MovingPlatform) or isinstance(o, Door):
-                o.update(delta, self)
+            if o.position.distance_to(self.player.position) < 400:
+                if isinstance(o, MovingPlatform) or isinstance(o, Door):
+                    o.update(delta, self)
 
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:
             self.moon_light_intensity += 0.3 * delta

@@ -1,4 +1,4 @@
-from source import pg, get_path, AnimatedObject, Animation, LightSource
+from source import pg, get_path, AnimatedObject, Animation, LightSource, SoundManager
 
 
 class Candle(AnimatedObject):
@@ -36,7 +36,7 @@ class Hourglass(AnimatedObject):
 
 class Egg(AnimatedObject):
     def __init__(self, position):
-        egg_framerate = 8
+        egg_framerate = 10
         animation: Animation = Animation("egg", get_path("assets/sprites/anim/egg-animation-Sheet.png"),
                                          40,
                                          44,
@@ -55,11 +55,19 @@ class Egg(AnimatedObject):
         self.fade_time: float = 2.0  # time to fade after animation ends
         self.is_animation_over = False
 
+        self.sound_manager = SoundManager()
+
         super().__init__(position, animation, light_source=light_source)
 
     def draw(self, screen, camera_pos):
         self.animator.update()
         position = self.position - camera_pos
+
+        match self.animator.get_frame_number():
+            case 38:
+                self.sound_manager.play_system_sound("squish")
+            case 53:
+                self.sound_manager.play_system_sound("squish")
 
         if self.animator.is_last_frame():
             self.fade = max(self.fade - 0.016 * self.fade_time, 0.0)
