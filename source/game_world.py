@@ -1,5 +1,6 @@
 from source import *
 
+
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int]) -> None:
@@ -22,6 +23,8 @@ class GameWorld:
         self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
         self.time: float = 0.0
+
+        self.word_animation_timer = 0.0
 
         self.timer_anim: Animation = Animation("timer", get_path('assets/sprites/ui/ui_timer_anim.png'), 58, 16, 4, 8)
         self.timer_animator: Animator = Animator(self.timer_anim)
@@ -125,11 +128,23 @@ class GameWorld:
             for i in range(self.player.player_lives):
                 ui_screen.blit(ui_heart, UI_HEART_POSITIONS[i])
 
-            for i in range(len(self.player.letters_collected)):
+            lerp_value = 0
+            if self.player.word_animation_timer > 0:
+                print(self.player.word_animation_timer)
+                letters = self.player.last_word_completed
+                min_offset = pg.Vector2()
+                max_offset = pg.Vector2(120, -50)
+                lerp_value: float = 1 - self.player.word_animation_timer
+                offset = min_offset.lerp(max_offset, lerp_value)
+            else:
+                letters = self.player.letters_collected
+                offset = pg.Vector2()
+
+            for i in range(len(letters)):
                 if i > 5:  # Break if more than 5 letters would have to be displayed
                     break
-                letter = self.player.letters_collected[i]
-                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i])
+                letter = letters[i]
+                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i] - offset)
 
             if self.player.has_key:
                 ui_screen.blit(ui_key, UI_KEY_POSITION)
@@ -167,7 +182,6 @@ class GameWorld:
                 {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100,
                  "depth": 5},
             ]
-
 
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for i in range(len(BG_LAYERS)):
@@ -230,6 +244,3 @@ class GameWorld:
 
         # draw UI
         draw_ui()
-
-
-

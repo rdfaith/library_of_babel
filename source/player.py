@@ -31,7 +31,6 @@ class Player(MovingObject):
             0.03
         )
 
-        self.letters_collected: list[str] = []
         self.speed_x = 90.0
         self.jump_force = 300.0
         self.player_lives = 3
@@ -51,8 +50,10 @@ class Player(MovingObject):
             self.is_crouch_unlocked: bool = False
             self.is_dash_unlocked: bool = False
 
-        # Does Player have nonsense word?
-        self.has_wrong_word = False
+        self.letters_collected: list[str] = []
+        self.word_animation_timer = 0.0
+        self.has_wrong_word = False  # does player have nonsense word?
+        self.last_word_completed = ""
 
         # Does Player Have Key?
         self.has_key = False
@@ -132,6 +133,7 @@ class Player(MovingObject):
         Returns False if the letter can't be picked up, else True."""
 
         result = False
+        self.completed_word = False
 
         if len(self.letters_collected) < 5:  # return True if can pick up
             self.letters_collected.append(letter)
@@ -165,7 +167,10 @@ class Player(MovingObject):
 
 
         if word_completed:
+            self.word_animation_timer = 1.0
+            self.last_word_completed = self.letters_collected.copy()
             self.letters_collected = []
+
 
         if len(self.letters_collected) >= 5 and not word_completed and word != "BABEL":
             self.has_wrong_word = True
@@ -220,12 +225,14 @@ class Player(MovingObject):
             if self.get_rect().colliderect(o.get_rect()):
                 o.on_collide(self, game_world)
 
-    def handle_movement(self, keys, delta, game_world):
+    def handle_movement(self, delta, game_world):
         """Sets player movement and state according to input and switches animation if necessary"""
 
         # If dead, do nothing
         if self.state == self.State.DEAD:
             return
+
+        keys = pg.key.get_pressed()
 
         new_state = self.state
         is_grounded = self.check_is_grounded(game_world.static_objects)
@@ -354,6 +361,9 @@ class Player(MovingObject):
                 menu.update_settings(filename, highscores)
                 print(f"New best Time for {level} with {time}")
 
+        if self.word_animation_timer > 0:
+            self.word_animation_timer = max(self.word_animation_timer - delta, 0)
+
         if self.state == self.State.DEAD or self.state == self.State.WIN:
             self.velocity.x = 0
             if self.time_until_over != 0:
@@ -370,7 +380,6 @@ class Player(MovingObject):
                     # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
         else:
             # get player movement
-            keys = pg.key.get_pressed()
 
             # Check invincibility frames
             if self.invincibility_time > 0:
@@ -378,7 +387,7 @@ class Player(MovingObject):
                 if self.invincibility_time <= 0:
                     self.invincibility_time = 0
 
-            self.handle_movement(keys, delta, game_world)
+            self.handle_movement(delta, game_world)
 
             if self.bounce_velocity_x != 0:
                 if self.check_is_grounded(game_world.static_objects) and self.invincibility_time != 0.7:
