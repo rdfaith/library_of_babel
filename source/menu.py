@@ -2,12 +2,14 @@ from source import *
 from source.shaders.shader import Shader, FakeShader
 from source.title_screen import TitleScreen
 
+
 class GameState(Enum):
     START = 1
     LEVEL_SELECTION = 2
     GAME = 3
     GAME_OVER = 4
     IN_GAME_MENU = 5
+    SETTINGS = 6
 
 
 class In_Game_Menu:
@@ -69,6 +71,12 @@ def display_levels(levels, selected_level, screen, filename: str):
         text = FONT_16.render(line, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
 
+def display_menu(menu, selected_option, screen):
+    for i, option in enumerate(menu.keys()):
+        color = '#a05b53' if i == selected_option else (244,204,161)
+        text = FONT_16.render(option, True, color)
+        screen.blit(text, (SCREEN_WIDTH // 2 - 110 // 2, 35 + i * 30))
+
 def unlock_levels(filename, current_level):
     levels = load_file(filename)
     all_levels = list(levels.keys())  # Jetzt ist es eine echte Liste
@@ -92,6 +100,7 @@ def menu_main(running: bool):
     # variablen
     selected_level = 0
     selected_button = 0
+    selected_option = 0
     sound_manager = SoundManager()
     game_state: GameState = GameState.START
     delta = 0.0
@@ -147,7 +156,7 @@ def menu_main(running: bool):
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
                     elif event.key == pg.K_ESCAPE:
-                        game_state = GameState.IN_GAME_MENU
+                        game_state = GameState.SETTINGS
 
             # Render with shader
             shader.update()
@@ -200,10 +209,50 @@ def menu_main(running: bool):
                     sys.exit()
 
             clock.tick(60)
-
         while game_state == GameState.IN_GAME_MENU:
+            last_game_state = GameState.IN_GAME_MENU
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
+            sound_manager.play_enemy_sound("idle")
+            shader.get_ui_screen().fill((57, 49, 75))
+
+            MENU_OPTIONS = {
+                "RESUME": GameState.GAME,
+                "RESTART": GameState.GAME,
+                "LEVEL": GameState.LEVEL_SELECTION,
+                "SETTINGS": GameState.SETTINGS,
+            }
+
+            display_menu(MENU_OPTIONS, selected_option, shader.get_ui_screen())
+            clock.tick(60)  # Framerate-Limit früh setzen
+
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        game_state = last_game_state if game_state == GameState.IN_GAME_MENU else GameState.IN_GAME_MENU
+                        shader = get_shader()
+                    elif event.key == pg.K_DOWN:
+                        selected_option = (selected_option + 1) % len(MENU_OPTIONS)
+                        sound_manager.play_system_sound("selection")
+                    elif event.key == pg.K_UP:
+                        selected_option = (selected_option - 1) % len(MENU_OPTIONS)
+                        sound_manager.play_system_sound("selection")
+                    elif event.key == pg.K_RETURN:
+                        menu_options = list(MENU_OPTIONS.keys())
+
+                        if selected_option == 1:
+                            game_world = load_world(current_level)
+
+                        game_state = MENU_OPTIONS[menu_options[selected_option]]
+
+                elif event.type == pg.QUIT:
+                    running = False
+                    pg.quit()
+                    sys.exit()
+
+            shader.update()
+
+        while game_state == GameState.SETTINGS:
             shader.get_ui_screen().fill((57, 49, 75))
 
             for event in pg.event.get():
