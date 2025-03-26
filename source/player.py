@@ -87,7 +87,7 @@ class Player(MovingObject):
         self.fall = Animation("fall", get_path('assets/sprites/anim/dino-fall-Sheet.png'), 24, 24, 3, 24, True)
         self.duck_walk = Animation("duck_run", get_path('assets/sprites/anim/dino-duck-walk-Sheet.png'), 24, 24, 6, 14)
         self.duck_idle = Animation("duck_idle", get_path('assets/sprites/anim/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
-        self.dash = Animation("dash", get_path('assets/test/dino-dash.png'), 32, 24, 1, 10)
+        self.dash = Animation("dash", get_path('assets/sprites/anim/dino-dash-Sheet.png'), 32, 24, 1, 1)
         self.dead = Animation("dead", get_path('assets/sprites/anim/dino-death-Sheet.png'), 24, 24, 8, 8)
         self.win = Animation("win", get_path('assets/sprites/anim/dino-win-Sheet.png'), 24, 24, 4, 8)
 
@@ -254,14 +254,6 @@ class Player(MovingObject):
         is_grounded = self.check_is_grounded(game_world.static_objects)
         obj_below = self.check_is_grounded(game_world.static_objects)
 
-        # Dash
-        if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:
-            self.has_gravity = False
-            self.dash_timer = self.dash_time  # Start dash duration
-            self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
-            self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
-            new_state = self.State.DASH
-
         # Update Wall Jump Timer
         if self.wall_jump_timer != 0.0:
             self.wall_jump_timer -= delta
@@ -273,7 +265,7 @@ class Player(MovingObject):
             self.velocity.y = 0  # no y velocity while dashing
         elif self.wall_jump_timer != 0.0:
             pass
-        else:  # if not dashing
+        else:  # if not dashing and not wall jumping
             if keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.velocity.x = -self.speed_x  # Move left
                 self.current_direction = -1
@@ -291,12 +283,13 @@ class Player(MovingObject):
 
         # Wall Jump
         if (self.touching_wall_right or self.touching_wall_left) and not is_grounded and self.wall_jump_timer == 0.0:
-            self.jump_counter = 2
+            self.jump_counter = 0
             if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
+                self.jump_counter += 1
                 if self.touching_wall_right:
                     self.current_direction = -1
                     self.velocity.x = -self.speed_x
@@ -345,10 +338,20 @@ class Player(MovingObject):
                         self.on_player_death("fell from block")
                         self.got_damage = True
 
+
+        # Dash
+        if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:
+            self.has_gravity = False
+            self.dash_timer = self.dash_time  # Start dash duration
+            self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
+            self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
+            new_state = self.State.DASH
+
         # Handle Dash Duration
         if self.dash_timer > 0:
             self.dash_timer -= delta
             if self.dash_timer <= 0:  # Dash ends
+                self.dash_timer = 0.0
                 self.velocity.x = 0 if not (keys[pg.K_LEFT] or keys[pg.K_RIGHT]) else self.velocity.x
                 new_state = self.State.RUN if (keys[pg.K_LEFT] or keys[pg.K_RIGHT]) else self.State.IDLE
                 self.has_gravity = True
@@ -356,6 +359,8 @@ class Player(MovingObject):
         # Handle Dash Cooldown Timer
         if self.dash_cooldown_timer > 0:
             self.dash_cooldown_timer -= delta
+            if self.dash_cooldown_timer <= 0:
+                self.dash_cooldown_timer = 0.0
 
         # Not crouch -> crouch
         if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (
@@ -365,6 +370,9 @@ class Player(MovingObject):
         if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
                 new_state = self.state  # Set back to DUCK
+
+        if self.dash_timer != 0:
+            new_state = self.State.DASH
 
         if new_state != self.state:
             self.state = new_state
