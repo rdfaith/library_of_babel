@@ -1,5 +1,5 @@
 from source import *
-from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy
+from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy, KeyPickUp
 
 
 class Player(MovingObject):
@@ -66,7 +66,7 @@ class Player(MovingObject):
         # Dash Values
         self.dash_speed = 450.0  # Dash speed multiplier
         self.dash_time: float = 0.2  # Dash duration in seconds
-        self.dash_cooldown: float = 2.0  # Cooldown before dashing again
+        self.dash_cooldown: float = 1.5  # Cooldown before dashing again
         self.dash_timer = 0  # Time left in current dash
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
@@ -196,7 +196,6 @@ class Player(MovingObject):
             self.sound_manager.play_system_sound("magical_twinkle")
             self.last_word_completed = self.letters_collected.copy()
             self.letters_collected = []
-
 
         if len(self.letters_collected) >= 5 and not word_completed and word != "BABEL":
             self.has_wrong_word = True
@@ -454,4 +453,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        # pygame.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)

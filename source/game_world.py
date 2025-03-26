@@ -189,7 +189,7 @@ class GameWorld:
                 ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i] - offset)
 
             if self.player.has_key:
-                ui_screen.blit(sprites["ui_keys"], UI_KEY_POSITION)
+                ui_screen.blit(sprites["ui_key"], UI_KEY_POSITION)
 
             if self.player.check_is_wrong_word():
                 time = (math.sin(self.time * 3) + 1)

@@ -97,6 +97,9 @@ class ColliderObject(GameObject):
         position = self.position - camera_pos
         screen.blit(self.image, position - sprite_offset)
 
+        # Draw hit box, just for debugging:
+        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+
 
 class InteractableObject(ColliderObject):
     """Base class for all objects that define special behaviour when colliding with player"""
@@ -261,7 +264,6 @@ class KeyPickUp(MovingObject):
             0.01
         )
         super().__init__(position.copy(), image, True, light_source=light_source)
-
 
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
