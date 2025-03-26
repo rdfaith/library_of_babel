@@ -33,14 +33,15 @@ class Player(MovingObject):
         )
 
         self.speed_x = 90.0
-        self.jump_force = 300.0
-        self.gravity = 22.0
+        self.jump_force = 330.0
+        self.gravity = 20.0
         self.max_y_velocity = 400.0
         self.player_lives = 3
         self.bounce_velocity_x = 0
         self.invincibility_time: float = 0.0
         self.current_direction: int = 1
         self.time_until_over = 5.0
+        self.jump_timer = 0.0  # tracks how long player is jumping for variable jump height
 
         self.state = self.State.IDLE
 
@@ -48,7 +49,7 @@ class Player(MovingObject):
             self.is_jump_unlocked: bool = True
             self.is_crouch_unlocked: bool = True
             self.is_dash_unlocked: bool = True
-            self.is_wall_jump_unlocked: bool = True
+            self.is_wall_jump_unlocked: bool = False
             self.is_double_jump_unlocked: bool = True
         else:
             self.is_jump_unlocked: bool = False
@@ -65,10 +66,13 @@ class Player(MovingObject):
         # Does Player Have Key?
         self.has_key = False
 
+        # Has Player picked up time item this frame?
+        self.picked_up_time = False
+
         # Dash Values
         self.dash_speed = 450.0  # Dash speed multiplier
         self.dash_time: float = 0.2  # Dash duration in seconds
-        self.dash_cooldown: float = 1.5  # Cooldown before dashing again
+        self.dash_cooldown: float = 0.7  # Cooldown before dashing again
         self.dash_timer = 0  # Time left in current dash
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
@@ -158,6 +162,7 @@ class Player(MovingObject):
 
     def on_pickup_key(self):
         self.has_key = True
+        self.sound_manager.play_system_sound("collect")
 
     def on_pickup_heart(self):
         if self.player_lives < 3:
@@ -166,6 +171,11 @@ class Player(MovingObject):
             return True
         else:
             return False
+
+    def on_pickup_time(self):
+        self.sound_manager.play_system_sound("collect")
+        self.picked_up_time = True
+        return True
 
     def on_pickup_letter(self, letter: str, game_world) -> bool:
         """Called when player moves into collider of letter.
@@ -185,16 +195,12 @@ class Player(MovingObject):
 
         match word:
             case "JUMP":
-                if self.jumps_collected == 0:
-                    self.is_jump_unlocked = True
-                    word_completed = True
-                elif self.jumps_collected == 1:
-                    self.is_double_jump_unlocked = True
-                    word_completed = True
-                elif self.jumps_collected == 2 and self.wall_collected:
+                if self.wall_collected:
                     self.is_wall_jump_unlocked = True
-                    word_completed = True
-                self.jumps_collected += 1
+                elif self.is_jump_unlocked:
+                    self.is_double_jump_unlocked = True
+                else:
+                    self.is_jump_unlocked = True
             case "WALL":
                 self.wall_collected = True
                 word_completed = True
@@ -212,7 +218,7 @@ class Player(MovingObject):
                 self.check_highscore(game_world.level_name, game_world.level_timer)
                 self.on_player_win()
             case "LIGHT":
-                print("Es werde Licht")
+                print("Es werde Licht!")
                 pg.event.post(pg.event.Event(WORD_LIGHT))
                 word_completed = True
 
@@ -354,26 +360,35 @@ class Player(MovingObject):
         if is_grounded:
             self.jump_counter = 0
             self.got_damage = False
+            # jump
             if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
-                new_state = self.State.JUMP
+                self.jump_timer = PLAYER_JUMP_TIMER  # timer for extended jumps
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
                 self.jump_lock = True
                 has_jumped = True
+                new_state = self.State.JUMP
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 if self.velocity.x != 0:
                     new_state = self.State.DUCK_WALK
                 else:
                     new_state = self.State.DUCK_IDLE
         else:
+            # double jump
             if self.jump_counter == 1 and self.jump_cooldown == 0.0 and self.is_double_jump_unlocked and (
                         keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                     self.velocity.y = -self.jump_force
+                    self.jump_timer = PLAYER_JUMP_TIMER
                     new_state = self.State.JUMP
                     self.jump_lock = True
                     has_jumped = True
             elif self.velocity.y < 0:
+                if not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) or self.jump_timer <= 0:
+                    self.velocity.y *= 0.5  # Cut the jump short (micro jump)
+                else: # if player is continuously pressing jump
+                    self.velocity.y += -3  # counterbalance some gravity
+                    self.jump_timer -= delta # Reduce jump hold time
                 new_state = self.State.JUMP
             else:
                 new_state = self.State.FALL

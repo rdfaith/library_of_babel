@@ -6,7 +6,10 @@ class GameObject:
         self.image = image.convert_alpha()  # Sprite image
         self.normal: pg. Surface = normal if normal else None
         self.position = position.copy()
+
+        # Cosmetic stuff
         self.light_source = light_source  # Leave None if no light source
+        self.do_wave_animation = False
 
     def update(self, delta: float, game_world):
         pass
@@ -174,6 +177,8 @@ class MovingObject(InteractableObject):
             self.position.x, _ = rect.topleft  # Reset precise position
 
         # move y and check collisions
+        if self.position.y > 2000:  # that's way too far away bruh
+            return
         self.position.y += dy
         rect.topleft = self.position
 
@@ -193,7 +198,7 @@ class LetterPickUp(InteractableObject):
     def __init__(self, position: pg.Vector2, letter: str):
         self.letter = letter
         image = LETTER_IMAGES[letter]
-        offset = pg.Vector2(4, 4)
+        offset = pg.Vector2(0, -1)
         light_source = LightSource(
             position.copy(),
             pg.Vector2(4, 4) + offset,
@@ -201,8 +206,8 @@ class LetterPickUp(InteractableObject):
             10.0,
             0.05
         )
-
         super().__init__(position.copy() + offset, image, light_source=light_source)
+        self.do_wave_animation = True
 
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
@@ -210,21 +215,38 @@ class LetterPickUp(InteractableObject):
 
 class HeartPickUp(InteractableObject):
     def __init__(self, position: pg.Vector2):
-        self.letter = letter
         image = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
-        offset = pg.Vector2(4, 4)
+        offset = pg.Vector2(1, 0)
         light_source = LightSource(
             position.copy(),
-            pg.Vector2(4, 4) + offset,
+            pg.Vector2(6, 5) + offset,
             COLOR_GOLD,
             10.0,
             0.05
         )
-
         super().__init__(position.copy() + offset, image, light_source=light_source)
+        self.do_wave_animation = True
 
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_heart():  # If player picks up (doesn't pick up if inventory full)
+            game_world.interactable_objects.remove(self)
+
+class TimePickUp(InteractableObject):
+    def __init__(self, position: pg.Vector2):
+        image = pg.image.load(get_path("assets/sprites/hourglass.png"))
+        offset = pg.Vector2(2, 0)
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(6, 6) + offset,
+            COLOR_GOLD,
+            10.0,
+            0.05
+        )
+        super().__init__(position.copy() + offset, image, light_source=light_source)
+        self.do_wave_animation = True
+
+    def on_collide(self, player, game_world) -> None:
+        if player.on_pickup_time():  # If player picks up (doesn't pick up if inventory full)
             game_world.interactable_objects.remove(self)
 
 

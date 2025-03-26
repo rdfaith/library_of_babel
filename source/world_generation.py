@@ -98,6 +98,8 @@ def generate_world(map_file_path: str) -> GameWorld:
                     egg_pos = pos.copy() - pg.Vector2(17, 0)
                 case "heart" | "ht":
                     interactable_objects.append(HeartPickUp(pos))
+                case "time" | "ti":
+                    interactable_objects.append(TimePickUp(pos))
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:

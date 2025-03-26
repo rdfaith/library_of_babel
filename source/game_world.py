@@ -1,3 +1,5 @@
+import math
+
 from source import *
 
 
@@ -95,6 +97,9 @@ class GameWorld:
             delta = 0.016
 
         self.level_timer += delta
+        if self.player.picked_up_time:
+            self.level_timer = max(self.level_timer - TIME_ITEM_VALUE, 0.0)
+            self.player.picked_up_time = False
 
         # check if the player has fallen out of bounds
         if self.player.position.y > self.level_height:
@@ -252,11 +257,21 @@ class GameWorld:
         # draw background parallax
         draw_bg_parallax()
 
+        # dynamic light sources (comment out for static lighting)
+        self.light_map.clear_sources()
+        self.light_map.add_source(self.player.light_source)
+
         # draw objects
-        for o in self.static_objects + self.objects + self.interactable_objects:  # Static -> Deco -> Interactive
+        for o in self.objects + self.static_objects + self.interactable_objects:  # Static -> Deco -> Interactive
             if self.camera_pos.x - 16 < o.position.x < self.camera_pos.x + SCREEN_WIDTH + 32:  # Only draw if within camera bounds + 64px
                 if self.camera_pos.y - 16 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 32:
-                    o.draw(game_screen, self.camera_pos)
+                    pos = self.camera_pos.copy()
+                    if o.do_wave_animation:
+                        pos += pg.Vector2(0, math.sin(self.time * 2.5))
+                    o.draw(game_screen, pos)
+                    if o.get_light_source():
+                        self.light_map.add_source(o.get_light_source())
+
 
         # draw player
         self.player.draw(game_screen, self.camera_pos)

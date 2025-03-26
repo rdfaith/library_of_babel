@@ -7,6 +7,10 @@ DEBUG_MODE = True
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
+# Game Settings
+TIME_ITEM_VALUE = 15.0
+PLAYER_JUMP_TIMER = 0.24
+
 # Shader Settings
 NUM_LIGHTS = 25  # Has to be the same as NUM_LIGHTS in frag_shader.glsl!
 
