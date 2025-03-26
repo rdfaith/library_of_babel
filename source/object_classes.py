@@ -93,7 +93,7 @@ class ColliderObject(GameObject):
 
     def draw_debug_hitbox(self, screen, camera_pos):
         # Draw hit box, just for debugging:
-        if DEBUG_MODE:
+        if DEBUG_HITBOXES:
             rect = self.get_rect().move(-camera_pos)
             pg.draw.rect(screen, (255, 0, 0), rect, 2)
 

@@ -218,16 +218,17 @@ class GameWorld:
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]
             parallax_factor: float = 1 - (depth / max_depth)  # Dynamische Berechnung des Parallax-Faktors
+            y_parallax_factor: float = 0.1  # Größer -> stärkeres Y-parallax, niedriger -> schwächeres Y-parallax
 
             # Berechnung der versetzten Hintergrundposition (x und y)
             offset_y: int = layer["offset_y"]
-            bg_pos: pg.Vector2 = pg.Vector2(
-                (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor,
-                offset_y - self.camera_pos.y * parallax_factor / 2)
+            x_pos = (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor
+            y_pos = offset_y - self.camera_pos.y * parallax_factor * y_parallax_factor if y_parallax else offset_y - self.camera_pos.y
+            bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
             bg_width = layer["image"].get_width()
             mod_x = bg_pos.x % bg_width
-            # Hintergrund zeichnen
 
+            # Hintergrund zeichnen
             screen.blit(layer["image"], pg.Vector2(mod_x, bg_pos.y))
             screen.blit(layer["image"], pg.Vector2(mod_x - bg_width, bg_pos.y))
 

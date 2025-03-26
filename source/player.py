@@ -124,9 +124,10 @@ class Player(MovingObject):
             self.velocity.y = -200
             self.invincibility_time = 0.7
 
+            self.sound_manager.play_movement_sound("damage")
+
             if self.player_lives > 1:
                 print("Aua")
-                self.sound_manager.play_movement_sound("damage")
                 self.player_lives -= 1
             else:
                 self.on_player_death("hit by enemy")

@@ -67,7 +67,7 @@ class Egg(AnimatedObject):
             case 38:
                 self.sound_manager.play_system_sound("squish")
             case 53:
-                self.sound_manager.play_system_sound("squish")
+                self.sound_manager.play_system_sound("eye_animation")
 
         if self.animator.is_last_frame():
             self.fade = max(self.fade - 0.016 * self.fade_time, 0.0)
