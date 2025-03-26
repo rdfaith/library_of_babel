@@ -34,7 +34,7 @@ class SoundManager:
 
 
     def play_enemy_sound(self, sound_name):
-        self.settings = load_settings(SETTINGS)
+        self.settings = load_file(SETTINGS)
         if self.current_enemy == sound_name and self.settings["SFX"] == "True":
             if self.current_enemy_sound:
                 self.current_enemy_sound.set_volume(0.6)

@@ -46,3 +46,6 @@ class LightMap:
     def get_flickers(self, max_index: int):
         sources = [ls.flicker for ls in self.get_sources()]
         return sources[:max_index] + [False] * (max_index - len(sources))
+
+    def get_first_source(self):
+        return self.light_sources[0]

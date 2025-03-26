@@ -4,6 +4,10 @@ from source.utils import get_path
 
 DEBUG_MODE = True
 
+# Shader Settings
+LIGHT_DEBUG_MODE = False
+NUM_LIGHTS = 25  # Has to be the same as NUM_LIGHTS in frag_shader.glsl!
+
 FRAME_SIZE = 16
 SCREEN_WIDTH = 320
 SCREEN_HEIGHT = 180
@@ -80,20 +84,21 @@ TILE_MAPPING = {
 #endregion
 
 #Background
-SKYBOX = pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png'))
-BG_LAYERS = [
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0, "depth": 20},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100, "depth": 16},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100, "depth": 12},
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100, "depth": 5},
-]
-
-FG_LAYERS = [
-    {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33, "depth": -5}
-]
+NUM_BG_LAYERS = 4
+# SKYBOX = pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png'))
+# BG_LAYERS = [
+#     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_sky.png')), "offset_y": -0, "depth": 20},
+#     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_3.png')), "offset_y": -100, "depth": 16},
+#     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_2.png')), "offset_y": -100, "depth": 12},
+#     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_1.png')), "offset_y": -100, "depth": 5},
+# ]
+#
+# FG_LAYERS = [
+#     {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": -33, "depth": -5}
+# ]
 
 # Effects
-VIGNETTE = pg.image.load(get_path("assets/sprites/effects/vignette_lesser.png"))
+# VIGNETTE = pg.image.load(get_path("assets/sprites/effects/vignette_lesser.png"))
 
 # Schriftart
 WHITE = (255, 255, 255)
