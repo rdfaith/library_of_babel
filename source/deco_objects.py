@@ -33,3 +33,40 @@ class Hourglass(AnimatedObject):
             10
         )
         super().__init__(position, animation)
+
+class Egg(AnimatedObject):
+    def __init__(self, position):
+        egg_framerate = 8
+        animation: Animation = Animation("egg", get_path("assets/sprites/anim/egg-animation-Sheet.png"),
+                                         40,
+                                         44,
+                                         60,
+                                         egg_framerate,
+                                         True)
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(20, 10),
+            pg.Color((160, 220, 200)),
+            40.0,
+            0.05,
+        )
+        self.egg_anim_timer: float = 60 / 8.0  # Time animation takes (frames / frame rate)
+        self.fade: float = 1.0
+        self.fade_time: float = 2.0  # time to fade after animation ends
+        self.is_animation_over = False
+
+        super().__init__(position, animation, light_source=light_source)
+
+    def draw(self, screen, camera_pos):
+        self.animator.update()
+        position = self.position - camera_pos
+
+        if self.animator.is_last_frame():
+            self.fade = max(self.fade - 0.016 * self.fade_time, 0.0)
+
+        sprite = self.animator.get_frame(1)
+        sprite.set_alpha(255 * self.fade)
+        screen.blit(sprite, position)
+
+        if self.fade == 0.0:
+            self.is_animation_over = True

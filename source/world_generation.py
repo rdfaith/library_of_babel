@@ -54,7 +54,8 @@ def generate_world(map_file_path: str) -> GameWorld:
     current_pos: pg.Vector2 = pg.Vector2(0, 0)
     collision_objects: list[GameObject] = []
     interactable_objects: list[GameObject] = []
-    objects: list[GameObject] = []  # unused currently
+    objects: list[GameObject] = []  # deco objects
+    egg_pos = None
     player_start_pos: pg.Vector2
     level_size: tuple[int, int] = (len(map_data[0]) * FRAME_SIZE, len(map_data) * FRAME_SIZE)
     level_name = map_file_path[14:]
@@ -65,13 +66,13 @@ def generate_world(map_file_path: str) -> GameWorld:
             tile_index = find_tile(pos, map_data)  # Berechnung nur einmal hier
 
             match col:
-                case "block":
+                case "block" | "BL":
                     collision_objects.append(ColliderObject(pos, *get_sprites(tile_index, 0, spritesheets)))
-                case "shelf":
+                case "shelf" | "SH":
                     collision_objects.append(ColliderObject(pos, *get_sprites(tile_index, 1, spritesheets)))
-                case "pillar":
+                case "pillar" | "PR":
                     collision_objects.append(ColliderObject(pos, *get_sprites(tile_index, 2, spritesheets)))
-                case "moving_platform":
+                case "moving_platform" | "mp":
                     collision_objects.append(MovingPlatform(pos.copy()))
                 case "keyhole":
                     interactable_objects.append(Keyhole(pos))
@@ -79,18 +80,20 @@ def generate_world(map_file_path: str) -> GameWorld:
                     collision_objects.append(Door(pos))
                 case "worm":
                     interactable_objects.append(Worm(pos.copy()))
-                case "flying_book":
+                case "flying_book" | "fb":
                     interactable_objects.append(FlyingBook(pos.copy()))
                 case "monkey":
                     interactable_objects.append(Monkey(pos.copy()))
                 case "player":
                     player_start_pos = pg.Vector2(pos.x, pos.y)
-                case "deco_candle":
+                case "deco_candle" | "dc":
                     objects.append(Candle(pos))
-                case "deco_hourglass":
+                case "deco_hourglass" | "dh":
                     objects.append(Hourglass(pos))
-                case "deco_books":
+                case "deco_books" | "db":
                     objects.append(GameObject(pos.copy(), pg.image.load(get_path("assets/sprites/deco/books1.png"))))
+                case "egg":
+                    egg_pos = pos.copy() - pg.Vector2(11, 0)
                 case _:  # letter objects
                     if len(col) == 1:
                         if 65 <= ord(col) <= 90:
@@ -105,5 +108,5 @@ def generate_world(map_file_path: str) -> GameWorld:
         print("ERROR: Player start position not defined for this level!")
 
     game_world: GameWorld = GameWorld(objects, collision_objects, interactable_objects, player_start_pos, level_size,
-                                      level_name)
+                                      level_name, egg_pos=egg_pos)
     return game_world

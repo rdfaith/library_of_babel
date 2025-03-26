@@ -17,6 +17,7 @@ uniform sampler2D fgTex;
 
 uniform float time;
 uniform float moonLightIntensity;
+uniform float lightSourceIntensity;
 uniform ivec2 moonPosition;
 
 uniform bool lightDebugMode;
@@ -83,7 +84,9 @@ vec3 getLight(vec2 worldPos) {
         if (lightFlicker[i]) flicker = flicker + 0.02 * sin(time * 5.0); // Add flicker
         float attenuation = flicker * smoothstep(lightRadii[i], 0.1, distance) * 0.1;
         vec3 light = vec3(lightColors[i] * attenuation);
-        finalLight += light;  // * NdotL; // Apply normal influence
+        // Apply lightSourceIntensity modifier (unless it's the player light source)
+        float intensityModifier =  (i == 0) ? 1.0 : lightSourceIntensity;
+        finalLight += light * intensityModifier;  // * NdotL; // Apply normal influence
     }
 
     return finalLight;

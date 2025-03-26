@@ -198,7 +198,7 @@ def menu_main(running: bool):
 
             game_world.do_updates(delta)
             game_world.do_render(shader)
-            shader.update(game_world.camera_pos, game_world.light_map)
+            shader.update(game_world.camera_pos, game_world.get_light_map())
             delta = clock.tick(60) / 1000
 
         while game_state == GameState.GAME_OVER:
