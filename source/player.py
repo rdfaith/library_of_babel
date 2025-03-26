@@ -136,13 +136,13 @@ class Player(MovingObject):
         self.on_player_death("fell out of bounds")
 
     def check_highscore(self, level, time):
-        filename = get_path("saves/levels.sav")
+        filename = LEVELS
         highscores = load_file(filename)
         minutes = int(time // 60)  # Ganze Minuten
         seconds = round((time % 60) / 100, 2)  # Sekunden als Dezimalanteil korrigiert
         current_time = minutes + seconds
         highscore_text = None
-        if highscores[level] != "None":
+        if highscores[level] != "False":
             if float(highscores[level]) > current_time:
                 highscores[level] = current_time
                 update_file(filename, highscores)

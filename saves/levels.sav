@@ -1,5 +1,2 @@
-hex_1.csv=0.15
-hex_2.csv=99.99
-hex_3.csv=None
-test_map.csv=99.99
-dash_level_test.csv=1.12
+HEX_1.csv=99.99
+HEX_2.csv=False

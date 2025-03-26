@@ -154,10 +154,15 @@ TRUE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggle
 FALSE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggle_off_highlighted.png'))
 
 SETTINGS = get_path("saves/settings.sav")
+LEVELS = get_path("saves/levels.sav")
+
+MENU_OPTIONS = ["RESUME", "RESTART", "LEVEL" "SETTINGS"]
 
 #Fonts
 pg.font.init()
 FONT_8 = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
 FONT_16 = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
 FONT_8_BOLD = pg.font.Font(get_path("assets/fonts/PixelOperator8-Bold.ttf"), 8)
+
+
 

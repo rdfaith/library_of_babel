@@ -19,7 +19,7 @@ class GameWorld:
         self.play_start_position = player_pos
         # self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
-        self.is_moonlight_on = level_name != "hex_1.csv"
+        self.is_moonlight_on = level_name != "HEX_1.csv"
         self.moon_light_intensity: float = 0.0
         self.is_light_sources_on = True
         self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
@@ -58,7 +58,7 @@ class GameWorld:
         ]
 
         self.FG_LAYERS = [
-            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 30,
+            {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 100,
              "depth": -5}
         ]
 
