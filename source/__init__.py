@@ -10,6 +10,7 @@ import pygame as pg
 # Import core utilities
 from .constants import *
 from .utils import get_path
+from .file_editor import *
 
 # Import major classes and objects
 from .sound_manager import SoundManager
