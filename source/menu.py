@@ -17,7 +17,7 @@ class In_Game_Menu:
         self.image = None
         self.settings = load_file(settings_filename)
         self.options = list(self.settings.keys())
-        self.font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)  # Einmalige Initialisierung
+        self.font = FONT_16
 
     def draw_button(self, name, selected_name, screen):
         self.value = self.settings[name]
@@ -76,12 +76,11 @@ def availible_levels(filename: str) -> list:
     return unlocked_levels
 
 def display_levels(levels, selected_level, screen, filename: str):
-    FONT = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
     highscores = load_file(filename)
     for i, option in enumerate(levels):
         color = '#a05b53' if i == selected_level else (244,204,161)
         line = f"{option[:-4]} - {highscores[option]}" if highscores[option] != "None" and highscores[option] != "99.99" else f"{option[:-4]} - None"
-        text = FONT.render(line, True, color)
+        text = FONT_16.render(line, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
 
 def unlock_levels(filename, current_level):
