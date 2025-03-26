@@ -107,12 +107,17 @@ PLAYER_SOUNDS = {
             "jump_up": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
             "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
             "damage": pg.mixer.Sound(get_path("assets/sounds/damage.wav")),
+
+        }
+ENEMY_SOUNDS = {
+            "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
             "idle": None
         }
 SYSTEM_SOUNDS = {
             "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
             "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
+            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3"))
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),

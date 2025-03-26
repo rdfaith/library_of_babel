@@ -1,12 +1,13 @@
 from source import pg
 
 class LightSource:
-    def __init__(self, position: pg.Vector2, offset: pg.Vector2, color: pg.Color, radius: float, intensity: float):
+    def __init__(self, position: pg.Vector2, offset: pg.Vector2, color: pg.Color, radius: float, intensity: float, flicker=False):
         self.position: pg.Vector2 = position + offset  # position of the light in world space
         self.offset: pg.Vector2 = offset  # offset from top left corner of sprite to point in sprite from where light should be emitted
         self.color: pg.Color = color
         self.radius: float = radius
         self.intensity: float = intensity
+        self.flicker: bool = flicker
 
     def set_position(self, pos: pg.Vector2):
         self.position = pos + (self.offset.x, self.offset.y)
@@ -41,3 +42,7 @@ class LightMap:
     def get_radii(self, max_index: int) -> list[float]:
         sources = [ls.radius for ls in self.get_sources()]
         return sources[:max_index] + [0.0] * (max_index - len(sources))
+
+    def get_flickers(self, max_index: int):
+        sources = [ls.flicker for ls in self.get_sources()]
+        return sources[:max_index] + [False] * (max_index - len(sources))

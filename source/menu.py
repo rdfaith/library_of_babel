@@ -1,5 +1,5 @@
 from source import *
-from source.shaders.shader import Shader
+from source.shaders.shader import Shader, FakeShader
 from source.title_screen import TitleScreen
 
 class GameState(Enum):
@@ -222,7 +222,6 @@ def menu_main(running: bool):
 
             # !!! Render with shader (use this instead of display.flip()!!!)
             shader.update(game_world.camera_pos, game_world.light_map)
-
             delta = clock.tick(60) / 1000
 
         while game_state == GameState.GAME_OVER:

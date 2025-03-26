@@ -108,7 +108,6 @@ class Player(MovingObject):
         self.player_lives = 0
         self.state = self.State.DEAD
         self.on_state_changed(self.State.DEAD)
-        self.player_lives = 3
 
     def on_player_win(self):
         self.state = self.State.WIN
@@ -172,6 +171,7 @@ class Player(MovingObject):
 
         if word_completed:
             self.word_animation_timer = 1.0
+            self.sound_manager.play_system_sound("magical_twinkle")
             self.last_word_completed = self.letters_collected.copy()
             self.letters_collected = []
 

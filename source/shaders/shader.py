@@ -37,6 +37,7 @@ class Shader:
         self.render_object = self.ctx.vertex_array(self.program, [(self.quad_buffer, '2f 2f', 'vert', 'texcoord')])
 
         # Fun shader properties here:
+        self.time: float = 0.0  # for effects varying over time
         self.moon_light_intensity: float = 1.0
         self.moon_position: pg.Vector2 = pg.Vector2(62, 62)
 
@@ -68,6 +69,8 @@ class Shader:
             tex.swizzle = 'BGRA'
             tex.write(surf.get_view('1'))
             return tex
+
+        self.time += 0.016
 
         screen_number = 0
 
@@ -104,15 +107,18 @@ class Shader:
         light_colors = [(col.r, col.g, col.b) for col in light_map.get_colors(NUM_LIGHTS)]
         light_intensities = [i for i in light_map.get_intensities(NUM_LIGHTS)]
         light_radii = [i for i in light_map.get_radii(NUM_LIGHTS)]
+        light_flicker = [f for f in light_map.get_flickers(NUM_LIGHTS)]
 
         self.program['lightPositions'] = light_positions
         self.program['lightColors'] = light_colors
         self.program['lightIntensities'] = light_intensities
         self.program['lightRadii'] = light_radii
+        self.program['lightFlicker'] = light_flicker
 
         self.program['moonLightIntensity'] = self.moon_light_intensity
         self.program['moonPosition'] = (int(self.moon_position.x), int(self.moon_position.y))
 
+        self.program['time'] = self.time
         self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
         
         self.program['lightDebugMode'] = self.light_debug_mode

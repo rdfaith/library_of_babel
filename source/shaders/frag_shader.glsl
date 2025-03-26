@@ -28,6 +28,7 @@ uniform vec2 lightPositions[NUM_LIGHTS];
 uniform vec3 lightColors[NUM_LIGHTS];
 uniform float lightIntensities[NUM_LIGHTS];
 uniform float lightRadii[NUM_LIGHTS];
+uniform bool lightFlicker[NUM_LIGHTS];
 
 in vec2 fragTexCoord;
 out vec4 f_color;
@@ -78,7 +79,9 @@ vec3 getLight(vec2 worldPos) {
 //        float NdotL = max(dot(normal, lightVec), 0.0);
 
         // Smoothstep falloff (soft edge falloff)
-        float attenuation = lightIntensities[i] * smoothstep(lightRadii[i], 0.1, distance) * 0.1;
+        float flicker = lightIntensities[i];
+        if (lightFlicker[i]) flicker = flicker + 0.02 * sin(time * 5.0); // Add flicker
+        float attenuation = flicker * smoothstep(lightRadii[i], 0.1, distance) * 0.1;
         vec3 light = vec3(lightColors[i] * attenuation);
         finalLight += light;  // * NdotL; // Apply normal influence
     }
@@ -137,12 +140,9 @@ void main() {
     vec4 gameColor = texture(gameTex, fragTexCoord);
     vec4 uiColor = texture(uiTex, fragTexCoord);
 
-//    vec4 normal = texture(gameNormal, fragTexCoord);
+//  vec4 normal = texture(gameNormal, fragTexCoord);
 
     vec4 color = vec4(0.0);
-
-
-    vec4 onlyLight = vec4(0.5, 0.5, 0.5, 1.0);
 
     vec4 parallaxBG = getParallaxLayersAt(fragTexCoord);
     // Adjust background lighting (general ambient lighting)
@@ -167,10 +167,11 @@ void main() {
 
     // Apply the volumetric light effect
     vec3 lightColor = vec3(0.5, 0.8, 0.95);  // Cold moonlight color
-    float intensity = 0.3 * moonLightIntensity;
+    float flicker = moonLightIntensity + 0.4 * sin(time * 0.75);
+    float intensity = 0.5 * flicker;
     vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * intensity, parallaxBG.a);
 
-    onlyLight = vec4(onlyLight.rgb + lightColor * lightStrength * intensity, onlyLight.a);
+
 
     // Adjust skybox lighting
     bg0 = vec4(bg0.rgb * moonLightIntensity, bg0.a);
@@ -184,7 +185,6 @@ void main() {
     // lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
     gameColor = vec4(gameColor.rgb * lighting, gameColor.a);
 
-    onlyLight = vec4(onlyLight.rgb * lighting, onlyLight.a);
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);
@@ -193,5 +193,10 @@ void main() {
     // Add UI on top and return
     f_color = addLayerColor(color, uiColor);
 
-    if (lightDebugMode) f_color = onlyLight;
+    if (lightDebugMode) {
+        vec4 onlyLight = vec4(0.5, 0.5, 0.5, 1.0);
+        onlyLight = vec4(onlyLight.rgb + lightColor * lightStrength * intensity, onlyLight.a);
+        onlyLight = vec4(onlyLight.rgb * lighting, onlyLight.a);
+        f_color = onlyLight;
+    }
 }

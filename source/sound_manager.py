@@ -17,6 +17,8 @@ class SoundManager:
         self.current_movement_sound = None
         self.current_movement = None
         self.current_system_sound = None
+        self.current_enemy = None
+        self.current_enemy_sound = None
     def play_bg_music(self, menu_state):
         self.settings = load_settings(SETTINGS)
         if self.current_menu_state == menu_state and self.settings["MUSIC"] == "True":
@@ -39,6 +41,29 @@ class SoundManager:
             self.current_bg_music.play(loops=-1)
 
 
+    def play_enemy_sound(self, sound_name):
+        self.settings = load_settings(SETTINGS)
+        if self.current_enemy == sound_name and self.settings["SFX"] == "True":
+            if self.current_enemy_sound:
+                self.current_enemy_sound.set_volume(0.6)
+            return
+        elif self.settings["SFX"] == "False":
+            if self.current_enemy_sound:
+                self.current_enemy_sound.set_volume(0)
+        else:
+
+            for key, value in ENEMY_SOUNDS.items():
+                if value:
+                    value.fadeout(100)
+
+            self.current_enemy = sound_name
+            self.current_enemy_sound = ENEMY_SOUNDS.get(sound_name)
+
+            channel = None
+            if self.current_enemy_sound:
+                channel = self.current_enemy_sound.play(loops=-1)
+
+            return channel  # Return sound channel for directional audio
 
     def play_movement_sound(self, movement_name):
         self.settings = load_settings(SETTINGS)

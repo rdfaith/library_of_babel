@@ -1,6 +1,5 @@
 from source import *
 
-
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int]) -> None:
@@ -19,6 +18,7 @@ class GameWorld:
                                                  self.player.get_rect().y - SCREEN_HEIGHT // 2)
         self.level_width, self.level_height = level_size
         self.play_start_position = player_pos
+        self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
         self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
@@ -36,6 +36,10 @@ class GameWorld:
         """Sets player position, used when initialising level"""
         self.player.get_rect().x = pos.x
         self.player.get_rect().y = pos.y
+
+    # def reset(self):
+    #     self.player.reset()
+    #     self.player.position = self.play_start_position()
 
     def get_light_map(self) -> LightMap:
         return self.light_map
