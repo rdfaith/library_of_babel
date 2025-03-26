@@ -69,9 +69,12 @@ class Player(MovingObject):
         self.dash_timer = 0  # Time left in current dash
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
+        # Value for Double and Wall Jump
+        self.jump_lock = False  # Makes sure that player has to jump multiple times and can't just keep Space pressed
+
         # Double Jump Values
         self.jump_counter = 0  # Counter for how many jumps since on ground
-        self.jump_cooldown_time = 0.35  # Cooldown time until next jump possible
+        self.jump_cooldown_time = 0.25  # Cooldown time until next jump possible
         self.jump_cooldown: float = 0.0  # Time left until cooldown
 
         # Wall Jump Values
@@ -235,12 +238,6 @@ class Player(MovingObject):
         is_grounded = self.check_is_grounded(game_world.static_objects)
         obj_below = self.check_is_grounded(game_world.static_objects)
 
-        # Update Wall Jump Timer
-        if self.wall_jump_timer != 0.0:
-            self.wall_jump_timer -= delta
-            if self.wall_jump_timer <= 0:
-                self.wall_jump_timer = 0.0
-
         # Handle Input, input will be ignored if player is dashing or wall jumping
         if self.dash_timer > 0:  # if dashing
             self.velocity.y = 0  # no y velocity while dashing
@@ -262,14 +259,25 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
+        # Update Jump Lock to check whether player has released the key in between jumps
+        if not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            self.jump_lock = False
+
+        # Update Wall Jump Timer
+        if self.wall_jump_timer != 0.0:
+            self.wall_jump_timer -= delta
+            if self.wall_jump_timer <= 0:
+                self.wall_jump_timer = 0.0
+
         # Wall Jump
         if (self.touching_wall_right or self.touching_wall_left) and not is_grounded and self.wall_jump_timer == 0.0:
             self.jump_counter = 0
-            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
+                self.jump_lock = True
                 self.jump_counter += 1
                 if self.touching_wall_right:
                     self.current_direction = -1
@@ -285,19 +293,21 @@ class Player(MovingObject):
                 self.jump_cooldown = 0.0
 
         if self.jump_counter == 1 and self.jump_cooldown == 0.0:
-            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
+                self.jump_lock = True
                 self.jump_counter += 1
         elif is_grounded:
             self.jump_counter = 0
             self.got_damage = False
-            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_counter += 1
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
+                self.jump_lock = True
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 if self.velocity.x != 0:
                     new_state = self.State.DUCK_WALK
@@ -318,7 +328,6 @@ class Player(MovingObject):
                     else:
                         self.on_player_death("fell from block")
                         self.got_damage = True
-
 
         # Dash
         if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:

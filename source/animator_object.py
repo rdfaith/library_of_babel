@@ -2,7 +2,7 @@ from source import pg
 
 
 class Animation:
-    def __init__(self, name, sprite_sheet, frame_width, frame_height, num_frames, frame_rate, freeze_on_last_frame=False):
+    def __init__(self, name, sprite_sheet, frame_width, frame_height, num_frames, frame_rate=10, freeze_on_last_frame=False):
         self.name = name
         self.sprite_sheet = sprite_sheet
         self.frame_width = frame_width
