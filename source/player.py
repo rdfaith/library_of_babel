@@ -70,25 +70,28 @@ class Player(MovingObject):
         self.dash_timer = 0  # Time left in current dash
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
+        # Value for Double and Wall Jump
+        self.jump_lock = False  # Makes sure that player has to jump multiple times and can't just keep Space pressed
+
         # Double Jump Values
         self.jump_counter = 0  # Counter for how many jumps since on ground
-        self.jump_cooldown_time = 0.2  # Cooldown time until next jump possible
+        self.jump_cooldown_time = 0.25  # Cooldown time until next jump possible
         self.jump_cooldown: float = 0.0  # Time left until cooldown
 
         # Wall Jump Values
         self.touching_wall_left = False
         self.touching_wall_right = False
         self.wall_jump_timer = 0.0  # Time left in current wall jump lock
-        self.wall_jump_lock_time = 0.2  # Time that player movement is supposed to be locked
+        self.wall_jump_lock_time = 0.3  # Time that player movement is supposed to be locked
 
         # Define Animations
-        self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 18)
-        self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
-        self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
-        self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
-        self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
-        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
-        self.dash = Animation("dash", get_path('assets/test/dino-dash.png'), 32, 24, 1, 10)
+        self.run = Animation("run", get_path('assets/sprites/anim/dino-run-Sheet.png'), 24, 24, 9, 18)
+        self.idle = Animation("idle", get_path('assets/sprites/anim/dino-idle-Sheet.png'), 24, 24, 6, 10)
+        self.jump_up = Animation("jump_up", get_path('assets/sprites/anim/dino-jump-Sheet.png'), 24, 24, 3, 6, True)
+        self.fall = Animation("fall", get_path('assets/sprites/anim/dino-fall-Sheet.png'), 24, 24, 3, 24, True)
+        self.duck_walk = Animation("duck_run", get_path('assets/sprites/anim/dino-duck-walk-Sheet.png'), 24, 24, 6, 14)
+        self.duck_idle = Animation("duck_idle", get_path('assets/sprites/anim/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
+        self.dash = Animation("dash", get_path('assets/sprites/anim/dino-dash-Sheet.png'), 32, 24, 1, 1)
         self.dead = Animation("dead", get_path('assets/sprites/anim/dino-death-Sheet.png'), 24, 24, 8, 8)
         self.win = Animation("win", get_path('assets/sprites/anim/dino-win-Sheet.png'), 24, 24, 4, 8)
 
@@ -129,6 +132,24 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
+    def check_highscore(self, level, time):
+        print(time)
+        filename = get_path("saves/levels.sav")
+        highscores = load_file(filename)
+        minutes = int(time // 60)  # Ganze Minuten
+        seconds = round((time % 60) / 100, 2)  # Sekunden als Dezimalanteil korrigiert
+        current_time = minutes + seconds
+        print(current_time)
+        if highscores[level] != "None":
+            if float(highscores[level]) > current_time:
+                highscores[level] = current_time
+                update_file(filename, highscores)
+                print(f"New best Time for {level[:-4]} with {current_time}")
+        else:
+            highscores[level] = current_time
+            update_file(filename, highscores)
+            print(f"New best Time for {level[:-4]} with {current_time}")
+
     def on_pickup_key(self):
         self.has_key = True
 
@@ -163,6 +184,7 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
+                self.check_highscore(game_world.level_name, game_world.level_timer)
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht")
@@ -242,26 +264,12 @@ class Player(MovingObject):
         is_grounded = self.check_is_grounded(game_world.static_objects)
         obj_below = self.check_is_grounded(game_world.static_objects)
 
-        # Dash
-        if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:
-            self.has_gravity = False
-            self.dash_timer = self.dash_time  # Start dash duration
-            self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
-            self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
-            new_state = self.State.DASH
-
-        # Update Wall Jump Timer
-        if self.wall_jump_timer != 0.0:
-            self.wall_jump_timer -= delta
-            if self.wall_jump_timer <= 0:
-                self.wall_jump_timer = 0.0
-
         # Handle Input, input will be ignored if player is dashing or wall jumping
         if self.dash_timer > 0:  # if dashing
             self.velocity.y = 0  # no y velocity while dashing
         elif self.wall_jump_timer != 0.0:
             pass
-        else:  # if not dashing
+        else:  # if not dashing and not wall jumping
             if keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.velocity.x = -self.speed_x  # Move left
                 self.current_direction = -1
@@ -277,14 +285,26 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
+        # Update Jump Lock to check whether player has released the key in between jumps
+        if not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            self.jump_lock = False
+
+        # Update Wall Jump Timer
+        if self.wall_jump_timer != 0.0:
+            self.wall_jump_timer -= delta
+            if self.wall_jump_timer <= 0:
+                self.wall_jump_timer = 0.0
+
         # Wall Jump
         if (self.touching_wall_right or self.touching_wall_left) and not is_grounded and self.wall_jump_timer == 0.0:
-            self.jump_counter = 2
-            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            self.jump_counter = 0
+            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
+                self.jump_lock = True
+                self.jump_counter += 1
                 if self.touching_wall_right:
                     self.current_direction = -1
                     self.velocity.x = -self.speed_x
@@ -299,19 +319,21 @@ class Player(MovingObject):
                 self.jump_cooldown = 0.0
 
         if self.jump_counter == 1 and self.jump_cooldown == 0.0:
-            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
+                self.jump_lock = True
                 self.jump_counter += 1
         elif is_grounded:
             self.jump_counter = 0
             self.got_damage = False
-            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_counter += 1
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
+                self.jump_lock = True
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 if self.velocity.x != 0:
                     new_state = self.State.DUCK_WALK
@@ -333,10 +355,19 @@ class Player(MovingObject):
                         self.on_player_death("fell from block")
                         self.got_damage = True
 
+        # Dash
+        if self.is_dash_unlocked and keys[pg.K_LSHIFT] and self.dash_cooldown_timer <= 0 and self.dash_timer <= 0:
+            self.has_gravity = False
+            self.dash_timer = self.dash_time  # Start dash duration
+            self.dash_cooldown_timer = self.dash_cooldown  # Start cooldown
+            self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
+            new_state = self.State.DASH
+
         # Handle Dash Duration
         if self.dash_timer > 0:
             self.dash_timer -= delta
             if self.dash_timer <= 0:  # Dash ends
+                self.dash_timer = 0.0
                 self.velocity.x = 0 if not (keys[pg.K_LEFT] or keys[pg.K_RIGHT]) else self.velocity.x
                 new_state = self.State.RUN if (keys[pg.K_LEFT] or keys[pg.K_RIGHT]) else self.State.IDLE
                 self.has_gravity = True
@@ -344,6 +375,8 @@ class Player(MovingObject):
         # Handle Dash Cooldown Timer
         if self.dash_cooldown_timer > 0:
             self.dash_cooldown_timer -= delta
+            if self.dash_cooldown_timer <= 0:
+                self.dash_cooldown_timer = 0.0
 
         # Not crouch -> crouch
         if (self.state != self.State.DUCK_IDLE or self.state != self.State.DUCK_WALK) and (
@@ -354,18 +387,14 @@ class Player(MovingObject):
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
                 new_state = self.state  # Set back to DUCK
 
+        if self.dash_timer != 0:
+            new_state = self.State.DASH
+
         if new_state != self.state:
             self.state = new_state
             self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
-        def check_highscore(level, time):
-            filename = get_path("saves/highscores.sav")
-            highscores = menu.load_settings(filename)
-            if highscores[level] > time:
-                highscores[level] = time
-                menu.update_settings(filename, highscores)
-                print(f"New best Time for {level} with {time}")
 
         if self.word_animation_timer > 0:
             self.word_animation_timer = max(self.word_animation_timer - delta, 0)

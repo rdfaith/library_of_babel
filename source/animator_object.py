@@ -1,13 +1,15 @@
 from source import pg
 
+
 class Animation:
-    def __init__(self, name, sprite_sheet, frame_width, frame_height, num_frames, frame_rate):
+    def __init__(self, name, sprite_sheet, frame_width, frame_height, num_frames, frame_rate=10, freeze_on_last_frame=False):
         self.name = name
         self.sprite_sheet = sprite_sheet
         self.frame_width = frame_width
         self.frame_height = frame_height
         self.num_frames = num_frames
         self.frame_rate = frame_rate
+        self.freeze_on_last_frame = freeze_on_last_frame
 
 
 class Animator:
@@ -31,11 +33,15 @@ class Animator:
         return frames
 
     def update(self):
-        """Update animation frame based on time."""
+        """Update animation frame based on time. If freeze_on_last_frame is activated, the animation does not loop."""
         now = pg.time.get_ticks()
         if now - self.last_update > 1000 // self.frame_rate:
             self.last_update = now
-            self.current_frame = (self.current_frame + 1) % self.num_frames
+            if self.current_animation.freeze_on_last_frame:
+                if self.current_frame < self.num_frames - 1:
+                    self.current_frame += 1
+            else:
+                self.current_frame = (self.current_frame + 1) % self.num_frames
 
     def reset_animation(self):
         self.current_frame = 0

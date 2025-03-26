@@ -75,7 +75,7 @@
 #                     menu = False
 #                     level_selection = True
 #     while level_selection:
-#         unlocked_level = load_score(get_path("saves/unlocked_levels.sav"))
+#         unlocked_level = load_score(get_path("saves/levels.sav"))
 #         print(unlocked_level)
 #         # Menüoptionen
 #         screen.fill((0, 0, 0))
@@ -116,7 +116,7 @@
 #                 print("test")
 #             if event.type == pg.USEREVENT + 2:
 #                 unlocked_level = f"{level[:-1]}{int(level[-1]) + 1}"
-#                 write_score(get_path("saves/unlocked_levels.sav"), unlocked_level)
+#                 write_score(get_path("saves/levels.sav"), unlocked_level)
 #                 game_world = load_world(unlocked_level)
 #                 clock = pg.time.Clock()
 #                 game_world.do_updates(delta)

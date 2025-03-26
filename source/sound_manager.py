@@ -1,13 +1,5 @@
 from source import *
 
-def load_settings(filename: str) -> dict:
-    settings = dict()
-
-    with open(filename, 'r') as file:
-        for line in file:
-            key, value = line.strip().split('=')
-            settings[key] = value
-    return settings
 
 class SoundManager:
     def __init__(self):
@@ -20,7 +12,7 @@ class SoundManager:
         self.current_enemy = None
         self.current_enemy_sound = None
     def play_bg_music(self, menu_state):
-        self.settings = load_settings(SETTINGS)
+        self.settings = load_file(SETTINGS)
         if self.current_menu_state == menu_state and self.settings["MUSIC"] == "True":
             self.current_bg_music.set_volume(1)
             return
@@ -66,7 +58,7 @@ class SoundManager:
             return channel  # Return sound channel for directional audio
 
     def play_movement_sound(self, movement_name):
-        self.settings = load_settings(SETTINGS)
+        self.settings = load_file(SETTINGS)
         if self.current_movement == movement_name and self.settings["SFX"] == "True":
             if self.current_movement_sound:
                 self.current_movement_sound.set_volume(0.5)
@@ -87,7 +79,7 @@ class SoundManager:
                 self.current_movement_sound.play(loops=-1)
 
     def play_system_sound(self, system_sound_name):
-        self.settings = load_settings(SETTINGS)
+        self.settings = load_file(SETTINGS)
 
         if self.current_system_sound:
             self.current_system_sound.stop()
