@@ -1,24 +1,14 @@
-# Example file showing a basic pygame "game loop"
-import sys
-import pygame as pg
-import object_classes
-import world_generation
-from utils import *
-from constants import *
-from sound_manager import *
-import os
-from shaders.shader import Shader, FakeShader
-from enum import Enum
-from title_screen import TitleScreen
-from file_editor import *
+from source import *
+from source.shaders.shader import Shader
+from source.title_screen import TitleScreen
 
-# pygame setup
 class GameState(Enum):
     START = 1
     LEVEL_SELECTION = 2
     GAME = 3
     GAME_OVER = 4
     IN_GAME_MENU = 5
+
 
 class In_Game_Menu:
     def __init__(self, settings_filename: str):
@@ -27,6 +17,7 @@ class In_Game_Menu:
         self.image = None
         self.settings = load_file(settings_filename)
         self.options = list(self.settings.keys())
+        print(self.settings)
 
     def draw_button(self, name, selected_name, screen):
         self.font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
@@ -106,7 +97,7 @@ def get_shader():
         shader = FakeShader(SCREEN_WIDTH, SCREEN_HEIGHT)
     return shader
 
-def main(running: bool):
+def menu_main(running: bool):
 
     # variablen
     selected_level = 0
@@ -135,6 +126,7 @@ def main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
 
                 if event.type == pg.KEYDOWN:
@@ -161,6 +153,7 @@ def main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_DOWN:
@@ -207,6 +200,7 @@ def main(running: bool):
                     game_world.on_player_collected_light()
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
 
             game_world.do_updates(delta)
@@ -230,6 +224,7 @@ def main(running: bool):
                         game_state = GameState.GAME
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
 
             clock.tick(60)
@@ -241,6 +236,7 @@ def main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
+                    pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_DOWN:

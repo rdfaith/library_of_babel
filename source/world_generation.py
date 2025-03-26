@@ -1,10 +1,5 @@
-import pygame as pg
-import csv
-from object_classes import *
-from deco_objects import *
-from game_world import *
-from constants import *
-from utils import *
+from source import *
+from source.object_classes import GameObject, ColliderObject
 
 
 def read_map(map_file_path: str) -> list[list[str]]:
@@ -40,9 +35,9 @@ def get_frame(frame_x: int, frame_y: int, tileset_file_path: str) -> pg.Surface:
     return frame
 
 
-def get_sprite_and_collider(frame_x: int, frame_y: int) -> (pg.Surface, pg.Surface):
+def get_sprites(frame_x: int, frame_y: int) -> (pg.Surface, pg.Surface):
     """Extrahiert sprite und Kollisions-sprite aus den standard tilesets"""
-    return get_frame(frame_x, frame_y, DEFAULT_TILESET), get_frame(frame_x, frame_y, DEFAULT_COLLIDER_TILESET)
+    return get_frame(frame_x, frame_y, DEFAULT_TILESET), get_frame(frame_x, frame_y, DEFAULT_COLLIDER_TILESET), get_frame(frame_x, frame_y, DEFAULT_NORMAL_TILESET)
 
 
 def generate_world(map_file_path: str) -> GameWorld:
@@ -73,11 +68,11 @@ def generate_world(map_file_path: str) -> GameWorld:
 
             match col:
                 case "block":
-                    collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 0)))
+                    collision_objects.append(ColliderObject(pos, *get_sprites(find_tile(pos, map_data), 0)))
                 case "shelf":
-                    collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 1)))
+                    collision_objects.append(ColliderObject(pos, *get_sprites(find_tile(pos, map_data), 1)))
                 case "pillar":
-                    collision_objects.append(ColliderObject(pos, *get_sprite_and_collider(find_tile(pos, map_data), 2)))
+                    collision_objects.append(ColliderObject(pos, *get_sprites(find_tile(pos, map_data), 2)))
                 case "moving_platform":
                     collision_objects.append(MovingPlatform(pos.copy()))
                 case "keyhole":
@@ -86,6 +81,8 @@ def generate_world(map_file_path: str) -> GameWorld:
                     collision_objects.append(Door(pos))
                 case "worm":
                     interactable_objects.append(Worm(pos.copy()))
+                case "flying_book":
+                    interactable_objects.append(FlyingBook(pos.copy()))
                 case "monkey":
                     interactable_objects.append(Monkey(pos.copy()))
                 case "player":

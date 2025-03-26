@@ -1,13 +1,5 @@
-import pygame
-import pygame as pg
-
-from utils import *
-from object_classes import *
-from animator_object import *
-from enum import Enum
-from sound_manager import *
-from light_source import LightSource
-from file_editor import *
+from source import *
+from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy
 
 
 class Player(MovingObject):
@@ -23,7 +15,7 @@ class Player(MovingObject):
         DEAD = 8
         WIN = 9
 
-    def __init__(self, position: pygame.Vector2):
+    def __init__(self, position: pg.Vector2):
         image = pg.image.load(get_path('assets/sprites/dino/test_dino.png')).convert()
         hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert()
         hitbox_image_crouch = pg.image.load(get_path('assets/sprites/dino/test_hitbox_crouch.png')).convert()
@@ -34,10 +26,10 @@ class Player(MovingObject):
 
         self.light_source: LightSource = LightSource(
             self.position,
-            pg.Vector2(12, 12),
+            pg.Vector2(5, 5),
             pg.Color((100, 180, 250)),
             25.0,
-            0.04
+            0.03
         )
 
         self.letters_collected: list[str] = []
@@ -55,10 +47,14 @@ class Player(MovingObject):
             self.is_jump_unlocked: bool = True
             self.is_crouch_unlocked: bool = True
             self.is_dash_unlocked: bool = True
+            self.is_wall_jump_unlocked: bool = True
+            self.is_double_jump_unlocked: bool = True
         else:
             self.is_jump_unlocked: bool = False
             self.is_crouch_unlocked: bool = False
             self.is_dash_unlocked: bool = False
+            self.is_wall_jump_unlocked: bool = True
+            self.is_double_jump_unlocked: bool = False
 
         # Does Player have nonsense word?
         self.has_wrong_word = False
@@ -74,18 +70,25 @@ class Player(MovingObject):
         self.dash_cooldown_timer = 0  # Cooldown timer after dash
 
         # Double Jump Values
-        self.jump_counter = 0
-        self.jump_cooldown: float = 0.0
+        self.jump_counter = 0  # Counter for how many jumps since on ground
+        self.jump_cooldown_time = 0.35  # Cooldown time until next jump possible
+        self.jump_cooldown: float = 0.0  # Time left until cooldown
+
+        # Wall Jump Values
+        self.touching_wall_left = False
+        self.touching_wall_right = False
+        self.wall_jump_timer = 0.0  # Time left in current wall jump lock
+        self.wall_jump_lock_time = 0.3  # Time that player movement is supposed to be locked
 
         # Define Animations
-        self.run = Animation("run", get_path('assets/test/dino-run-test-Sheet.png'), 24, 24, 9, 18)
-        self.idle = Animation("idle", get_path('assets/test/dino-test-idle-Sheet.png'), 24, 24, 6, 10)
-        self.jump_up = Animation("jump_up", get_path('assets/test/dino-jump-up-Sheet.png'), 24, 24, 6, 30)
-        self.fall = Animation("fall", get_path('assets/test/dino-fall-Sheet.png'), 24, 24, 8, 24)
-        self.duck_walk = Animation("duck_run", get_path('assets/test/dino-duck-walk-Sheet.png'), 24, 24, 6, 10)
-        self.duck_idle = Animation("duck_idle", get_path('assets/test/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
+        self.run = Animation("run", get_path('assets/sprites/anim/dino-run-Sheet.png'), 24, 24, 9, 18)
+        self.idle = Animation("idle", get_path('assets/sprites/anim/dino-idle-Sheet.png'), 24, 24, 6, 10)
+        self.jump_up = Animation("jump_up", get_path('assets/sprites/anim/dino-jump-Sheet.png'), 24, 24, 3, 6, True)
+        self.fall = Animation("fall", get_path('assets/sprites/anim/dino-fall-Sheet.png'), 24, 24, 3, 24, True)
+        self.duck_walk = Animation("duck_run", get_path('assets/sprites/anim/dino-duck-walk-Sheet.png'), 24, 24, 6, 14)
+        self.duck_idle = Animation("duck_idle", get_path('assets/sprites/anim/dino-duck-idle-Sheet.png'), 24, 24, 1, 10)
         self.dash = Animation("dash", get_path('assets/test/dino-dash.png'), 32, 24, 1, 10)
-        self.dead = Animation("dead", get_path('assets/test/dino-death-Sheet.png'), 24, 24, 8, 8)
+        self.dead = Animation("dead", get_path('assets/sprites/anim/dino-death-Sheet.png'), 24, 24, 8, 8)
         self.win = Animation("win", get_path('assets/sprites/anim/dino-win-Sheet.png'), 24, 24, 4, 8)
 
         self.active_animation = self.idle
@@ -155,6 +158,7 @@ class Player(MovingObject):
 
         if len(self.letters_collected) < 5:  # return True if can pick up
             self.letters_collected.append(letter)
+            self.sound_manager.play_system_sound("collect")
             result = True
 
         word = "".join(self.letters_collected).upper()
@@ -172,8 +176,7 @@ class Player(MovingObject):
                 self.is_dash_unlocked = True
                 word_completed = True
             case "KEY":
-                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64),
-                                                                 pg.image.load(get_path('assets/test/key.png')), True))
+                game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64)))
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
@@ -181,14 +184,13 @@ class Player(MovingObject):
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht")
-                pg.event.post(pygame.event.Event(WORD_LIGHT))
+                pg.event.post(pg.event.Event(WORD_LIGHT))
                 word_completed = True
-
 
         if word_completed:
             self.letters_collected = []
 
-        if len(self.letters_collected) >= 5 and not word_completed:
+        if len(self.letters_collected) >= 5 and not word_completed and word != "BABEL":
             self.has_wrong_word = True
 
         return result
@@ -260,9 +262,17 @@ class Player(MovingObject):
             self.velocity.x = self.current_direction * self.dash_speed  # Apply dash speed
             new_state = self.State.DASH
 
-        # Handle Input, input will be ignored if player is dashing
+        # Update Wall Jump Timer
+        if self.wall_jump_timer != 0.0:
+            self.wall_jump_timer -= delta
+            if self.wall_jump_timer <= 0:
+                self.wall_jump_timer = 0.0
+
+        # Handle Input, input will be ignored if player is dashing or wall jumping
         if self.dash_timer > 0:  # if dashing
             self.velocity.y = 0  # no y velocity while dashing
+        elif self.wall_jump_timer != 0.0:
+            pass
         else:  # if not dashing
             if keys[pg.K_a] or keys[pg.K_LEFT]:
                 self.velocity.x = -self.speed_x  # Move left
@@ -279,6 +289,21 @@ class Player(MovingObject):
             if isinstance(obj_below, MovingPlatform):
                 self.velocity.x += obj_below.current_direction * obj_below.speed_x
 
+        # Wall Jump
+        if (self.touching_wall_right or self.touching_wall_left) and not is_grounded and self.wall_jump_timer == 0.0:
+            self.jump_counter = 2
+            if self.is_wall_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+                self.velocity.y = -self.jump_force
+                new_state = self.State.JUMP
+                self.jump_cooldown = self.jump_cooldown_time
+                self.wall_jump_timer = self.wall_jump_lock_time
+                if self.touching_wall_right:
+                    self.current_direction = -1
+                    self.velocity.x = -self.speed_x
+                else:
+                    self.current_direction = 1
+                    self.velocity.x = self.speed_x
+
         # Jumping and Y-Velocity
         if self.jump_cooldown != 0.0:
             self.jump_cooldown -= delta
@@ -286,11 +311,10 @@ class Player(MovingObject):
                 self.jump_cooldown = 0.0
 
         if self.jump_counter == 1 and self.jump_cooldown == 0.0:
-            if self.is_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
+            if self.is_double_jump_unlocked and (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_counter += 1
-                print(f"double jump at {self.jump_counter}")
         elif is_grounded:
             self.jump_counter = 0
             self.got_damage = False
@@ -298,8 +322,8 @@ class Player(MovingObject):
                 self.velocity.y = -self.jump_force
                 new_state = self.State.JUMP
                 self.jump_counter += 1
-                self.jump_cooldown = 0.3
-                print(f"jump at {self.jump_counter}")
+                self.jump_cooldown = self.jump_cooldown_time
+                self.wall_jump_timer = self.wall_jump_lock_time
             elif self.is_crouch_unlocked and (keys[pg.K_LCTRL] or keys[pg.K_s] or keys[pg.K_DOWN]):
                 if self.velocity.x != 0:
                     new_state = self.State.DUCK_WALK
@@ -338,8 +362,7 @@ class Player(MovingObject):
                 new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
             self.set_hitbox("crouch")
         # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
-        if (
-                self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
+        if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
                 new_state = self.state  # Set back to DUCK
 
@@ -350,7 +373,7 @@ class Player(MovingObject):
     def update(self, delta: float, game_world):
 
         if self.state == self.State.DEAD or self.state == self.State.WIN:
-
+            self.velocity.x = 0
             if self.time_until_over != 0:
                 self.time_until_over -= delta
                 super().update(delta, game_world)
@@ -359,13 +382,13 @@ class Player(MovingObject):
                     self.time_until_over = 0
             else:
                 if self.state == self.State.DEAD:
-                    pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
+                    pg.event.post(pg.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
                 elif self.state == self.State.WIN:
-                    pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
-
+                    pg.event.post(pg.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
+                    # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
         else:
             # get player movement
-            keys = pygame.key.get_pressed()
+            keys = pg.key.get_pressed()
 
             # Check invincibility frames
             if self.invincibility_time > 0:
@@ -380,6 +403,17 @@ class Player(MovingObject):
                     self.bounce_velocity_x = 0
                 else:
                     self.velocity.x = self.bounce_velocity_x
+
+            self.touching_wall_left = False
+            self.touching_wall_right = False
+
+            for obj in game_world.static_objects:
+                preview_rect_right = self.get_rect().move(1, 0)
+                preview_rect_left = self.get_rect().move(-1, 0)
+                if preview_rect_right.colliderect(obj.get_rect()):
+                    self.touching_wall_right = True
+                elif preview_rect_left.colliderect(obj.get_rect()):
+                    self.touching_wall_left = True
 
             #  Interact with interactable game elements and call their on_collide function
             self.do_interaction(game_world)

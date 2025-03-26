@@ -1,6 +1,6 @@
 import pygame as pg
-from utils import get_path
 import os
+from source.utils import get_path
 
 DEBUG_MODE = True
 
@@ -37,6 +37,12 @@ HEART_POS_2: pg.Vector2 = pg.Vector2(50, 2)
 UI_HEART_POSITIONS: list[pg.Vector2] = [HEART_POS_0, HEART_POS_1, HEART_POS_2]
 
 UI_KEY_POSITION: pg.Vector2 = pg.Vector2(20, 20)
+
+# COLORS
+COLOR_GOLD = pg.Color('#f4b41b')
+COLOR_PALEBLUE = pg.Color('#8aebf1')
+COLOR_SILVER = pg.Color('#dff6f5')
+COLOR_ORANGE = pg.Color('#f47e1b')
 
 # LETTER_POS_0: pg.Vector2 = pg.Vector2(256, 0)
 UI_LETTER_POSITIONS: list[pg.Vector2] = []
@@ -105,6 +111,8 @@ PLAYER_SOUNDS = {
         }
 SYSTEM_SOUNDS = {
             "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
+            "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
+            "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),

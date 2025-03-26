@@ -1,15 +1,4 @@
-import math
-
-import pygame as pg
-from player import Player
-from object_classes import *
-from constants import *
-from source.file_editor import load_file
-from utils import *
-from light_source import *
-import math
-import sound_manager
-
+from source import *
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
@@ -84,14 +73,15 @@ class GameWorld:
 
         ui_screen = shader.get_ui_screen()
         game_screen = shader.get_game_screen()
-        # normal_screen = shader.game_normal_screen
+        normal_screen = shader.get_normal_screen()
 
         bg_screens = shader.get_bg_screens()
+        fg_screen = shader.get_fg_screen()
 
         for screen in bg_screens:
             screen.fill((0, 0, 0, 0))
-
-        # normal_screen.fill((0, 0, 0, 0))
+        fg_screen.fill((0, 0, 0, 0))
+        normal_screen.fill((0, 0, 0, 0))
         game_screen.fill((0, 0, 0, 0))
         ui_screen.fill((0, 0, 0, 0))
 
@@ -184,6 +174,7 @@ class GameWorld:
                  "depth": 5},
             ]
 
+
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for i in range(len(BG_LAYERS)):
                 if BG_LAYERS[i]["depth"] > 0:
@@ -191,10 +182,15 @@ class GameWorld:
 
         def draw_fg_parallax():
             """Draws the foreground parallax layers"""
+
+            FG_LAYERS = [
+                {"image": pg.image.load(get_path('assets/sprites/parallax/parallax_bg_-1.png')), "offset_y": 30,
+                 "depth": -5}
+            ]
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for layer in FG_LAYERS:
                 if layer["depth"] <= 0:
-                    draw_parallax_layer(layer, max_depth, False)
+                    draw_parallax_layer(layer, max_depth, False, screen=fg_screen)
 
         def draw_post_processing():
             """Adds visual effects and post-processing"""
@@ -202,11 +198,6 @@ class GameWorld:
             player_position = self.player.get_rect().topleft - self.player.get_sprite_offset() - self.camera_pos
             vignette_position = player_position - pg.Vector2(vignette.get_width() / 2, vignette.get_height() / 2)
             game_screen.blit(VIGNETTE, vignette_position)
-
-        def draw_normal_map(screen):
-            for o in self.get_all_objects():
-                if o.get_normal():
-                    screen.blit(o.get_normal(), o.position)
 
         #endregion
 
@@ -224,21 +215,21 @@ class GameWorld:
         self.light_map.clear_sources()
         self.light_map.add_source(self.player.light_source)
 
-        for o in self.objects:
+        for o in self.get_all_objects():
+            # get light source
             light_source = o.get_light_source()
             if light_source:
                 self.light_map.add_source(light_source)
+            # draw normal
+            # o.draw_normal(normal_screen, camera_pos=self.camera_pos)
 
         shader.set_moon_light_intensity(self.moon_light_intensity)
 
         # draw player
         self.player.draw(game_screen, self.camera_pos)
 
-        # draw normal maps
-        # draw_normal_map(normal_screen)
-
         # draw foreground parallax
-        # draw_fg_parallax()
+        draw_fg_parallax()
 
         # Visual effects
         # draw_post_processing()

@@ -1,16 +1,9 @@
-import pygame as pg
-from utils import *
-from hitbox import Hitbox
-from animator_object import *
-from constants import *
-from enum import Enum
-from light_source import LightSource
-
+from source import *
 
 class GameObject:
     def __init__(self, position: pg.Vector2, image: pg.Surface, normal: pg.Surface = None, light_source: LightSource = None):
         self.image = image.convert_alpha()  # Sprite image
-        self.normal: pg. Surface = normal.convert_alpha() if normal else image.copy().fill((0, 0, 0, 0)) # Sprite normal map
+        self.normal: pg. Surface = normal if normal else None
         self.position = position.copy()
         self.light_source = light_source  # Leave None if no light source
 
@@ -21,6 +14,12 @@ class GameObject:
         """Draw object on screen."""
         position = self.position - camera_pos
         screen.blit(self.image, position)
+
+    def draw_normal(self, screen, camera_pos):
+        """Draw normal of object on screen."""
+        if self.normal:
+            position = self.position - camera_pos
+            screen.blit(self.normal, position)
 
     def get_light_source(self):
         return self.light_source
@@ -46,8 +45,8 @@ class AnimatedObject(GameObject):
 class ColliderObject(GameObject):
     """Base class for all object with a collider"""
 
-    def __init__(self, position: pg.Vector2, image: pg.Surface, hitbox_image: pg.Surface = None, normal_image: pg.Surface = None):
-        super().__init__(position, image, normal=normal_image)
+    def __init__(self, position: pg.Vector2, image: pg.Surface, hitbox_image: pg.Surface = None, normal_image: pg.Surface = None, light_source=None):
+        super().__init__(position, image, normal=normal_image, light_source=light_source)
 
         # Use image to generate hitbox if no other hitbox is provided:
         if hitbox_image:
@@ -109,10 +108,10 @@ class MovingObject(InteractableObject):
     """Base class for all moving objects with physical collision handling"""
 
     def __init__(self, position: pg.Vector2, image: pg.Surface, has_gravity: bool,
-                 hitbox_image: pg.Surface = None):
-        super().__init__(position, image, hitbox_image)
+                 hitbox_image: pg.Surface = None, light_source=None):
+        super().__init__(position, image, hitbox_image, light_source=light_source)
         self.max_y_velocity = 800.0
-        self.gravity = 15.0
+        self.gravity = 18.0
         self.speed_x = 75.0
         self.speed_y = 0.0
         self.velocity = pg.Vector2(0.0, 0.0)
@@ -158,9 +157,9 @@ class MovingObject(InteractableObject):
         colliding_object = self.check_collision(rect, game_world.static_objects)
         if colliding_object:
             self.has_collided = True
-            if dx > 0:  # Moving right
+            if self.position.x < colliding_object.position.x:  # Moving right
                 rect.right = colliding_object.get_rect().left
-            elif dx < 0:  # Moving left
+            elif self.position.x > colliding_object.position.x:  # Moving left
                 rect.left = colliding_object.get_rect().right
             self.position.x, _ = rect.topleft  # Reset precise position
 
@@ -170,11 +169,11 @@ class MovingObject(InteractableObject):
 
         colliding_object = self.check_collision(rect, game_world.static_objects)
         if colliding_object:
-            if dy > 0:  # Falling down
+            if self.position.y < colliding_object.position.y:  # Falling down
                 rect.bottom = colliding_object.get_rect().top
                 self.velocity.y = 0
                 # self.on_ground = True
-            elif dy < 0:  # Hitting the ceiling
+            elif self.position.y > colliding_object.position.y:  # Hitting the ceiling
                 rect.top = colliding_object.get_rect().bottom
                 self.velocity.y = 0
             _, self.position.y = rect.topleft  # Reset precise position
@@ -184,7 +183,16 @@ class LetterPickUp(InteractableObject):
     def __init__(self, position: pg.Vector2, letter: str):
         self.letter = letter
         image = LETTER_IMAGES[letter]
-        super().__init__(position, image, image)
+        offset = pg.Vector2(4, 4)
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(4, 4),
+            COLOR_GOLD,
+            10.0,
+            0.05
+        )
+
+        super().__init__(position.copy() + offset, image, image, light_source=light_source)
 
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
@@ -241,6 +249,19 @@ class Keyhole(InteractableObject):
 
 
 class KeyPickUp(MovingObject):
+
+    def __init__(self, position):
+        image = pg.image.load(get_path('assets/test/key.png'))
+        light_source = LightSource(
+            position.copy(),
+            pg.Vector2(4, 4),
+            COLOR_GOLD,
+            10.0,
+            0.01
+        )
+        super().__init__(position.copy(), image, True, light_source=light_source)
+
+
     def on_collide(self, player, game_world) -> None:
         player.on_pickup_key()
         game_world.interactable_objects.remove(self)
@@ -270,8 +291,8 @@ class MovingPlatform(MovingObject):
 
 class Enemy(MovingObject):
 
-    def __init__(self, position: pg.Vector2, image: pg.Surface, gravity: bool):
-        super().__init__(position, image, gravity)
+    def __init__(self, position: pg.Vector2, image: pg.Surface, gravity: bool, hitbox_image = None):
+        super().__init__(position, image, gravity, hitbox_image=hitbox_image)
         self.current_direction = 1
 
 
@@ -361,6 +382,95 @@ class Worm(Enemy):
         # screen.blit(self.animator.get_frame(self.current_direction), position)
         # Draw hit box, just for debugging:
         # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+
+
+class FlyingBook(Enemy):
+
+    class State(Enum):
+        FLY = 1
+        DEAD = 2
+
+    def __init__(self, position: pg.Vector2):
+        hitbox_image = pg.image.load(get_path("assets/sprites/anim/flying_book_hitbox.png"))
+
+        super().__init__(position, hitbox_image, False, hitbox_image=hitbox_image)
+        self.speed_y = 20
+        self.distance = 0
+        self.max_distance = 100
+        self.state = self.State.FLY
+        self.time_until_death = 3.5
+
+        self.fly = Animation("fly", get_path('assets/sprites/anim/flying_book-fly-Sheet.png'), 43, 22, 10, 10)
+        self.dead = Animation("dead", get_path('assets/sprites/anim/flying_book-dead-Sheet.png'), 52, 32, 1, 10)
+
+        self.active_animation = self.fly
+        self.animator = Animator(self.active_animation)
+
+    def on_collide(self, player, game_world) -> None:
+        """Is called on collision with player."""
+        if self.state != self.State.DEAD:
+            if player.velocity.y > 0 and not player.check_is_grounded(game_world.static_objects):
+                # If player jumps on top of it, enemy dies
+                player.velocity.y = -250
+                player.bounce_velocity_x = 0
+                player.velocity.x = 0
+                self.state = self.State.DEAD
+                self.on_state_changed(self.State.DEAD)
+            else:
+                player.on_hit_by_enemy(self, player.current_direction)
+
+    def on_state_changed(self, state: Enum):
+        """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
+
+        # Change animation:
+        match state:
+            case self.State.FLY:
+                self.set_animation(self.fly)
+            case self.State.DEAD:
+                self.set_animation(self.dead)
+
+    def set_animation(self, animation):
+        if self.active_animation.name != animation.name:
+            self.active_animation = animation
+            self.animator = Animator(animation)
+            self.animator.reset_animation()
+
+    def update(self, delta: float, game_world):
+
+        if self.state == self.State.DEAD:
+            self.has_gravity = True
+            super().update(delta, game_world)
+            self.animator.update()
+            if self.time_until_death != 0:
+                self.time_until_death -= delta
+                if self.time_until_death <= 0:
+                    self.time_until_death = 0
+            else:
+                game_world.interactable_objects.remove(self)
+
+        else:
+            self.velocity.y = self.current_direction * self.speed_y
+
+            super().update(delta, game_world)
+
+            if not self.has_collided:
+                self.distance += abs(self.velocity.y * delta)
+
+            if self.distance >= self.max_distance or self.has_collided:
+                self.current_direction *= (-1)
+                self.distance = 0
+                self.has_collided = False
+
+            self.animator.update()
+
+    def draw(self, screen, camera_pos):
+        position = self.get_rect().topleft - camera_pos
+
+        frame = self.animator.get_frame(self.current_direction)
+        if self.state == self.State.DEAD and self.time_until_death <= 2:
+            frame.set_alpha(255 - (2 - self.time_until_death) * 255)
+
+        screen.blit(frame, position)
 
 
 class Monkey(Enemy):

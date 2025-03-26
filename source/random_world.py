@@ -1,7 +1,4 @@
-import csv
-import random
-import utils
-
+from source import *
 
 def create_level(width=50, height=16):
     # Leeres Level mit Luft füllen

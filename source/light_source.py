@@ -1,5 +1,4 @@
-import pygame as pg
-
+from source import pg
 
 class LightSource:
     def __init__(self, position: pg.Vector2, offset: pg.Vector2, color: pg.Color, radius: float, intensity: float):

@@ -1,8 +1,4 @@
-import pygame as pg
-from object_classes import AnimatedObject
-from animator_object import Animation
-from utils import *
-from light_source import LightSource
+from source import pg, get_path, AnimatedObject, Animation, LightSource
 
 
 class Candle(AnimatedObject):

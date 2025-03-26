@@ -1,7 +1,5 @@
-import pygame as pg
-from constants import *
-from utils import *
-from file_editor import *
+from source import *
+
 
 class SoundManager:
     def __init__(self):

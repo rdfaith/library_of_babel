@@ -1,6 +1,6 @@
 #version 330 core
 
-#define NUM_LIGHTS 50  // Max number of lights
+#define NUM_LIGHTS 25  // Max number of lights
 #define VIGNETTE_STRENGTH 0.7
 
 #define SCREEN_WIDTH 320.0
@@ -13,6 +13,7 @@ uniform sampler2D bg0Tex; // Parallax background (moon sky)
 uniform sampler2D bg1Tex; // Parallax background (wall windows)
 uniform sampler2D bg2Tex; // Parallax background (columns)
 uniform sampler2D bg3Tex; // Parallax background (shelves)
+uniform sampler2D fgTex;
 
 uniform float time;
 uniform float moonLightIntensity;
@@ -31,6 +32,24 @@ uniform float lightRadii[NUM_LIGHTS];
 in vec2 fragTexCoord;
 out vec4 f_color;
 
+ivec2 uvToPixel(vec2 uv) {
+    return ivec2(uv.x * 320.0, uv.y * 180.0);
+}
+
+vec2 pixelToUV(ivec2 pixel) {
+    return vec2(pixel.x / 320.0, pixel.y / 180.0);
+}
+
+vec3 quantizeColor(vec3 color, int levels) {
+    float factor = float(levels - 1);
+    return floor(color * factor + 0.5) / factor;
+}
+
+float quantizeLighting(float intensity, int levels) {
+    float step = 1.0 / float(levels);
+    return floor(intensity / step + 0.5) * step;
+}
+
 vec2 getWorldPos(vec2 uvCoord) {
     vec2 screenPos = vec2(uvCoord.x * SCREEN_WIDTH, uvCoord.y * SCREEN_HEIGHT);
     vec2 worldPos = cameraPos + screenPos;
@@ -46,17 +65,22 @@ vec3 getLight(vec2 worldPos) {
     vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity; // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
+        if (lightPositions[i] == vec2(0.0)) break;  // Break entire loop if empty entry (following will be empty too)
+
         vec2 lightDir = lightPositions[i] - worldPos;
         float distance = length(lightDir);
-        vec3 lightVec = normalize(vec3(lightDir, 1.0)); // Convert to 3D vector
 
-        // Compute normal influence (Lambertian reflection)
+        if (distance > lightRadii[i]) continue;  // Skip if light is too far
+
+//        vec3 lightVec = normalize(vec3(lightDir.x, -1 * lightDir.y, -0.2)); // Convert to 3D vector
+
+//        // Compute normal influence (Lambertian reflection)
 //        float NdotL = max(dot(normal, lightVec), 0.0);
 
         // Smoothstep falloff (soft edge falloff)
         float attenuation = lightIntensities[i] * smoothstep(lightRadii[i], 0.1, distance) * 0.1;
-
-        finalLight += lightColors[i] * attenuation; // * NdotL; // Apply normal influence
+        vec3 light = vec3(lightColors[i] * attenuation);
+        finalLight += light;  // * NdotL; // Apply normal influence
     }
 
     return finalLight;
@@ -83,31 +107,15 @@ vec4 getParallaxLayersAt(vec2 texCoord) {
     vec4 bg2 = texture(bg2Tex, texCoord);
     vec4 bg3 = texture(bg3Tex, texCoord);
     vec4 gameColor = texture(gameTex, texCoord);
+    vec4 fgColor = texture(fgTex, texCoord);
 
     // Add parallax bgs on top of each other
     vec4 parallaxBG = addLayerColor(bg1, bg2);
     parallaxBG = addLayerColor(parallaxBG, bg3);
     parallaxBG = addLayerColor(parallaxBG, gameColor);
+    parallaxBG = addLayerColor(parallaxBG, fgColor); // Add foreground (maybe remove again)
 
     return parallaxBG;
-}
-
-ivec2 uvToPixel(vec2 uv) {
-    return ivec2(uv.x * 320.0, uv.y * 180.0);
-}
-
-vec2 pixelToUV(ivec2 pixel) {
-    return vec2(pixel.x / 320.0, pixel.y / 180.0);
-}
-
-vec3 quantizeColor(vec3 color, int levels) {
-    float factor = float(levels - 1);
-    return floor(color * factor + 0.5) / factor;
-}
-
-float quantizeLighting(float intensity, int levels) {
-    float step = 1.0 / float(levels);
-    return floor(intensity / step + 0.5) * step;
 }
 
 void main() {
@@ -124,8 +132,12 @@ void main() {
     vec4 bg2 = texture(bg2Tex, fragTexCoord);
     vec4 bg3 = texture(bg3Tex, fragTexCoord);
 
+    vec4 fg0 = texture(fgTex, fragTexCoord);
+
     vec4 gameColor = texture(gameTex, fragTexCoord);
     vec4 uiColor = texture(uiTex, fragTexCoord);
+
+//    vec4 normal = texture(gameNormal, fragTexCoord);
 
     vec4 color = vec4(0.0);
 
@@ -169,13 +181,14 @@ void main() {
     // Do foreground lighting
     //float lighting = quantizeLighting(getLight(worldPos), 8);
     vec3 lighting = getLight(worldPos);
-    lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
+    // lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
     gameColor = vec4(gameColor.rgb * lighting, gameColor.a);
 
     onlyLight = vec4(onlyLight.rgb * lighting, onlyLight.a);
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);
+    color = addLayerColor(color, vec4(fg0.rgb * 0.2, fg0.a));
 
     // Add UI on top and return
     f_color = addLayerColor(color, uiColor);
