@@ -20,7 +20,7 @@ class Player(MovingObject):
         hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert()
         hitbox_image_crouch = pg.image.load(get_path('assets/sprites/dino/test_hitbox_crouch.png')).convert()
 
-        super().__init__(position, image, True, hitbox_image)
+        super().__init__(position, image, True, hitbox_image=hitbox_image)
 
         self.hitbox.add_hitbox("crouch", self.position, hitbox_image_crouch)
 
@@ -453,4 +453,4 @@ class Player(MovingObject):
         position = self.get_rect().topleft - camera_pos
         screen.blit(self.animator.get_frame(self.current_direction), position - self.get_sprite_offset())
         # Draw hit box, just for debugging:
-        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        self.draw_debug_hitbox(screen, camera_pos)

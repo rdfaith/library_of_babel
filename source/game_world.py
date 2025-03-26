@@ -19,9 +19,9 @@ class GameWorld:
         self.play_start_position = player_pos
         # self.start_interactable_objects = interactable_objects.copy()  # Used to reset the game
 
-        self.is_moonlight_on = False
+        self.is_moonlight_on = True
         self.moon_light_intensity: float = 0.0
-        self.is_light_sources_on = False
+        self.is_light_sources_on = True
         self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
         self.time: float = 0.0
 

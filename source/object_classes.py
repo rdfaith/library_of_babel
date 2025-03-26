@@ -91,14 +91,20 @@ class ColliderObject(GameObject):
                     return col_obj
         return None
 
+    def draw_debug_hitbox(self, screen, camera_pos):
+        # Draw hit box, just for debugging:
+        if DEBUG_MODE:
+            rect = self.get_rect().move(-camera_pos)
+            pg.draw.rect(screen, (255, 0, 0), rect, 2)
+
     def draw(self, screen, camera_pos):
         """Draw object on screen."""
         sprite_offset = self.get_sprite_offset()
         position = self.position - camera_pos
         screen.blit(self.image, position - sprite_offset)
 
-        # Draw hit box, just for debugging:
-        # pg.draw.rect(screen, (255, 0, 0), self.get_rect().move(-camera_pos), 2)
+        self.draw_debug_hitbox(screen, camera_pos)
+
 
 
 class InteractableObject(ColliderObject):
@@ -190,13 +196,13 @@ class LetterPickUp(InteractableObject):
         offset = pg.Vector2(4, 4)
         light_source = LightSource(
             position.copy(),
-            pg.Vector2(4, 4),
+            pg.Vector2(4, 4) + offset,
             COLOR_GOLD,
             10.0,
             0.05
         )
 
-        super().__init__(position.copy() + offset, image, image, light_source=light_source)
+        super().__init__(position.copy() + offset, image, light_source=light_source)
 
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
@@ -210,12 +216,17 @@ class Door(ColliderObject):
         UNLOCKED = 2
 
     def __init__(self, position: pg.Vector2):
-        super().__init__(position, pg.image.load(get_path('assets/sprites/tiles/door.png')), pg.image.load(get_path('assets/sprites/tiles/door_collider.png')))
         self.unlocking = Animation("unlocking", get_path('assets/test/door-unlocking-Sheet.png'), 16, 32, 17, 6)
         self.animator = Animator(self.unlocking)
         self.current_direction = 1
         self.state = self.State.LOCKED
         self.time_until_open = 2.5
+
+        hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert()
+
+        image = pg.image.load(get_path('assets/sprites/tiles/door.png')).convert()
+        hitbox_image = pg.image.load(get_path('assets/sprites/tiles/door_collider.png')).convert()
+        super().__init__(position, image, hitbox_image=hitbox_image)
 
     def unlock(self, game_world):
         """Remove the door's hit box when unlocked."""
@@ -339,6 +350,9 @@ class Enemy(MovingObject):
             frame.set_alpha(255 - (2 - self.time_until_death) * 255)
 
         screen.blit(frame, position)
+
+        # debug mode hitbox
+        self.draw_debug_hitbox(screen, position)
 
 
 class Worm(Enemy):
