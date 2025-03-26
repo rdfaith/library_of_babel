@@ -33,6 +33,8 @@ class GameWorld:
         self.level_name: str = level_name
         self.highscores = load_file(get_path("saves/levels.sav"))
 
+        self.sound_manager: SoundManager = SoundManager()
+
         # Initialise Light Map
         self.light_map = LightMap()
         self.light_map.add_source(self.player.light_source)
@@ -41,6 +43,7 @@ class GameWorld:
             light_source = o.get_light_source()
             if light_source:
                 self.light_map.add_source(light_source)
+
 
         # Initialise Parallax bgs
         self.BG_LAYERS = [
@@ -258,6 +261,7 @@ class GameWorld:
 
         # Draw egg and return if egg animation is running
         if self.egg:
+
             if self.egg.is_animation_over:
                 self.egg = None
                 self.level_timer = 0.0

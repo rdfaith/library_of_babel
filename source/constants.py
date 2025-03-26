@@ -122,7 +122,8 @@ SYSTEM_SOUNDS = {
             "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
             "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
-            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3"))
+            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3")),
+            "egg": pg.mixer.Sound(get_path("assets/sounds/egg_animation.mp3"))
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
