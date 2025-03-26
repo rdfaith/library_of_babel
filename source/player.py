@@ -7,6 +7,7 @@ from animator_object import *
 from enum import Enum
 from sound_manager import *
 from light_source import LightSource
+from file_editor import *
 
 
 class Player(MovingObject):
@@ -125,6 +126,24 @@ class Player(MovingObject):
     def on_fell_out_of_bounds(self):
         self.on_player_death("fell out of bounds")
 
+    def check_highscore(self, level, time):
+        print(time)
+        filename = get_path("saves/highscores.sav")
+        highscores = load_file(filename)
+        minutes = int(time // 60)  # Ganze Minuten
+        seconds = round((time % 60) / 100, 2)  # Sekunden als Dezimalanteil korrigiert
+        current_time = minutes + seconds
+        print(current_time)
+        if highscores[level] != "None":
+            if float(highscores[level]) > current_time:
+                highscores[level] = current_time
+                update_file(filename, highscores)
+                print(f"New best Time for {level} with {current_time}")
+        else:
+            highscores[level] = current_time
+            update_file(filename, highscores)
+            print(f"New best Time for {level} with {current_time}")
+
     def on_pickup_key(self):
         self.has_key = True
 
@@ -158,6 +177,7 @@ class Player(MovingObject):
                 word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
+                self.check_highscore(game_world.level_name, game_world.level_timer)
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht")
@@ -328,13 +348,6 @@ class Player(MovingObject):
             self.on_state_changed(self.state)
 
     def update(self, delta: float, game_world):
-        def check_highscore(level, time):
-            filename = get_path("saves/highscores.sav")
-            highscores = menu.load_settings(filename)
-            if highscores[level] > time:
-                highscores[level] = time
-                menu.update_settings(filename, highscores)
-                print(f"New best Time for {level} with {time}")
 
         if self.state == self.State.DEAD or self.state == self.State.WIN:
 
@@ -349,8 +362,6 @@ class Player(MovingObject):
                     pg.event.post(pygame.event.Event(PLAYER_DIED, {"reason": "hit by enemy"}))
                 elif self.state == self.State.WIN:
                     pg.event.post(pygame.event.Event(PLAYER_WON, {"reason": "You're just that good!"}))
-                    # check_highscore(menu.current_level, game_world.GameWorld.self.level_timer)
-
 
         else:
             # get player movement

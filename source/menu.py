@@ -10,6 +10,7 @@ import os
 from shaders.shader import Shader, FakeShader
 from enum import Enum
 from title_screen import TitleScreen
+from file_editor import *
 
 # pygame setup
 class GameState(Enum):
@@ -24,9 +25,8 @@ class In_Game_Menu:
         self.value = False
         self.rect = None
         self.image = None
-        self.settings = load_settings(settings_filename)
+        self.settings = load_file(settings_filename)
         self.options = list(self.settings.keys())
-        print(self.settings)
 
     def draw_button(self, name, selected_name, screen):
         self.font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
@@ -80,20 +80,6 @@ def load_score(filename: str) -> list:
         scores = [line.rstrip("\n") for line in file]
     return scores
 
-def load_settings(filename: str) -> dict:
-    settings = dict()
-
-    with open(filename, 'r') as file:
-        for line in file:
-            key, value = line.strip().split('=')
-            settings[key] = value
-    return settings
-
-def update_settings(filename: str, settings: dict):
-    with open(filename, 'w') as file:
-        for key, value in settings.items():
-            file.write(f"{key}={value}\n")
-
 def load_world(level_name: str):
     return world_generation.generate_world(f"{MAP_FOLDER + level_name}.csv")
 
@@ -113,7 +99,7 @@ def display_levels(levels: int, selected_level, screen):
         text = FONT.render(option, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - text.get_width() // 2, 10 + i * 30))
 def get_shader():
-    settings = load_settings(get_path(SETTINGS))
+    settings = load_file(get_path(SETTINGS))
     if settings['SHADER'] == "True":
         shader = Shader(SCREEN_WIDTH, SCREEN_HEIGHT)
     elif settings['SHADER'] == "False":
@@ -265,8 +251,7 @@ def main(running: bool):
                         sound_manager.play_system_sound("selection")
                     elif event.key == pg.K_RETURN:
 
-                        update_settings(SETTINGS, in_game_menu.update(in_game_menu.options[selected_button]))
-                        print(in_game_menu.settings)
+                        update_file(SETTINGS, in_game_menu.update(in_game_menu.options[selected_button]))
                         sound_manager.play_bg_music("menu")
                         sound_manager.play_system_sound("selection")
                         for keys in in_game_menu.settings.keys():
