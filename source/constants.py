@@ -3,7 +3,7 @@ import os
 from source.utils import get_path
 
 # Debug Settings
-DEBUG_MODE = True
+DEBUG_MODE = False
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
