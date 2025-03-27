@@ -36,7 +36,7 @@ class In_Game_Menu:
         self.image_width = self.image.get_width()
         self.image_height = self.image.get_height()
 
-        self.lable = self.font.render(name, True, (244,204,161))
+        self.lable = self.font.render(name, True, (244, 204, 161))
         self.lable_width = self.lable.get_width()
         self.lable_height = self.lable.get_height()
 
@@ -55,29 +55,35 @@ class In_Game_Menu:
         self.settings[name] = "False" if self.settings[name] == "True" else "True"
         return self.settings
 
+
 def load_world(level_name: str):
     return world_generation.generate_world(f"{MAP_FOLDER + level_name}")
+
 
 def availible_levels(filename: str) -> list:
     levels = load_file(filename)
     unlocked_levels = [key for key, value in levels.items() if value != "False"]
     return unlocked_levels
 
+
 def display_levels(levels, selected_level, screen, filename: str):
     highscores = load_file(filename)
     for i, option in enumerate(levels):
-        color = '#a05b53' if i == selected_level else (244,204,161)
+        color = '#a05b53' if i == selected_level else (244, 204, 161)
         level_name_str = option[:-4].replace("_", " ").upper()
-        line = f"{level_name_str} - {highscores[option]}" if highscores[option] != "False" and highscores[option] != "99.99" else f"{level_name_str} - NONE"
+        line = f"{level_name_str} - {highscores[option]}" if highscores[option] != "False" and highscores[
+            option] != "99.99" else f"{level_name_str} - NONE"
         text = FONT_16.render(line, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
 
+
 def display_menu(menu, selected_option, screen):
-    screen.blit(MENU_IMAGE, (0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
+    screen.blit(MENU_IMAGE, (0, 0, SCREEN_WIDTH, SCREEN_HEIGHT))
     for i, option in enumerate(menu.keys()):
         color = '#A65E58' if i == selected_option else "#602323"
         text = FONT_8.render(option, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 + 45 // 2, 70 + i * 20))
+
 
 def unlock_levels(filename, current_level):
     levels = load_file(filename)
@@ -90,6 +96,7 @@ def unlock_levels(filename, current_level):
             levels[all_levels[current_index + 1]] = "99.99"
     update_file(filename, levels)
 
+
 def get_shader():
     settings = load_file(get_path(SETTINGS))
     if settings['SHADER'] == "True":
@@ -97,6 +104,7 @@ def get_shader():
     else:
         shader = FakeShader(SCREEN_WIDTH, SCREEN_HEIGHT)
     return shader
+
 
 def menu_main(running: bool):
     # variablen
@@ -110,6 +118,9 @@ def menu_main(running: bool):
     shader = get_shader()
     in_game_menu = In_Game_Menu(SETTINGS)
     last_game_state = GameState.START
+
+    game_world = None  # global name
+    current_level = None # global name
 
     title_screen: TitleScreen = TitleScreen()
 
@@ -275,7 +286,8 @@ def menu_main(running: bool):
                         sound_manager.play_bg_music("menu")
                         sound_manager.play_system_sound("selection")
                         for keys in in_game_menu.settings.keys():
-                            in_game_menu.draw_button(keys, in_game_menu.options[selected_button], shader.get_ui_screen())
+                            in_game_menu.draw_button(keys, in_game_menu.options[selected_button],
+                                                     shader.get_ui_screen())
                     elif event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
                         game_state = last_game_state
                         shader = get_shader()

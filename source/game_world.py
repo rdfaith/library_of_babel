@@ -12,6 +12,18 @@ class GameWorld:
         self.interactable_objects = interactable_objects
         self.level_settings = load_file(LEVELS)
         self.player = Player(player_pos)
+        level_number: int = int(level_name[-5])
+        if level_number > 2:
+            self.player.is_jump_unlocked = True
+            self.player.is_crouch_unlocked = True
+        if level_number > 3:
+            self.player.is_dash_unlocked = True
+        if level_number > 4:
+            self.player.is_wall_jump_unlocked = True
+        if level_number > 5:
+            self.player.is_double_jump_unlocked = True
+
+
         self.egg = Egg(egg_pos) if egg_pos and self.level_settings["HEX_1.csv"] == "99.99" else None
         self.level_timer: float = 0.0
 
@@ -23,8 +35,8 @@ class GameWorld:
 
         self.is_moonlight_on = level_name != "HEX_1.csv"
         self.moon_light_intensity: float = 0.0
-        self.is_light_sources_on = True
-        self.light_source_intensity: float = 1.0  # Light intensity of all light sources in the game
+        self.is_light_sources_on = not self.egg
+        self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
         self.time: float = 0.0
 
         self.word_animation_timer = 0.0
@@ -118,7 +130,7 @@ class GameWorld:
                     o.update(delta, self)
 
         if self.is_moonlight_on and self.moon_light_intensity < 1.0:
-            self.moon_light_intensity += 0.3 * delta
+            self.moon_light_intensity += 0.28 * delta
 
         if self.is_light_sources_on and self.light_source_intensity < 1.0:
             self.light_source_intensity += 0.1 * delta
@@ -213,6 +225,7 @@ class GameWorld:
                 img = LETTER_IMAGES[letters[i]]
                 img.set_alpha((1 - lerp_value) * 255)
                 ui_screen.blit(img, UI_LETTER_POSITIONS[i] - offset)
+                img.set_alpha(255)
 
             if self.player.has_key:
                 ui_screen.blit(sprites["ui_key"], UI_KEY_POSITION)
@@ -294,6 +307,7 @@ class GameWorld:
                 self.is_light_sources_on = True
                 self.player.set_animation(self.player.idle)
             else:
+                self.is_light_sources_on = False
                 self.player.set_animation(self.player.still)
                 self.player.draw(game_screen, self.camera_pos)
                 self.egg.draw(game_screen, self.camera_pos)

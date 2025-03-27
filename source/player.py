@@ -1,5 +1,5 @@
 from source import *
-from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy, KeyPickUp
+from source.object_classes import GameObject, MovingObject, MovingPlatform, Enemy, KeyPickUp, HeartPickUp, TimePickUp
 
 class Player(MovingObject):
     # Player states
@@ -223,6 +223,12 @@ class Player(MovingObject):
             case "KEY":
                 game_world.interactable_objects.append(KeyPickUp(pg.Vector2(self.position.x + 48, self.position.y - 64)))
                 word_completed = True
+            case "HEART":
+                game_world.interactable_objects.append(HeartPickUp(pg.Vector2(self.position.x + (48 * self.current_direction), self.position.y)))
+                word_completed = True
+            case "TIME":
+                game_world.interactable_objects.append(TimePickUp(pg.Vector2(self.position.x + (48 * self.current_direction), self.position.y)))
+                word_completed = True
             case "BABEL":
                 print("Yayy, you won!")
                 self.highscore_text = self.check_highscore(game_world.level_name, game_world.level_timer)
@@ -286,7 +292,7 @@ class Player(MovingObject):
                 self.sound_manager.play_movement_sound("idle")
 
         # Change hitbox
-        if self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK:
+        if self.state in {self.State.DUCK_WALK, self.State.DUCK_IDLE, self.State.DEAD}:
             self.set_hitbox("crouch")
         else:
             self.set_hitbox("default")

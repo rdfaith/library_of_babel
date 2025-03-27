@@ -3,12 +3,12 @@ import os
 from source.utils import get_path
 
 # Debug Settings
-DEBUG_MODE = True
+DEBUG_MODE = False
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
 # Game Settings
-TIME_ITEM_VALUE = 15.0
+TIME_ITEM_VALUE = 5.0
 PLAYER_JUMP_TIMER = 0.24
 
 # Shader Settings
