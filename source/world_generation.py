@@ -7,7 +7,7 @@ def load_spritesheets():
     return {
         "tileset": pg.image.load(get_path(DEFAULT_TILESET)).convert(),
         "collider": pg.image.load(get_path(DEFAULT_COLLIDER_TILESET)).convert(),
-        "normal": pg.image.load(get_path(DEFAULT_NORMAL_TILESET)).convert()
+        "normal": pg.image.load(get_path(DEFAULT_NORMAL_TILESET)).convert_alpha()
     }
 
 
