@@ -178,6 +178,7 @@ class MovingObject(InteractableObject):
 
         # move y and check collisions
         if self.position.y > 2000:  # that's way too far away bruh
+            print("You too far down dawg (object_classes.py:MovingObject)")  # to prevent endless falling
             return
         self.position.y += dy
         rect.topleft = self.position
@@ -414,6 +415,7 @@ class Worm(Enemy):
 
         self.active_animation = self.walk
         self.animator = Animator(self.active_animation)
+        self.audio_channel = None
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
@@ -491,6 +493,7 @@ class FlyingBook(Enemy):
 
         self.active_animation = self.fly
         self.animator = Animator(self.active_animation)
+        self.audio_channel = None
 
     def on_state_changed(self, state: Enum):
         """Called when the player state (RUN, IDLE, JUMP, etc.) changes"""
@@ -505,6 +508,14 @@ class FlyingBook(Enemy):
     def update(self, delta: float, game_world):
 
         if self.state == self.State.DEAD:
+
+            # switch off sounds
+            if self.is_playing_sound:
+                self.sound_manager.play_enemy_sound("idle")
+                self.sound_manager.play_system_sound("squish")
+                self.is_playing_sound = False
+                self.audio_channel = None
+
             self.has_gravity = True
             super().update(delta, game_world)
             self.animator.update()
@@ -517,6 +528,27 @@ class FlyingBook(Enemy):
 
         else:
             self.velocity.y = self.current_direction * self.speed_y
+
+            # region Do sound stuff
+            player_pos = game_world.player.position
+            distance = self.position.distance_to(player_pos)
+            max_distance = 200  # Distance at which volume starts to fade
+            if distance < max_distance and not self.is_playing_sound:
+                self.audio_channel = self.sound_manager.play_enemy_sound("paper_flutter")
+                self.is_playing_sound = True
+            elif distance > max_distance and self.is_playing_sound:
+                self.sound_manager.play_enemy_sound("idle")
+                self.is_playing_sound = False
+                self.audio_channel = None
+            if self.audio_channel:
+                # Normalize distance (closer = louder)
+                volume_factor = max(0.7, 1.0 - (distance / max_distance))  # Min 50% volume at max_distance
+                # Calculate stereo panning (-1 left, 1 right)
+                panning = (self.position.x - player_pos.x) / max(distance, 1)  # Avoid division by zero
+                left_volume = volume_factor * (1.0 - (panning + 1.0) / 2.0)
+                right_volume = volume_factor * ((panning + 1.0) / 2.0)
+                self.audio_channel.set_volume(left_volume, right_volume)  # Apply volume
+            # endregion sound stuff
 
             super().update(delta, game_world)
 

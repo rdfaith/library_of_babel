@@ -37,7 +37,7 @@ class SoundManager:
         self.settings = load_file(SETTINGS)
         if self.current_enemy == sound_name and self.settings["SFX"] == "True":
             if self.current_enemy_sound:
-                self.current_enemy_sound.set_volume(0.6)
+                self.current_enemy_sound.set_volume(0.7)
             return
         elif self.settings["SFX"] == "False":
             if self.current_enemy_sound:
@@ -53,8 +53,7 @@ class SoundManager:
 
             channel = None
             if self.current_enemy_sound:
-                channel = self.current_enemy_sound.play(loops=-1)
-
+                channel = self.current_enemy_sound.play(loops=50)
             return channel  # Return sound channel for directional audio
 
     def play_movement_sound(self, movement_name, loop=True, interrupt=False):
