@@ -172,7 +172,8 @@ def menu_main(running: bool):
                     elif event.key == pg.K_BACKSPACE:
                         game_world = load_world(current_level)
                 if event.type == PLAYER_DIED:  # Player Died
-                    game_state = GameState.GAME_OVER
+                    game_world = load_world(current_level)
+                    game_state = GameState.GAME
                 elif event.type == PLAYER_WON:  # Player Won
                     unlock_levels(LEVELS, current_level)
                     unlocked_levels = availible_levels(LEVELS)
