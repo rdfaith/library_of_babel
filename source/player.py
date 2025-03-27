@@ -210,6 +210,7 @@ class Player(MovingObject):
                     self.is_double_jump_unlocked = True
                 else:
                     self.is_jump_unlocked = True
+                word_completed = True
             case "WALL":
                 self.wall_collected = True
                 word_completed = True
@@ -328,7 +329,7 @@ class Player(MovingObject):
                 new_state = self.State.IDLE
 
             if isinstance(obj_below, MovingPlatform):
-                self.velocity.x += obj_below.current_direction * obj_below.speed_x
+                self.velocity.x += obj_below.velocity.x
 
         # Update Jump Lock to check whether player has released the key in between jumps
         if not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]):

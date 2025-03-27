@@ -138,13 +138,13 @@ class GameWorld:
 
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
-                self.player.get_rect().x - SCREEN_WIDTH // 2,
-                self.player.get_rect().y - SCREEN_HEIGHT // 2
+                self.player.position.x - SCREEN_WIDTH // 2,
+                self.player.position.y - SCREEN_HEIGHT // 2
             )
 
             self.camera_pos.x = smooth_movement(self.camera_pos.x, target_pos.x, CAMERA_DELAY_X)
             if abs(target_pos.y - self.camera_pos.y) > DEAD_ZONE_Y:
-                self.camera_pos.y = smooth_movement(self.camera_pos.y, target_pos.y, CAMERA_DELAY_Y)
+                self.camera_pos.y = smooth_movement(self.camera_pos.y, target_pos.y, CAMERA_DELAY_Y if self.player.velocity.y < 350 else 0.2)
             self.camera_pos.x = max(0, min(self.camera_pos.x, self.level_width - SCREEN_WIDTH))
             self.camera_pos.y = max(0, min(self.camera_pos.y, self.level_height - SCREEN_HEIGHT))
 
@@ -207,8 +207,9 @@ class GameWorld:
             for i in range(len(letters)):
                 if i > 5:  # Break if more than 5 letters would have to be displayed
                     break
-                letter = letters[i]
-                ui_screen.blit(LETTER_IMAGES[letter], UI_LETTER_POSITIONS[i] - offset)
+                img = LETTER_IMAGES[letters[i]]
+                img.set_alpha((1 - lerp_value) * 255)
+                ui_screen.blit(img, UI_LETTER_POSITIONS[i] - offset)
 
             if self.player.has_key:
                 ui_screen.blit(sprites["ui_key"], UI_KEY_POSITION)
@@ -250,7 +251,6 @@ class GameWorld:
 
         def draw_fg_parallax():
             """Draws the foreground parallax layers"""
-
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for layer in FG_LAYERS:
                 if layer["depth"] <= 0:
@@ -269,8 +269,8 @@ class GameWorld:
 
         # draw objects
         for o in self.objects + self.static_objects + self.interactable_objects:  # Static -> Deco -> Interactive
-            if self.camera_pos.x - 16 < o.position.x < self.camera_pos.x + SCREEN_WIDTH + 32:  # Only draw if within camera bounds + 64px
-                if self.camera_pos.y - 16 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 32:
+            if self.camera_pos.x - 64 < o.position.x < self.camera_pos.x + SCREEN_WIDTH + 64:  # Only draw if within camera bounds + 64px
+                if self.camera_pos.y - 64 < o.position.y < self.camera_pos.y + SCREEN_HEIGHT + 64:
                     pos = self.camera_pos.copy()
                     if o.do_wave_animation:
                         pos += pg.Vector2(0, math.sin(self.time * 2.5))

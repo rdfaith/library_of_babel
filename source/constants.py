@@ -3,7 +3,7 @@ import os
 from source.utils import get_path
 
 # Debug Settings
-DEBUG_MODE = False
+DEBUG_MODE = True
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
@@ -123,6 +123,7 @@ PLAYER_SOUNDS = {
         }
 ENEMY_SOUNDS = {
             "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
+            "paper_flutter": pg.mixer.Sound(get_path("assets/sounds/paper_flutter_shorter.mp3")),
             "idle": None
         }
 SYSTEM_SOUNDS = {
