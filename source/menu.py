@@ -2,12 +2,14 @@ from source import *
 from source.shaders.shader import Shader, FakeShader
 from source.title_screen import TitleScreen
 
+
 class GameState(Enum):
     START = 1
     LEVEL_SELECTION = 2
     GAME = 3
     GAME_OVER = 4
     IN_GAME_MENU = 5
+    SETTINGS = 6
 
 
 class In_Game_Menu:
@@ -17,7 +19,7 @@ class In_Game_Menu:
         self.image = None
         self.settings = load_file(settings_filename)
         self.options = list(self.settings.keys())
-        self.font = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)  # Einmalige Initialisierung
+        self.font = FONT_16
 
     def draw_button(self, name, selected_name, screen):
         self.value = self.settings[name]
@@ -53,36 +55,27 @@ class In_Game_Menu:
         self.settings[name] = "False" if self.settings[name] == "True" else "True"
         return self.settings
 
-
-def write_score(filename: str, text: str) -> None:
-    with open(filename, "r") as file:
-        content = file.read()
-
-    if text not in content:
-        with open(filename, "a") as file:
-            file.write("\n" + text)
-
-def load_score(filename: str) -> list:
-    with open(filename, "r") as file:
-        scores = [line.rstrip("\n") for line in file]
-    return scores
-
 def load_world(level_name: str):
     return world_generation.generate_world(f"{MAP_FOLDER + level_name}")
 
 def availible_levels(filename: str) -> list:
     levels = load_file(filename)
-    unlocked_levels = [key for key, value in levels.items() if value != "None"]
+    unlocked_levels = [key for key, value in levels.items() if value != "False"]
     return unlocked_levels
 
 def display_levels(levels, selected_level, screen, filename: str):
-    FONT = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
     highscores = load_file(filename)
     for i, option in enumerate(levels):
         color = '#a05b53' if i == selected_level else (244,204,161)
-        line = f"{option[:-4]} - {highscores[option]}" if highscores[option] != "None" and highscores[option] != "99.99" else f"{option[:-4]} - None"
-        text = FONT.render(line, True, color)
+        line = f"{option[:-4]} - {highscores[option]}" if highscores[option] != "False" and highscores[option] != "99.99" else f"{option[:-4]} - NONE"
+        text = FONT_16.render(line, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
+
+def display_menu(menu, selected_option, screen):
+    for i, option in enumerate(menu.keys()):
+        color = '#a05b53' if i == selected_option else (244,204,161)
+        text = FONT_16.render(option, True, color)
+        screen.blit(text, (SCREEN_WIDTH // 2 - 110 // 2, 35 + i * 30))
 
 def unlock_levels(filename, current_level):
     levels = load_file(filename)
@@ -107,6 +100,7 @@ def menu_main(running: bool):
     # variablen
     selected_level = 0
     selected_button = 0
+    selected_option = 0
     sound_manager = SoundManager()
     game_state: GameState = GameState.START
     delta = 0.0
@@ -142,8 +136,8 @@ def menu_main(running: bool):
             last_game_state = GameState.LEVEL_SELECTION
             shader.get_ui_screen().fill((57, 49, 75))
 
-            unlocked_levels = availible_levels(get_path("saves/levels.sav"))
-            display_levels(unlocked_levels, selected_level, shader.get_ui_screen(), get_path("saves/levels.sav"))
+            unlocked_levels = availible_levels(LEVELS)
+            display_levels(unlocked_levels, selected_level, shader.get_ui_screen(), LEVELS)
 
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -162,7 +156,7 @@ def menu_main(running: bool):
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
                     elif event.key == pg.K_ESCAPE:
-                        game_state = GameState.IN_GAME_MENU
+                        game_state = GameState.SETTINGS
 
             # Render with shader
             shader.update()
@@ -178,10 +172,11 @@ def menu_main(running: bool):
                     elif event.key == pg.K_BACKSPACE:
                         game_world = load_world(current_level)
                 if event.type == PLAYER_DIED:  # Player Died
-                    game_state = GameState.GAME_OVER
+                    game_world = load_world(current_level)
+                    game_state = GameState.GAME
                 elif event.type == PLAYER_WON:  # Player Won
-                    unlock_levels(get_path("saves/levels.sav"), current_level)
-                    unlocked_levels = availible_levels(get_path("saves/levels.sav"))
+                    unlock_levels(LEVELS, current_level)
+                    unlocked_levels = availible_levels(LEVELS)
                     game_world = load_world(unlocked_levels[-1])
                     clock = pg.time.Clock()
                 elif event.type == DOOR_UNLOCKED:  # unlock door
@@ -206,7 +201,7 @@ def menu_main(running: bool):
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE:
                         game_state = GameState.IN_GAME_MENU
-                    elif event.key == pg.K_e:
+                    elif event.key == pg.K_BACKSPACE:
                         game_world = load_world(current_level)
                         game_state = GameState.GAME
                 if event.type == pg.QUIT:
@@ -215,10 +210,50 @@ def menu_main(running: bool):
                     sys.exit()
 
             clock.tick(60)
-
         while game_state == GameState.IN_GAME_MENU:
+            last_game_state = GameState.IN_GAME_MENU
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
+            sound_manager.play_enemy_sound("idle")
+            shader.get_ui_screen().fill((57, 49, 75))
+
+            MENU_OPTIONS = {
+                "RESUME": GameState.GAME,
+                "RESTART": GameState.GAME,
+                "LEVEL": GameState.LEVEL_SELECTION,
+                "SETTINGS": GameState.SETTINGS,
+            }
+
+            display_menu(MENU_OPTIONS, selected_option, shader.get_ui_screen())
+            clock.tick(60)  # Framerate-Limit früh setzen
+
+            for event in pg.event.get():
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_ESCAPE:
+                        game_state = last_game_state if game_state == GameState.IN_GAME_MENU else GameState.IN_GAME_MENU
+                        shader = get_shader()
+                    elif event.key == pg.K_DOWN:
+                        selected_option = (selected_option + 1) % len(MENU_OPTIONS)
+                        sound_manager.play_system_sound("selection")
+                    elif event.key == pg.K_UP:
+                        selected_option = (selected_option - 1) % len(MENU_OPTIONS)
+                        sound_manager.play_system_sound("selection")
+                    elif event.key == pg.K_RETURN:
+                        menu_options = list(MENU_OPTIONS.keys())
+
+                        if selected_option == 1:
+                            game_world = load_world(current_level)
+
+                        game_state = MENU_OPTIONS[menu_options[selected_option]]
+
+                elif event.type == pg.QUIT:
+                    running = False
+                    pg.quit()
+                    sys.exit()
+
+            shader.update()
+
+        while game_state == GameState.SETTINGS:
             shader.get_ui_screen().fill((57, 49, 75))
 
             for event in pg.event.get():
@@ -244,6 +279,9 @@ def menu_main(running: bool):
                         shader = get_shader()
                     elif event.key == pg.K_BACKSPACE:
                         game_state = GameState.LEVEL_SELECTION
+                    elif event.key == pg.K_r:
+                        reset_file(LEVELS)
+                        print("level wurden zurückgesetzt")
 
             for keys in in_game_menu.settings.keys():
                 in_game_menu.draw_button(keys, in_game_menu.options[selected_button], shader.get_ui_screen())

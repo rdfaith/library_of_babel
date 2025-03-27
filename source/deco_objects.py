@@ -64,10 +64,12 @@ class Egg(AnimatedObject):
         position = self.position - camera_pos
 
         match self.animator.get_frame_number():
+            case 0:
+                self.sound_manager.play_system_sound("egg_shaking")
             case 38:
-                self.sound_manager.play_system_sound("squish")
+                self.sound_manager.play_system_sound("egg_cracking")
             case 53:
-                self.sound_manager.play_system_sound("eye_animation")
+                self.sound_manager.play_system_sound("egg_blinking")
 
         if self.animator.is_last_frame():
             self.fade = max(self.fade - 0.016 * self.fade_time, 0.0)

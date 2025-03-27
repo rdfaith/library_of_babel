@@ -7,6 +7,10 @@ DEBUG_MODE = True
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
+# Game Settings
+TIME_ITEM_VALUE = 15.0
+PLAYER_JUMP_TIMER = 0.24
+
 # Shader Settings
 NUM_LIGHTS = 25  # Has to be the same as NUM_LIGHTS in frag_shader.glsl!
 
@@ -111,10 +115,11 @@ MAP_FOLDER = "assets/levels/"
 pg.mixer.init()
 PLAYER_SOUNDS = {
             "run": pg.mixer.Sound(get_path("assets/sounds/run_slower.wav")),
-            "jump": pg.mixer.Sound(get_path("assets/sounds/jump_up.wav")),
+            "jump": pg.mixer.Sound(get_path("assets/sounds/jump_up2.mp3")),
             "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
             "damage": pg.mixer.Sound(get_path("assets/sounds/damage.wav")),
-            "dash": pg.mixer.Sound(get_path("assets/sounds/dash.wav"))
+            "dash": pg.mixer.Sound(get_path("assets/sounds/dash.wav")),
+            "idle": None
         }
 ENEMY_SOUNDS = {
             "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
@@ -125,8 +130,13 @@ SYSTEM_SOUNDS = {
             "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
             "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3")),
-            "egg": pg.mixer.Sound(get_path("assets/sounds/egg_animation.mp3")),
-            "eye_animation": pg.mixer.Sound(get_path("assets/sounds/eye_animation.mp3"))
+            "wining": pg.mixer.Sound(get_path("assets/sounds/wining.wav")),
+            "disappointed": pg.mixer.Sound(get_path("assets/sounds/disappointed.wav")),
+            "new_highscore": pg.mixer.Sound(get_path("assets/sounds/new_highscore.wav")),
+            "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
+            "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
+            "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3")),
+            "idle": None
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
@@ -151,3 +161,15 @@ TRUE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggle
 FALSE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggle_off_highlighted.png'))
 
 SETTINGS = get_path("saves/settings.sav")
+LEVELS = get_path("saves/levels.sav")
+
+
+
+#Fonts
+pg.font.init()
+FONT_8 = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 8)
+FONT_16 = pg.font.Font(get_path("assets/fonts/PixelOperator8.ttf"), 16)
+FONT_8_BOLD = pg.font.Font(get_path("assets/fonts/PixelOperator8-Bold.ttf"), 8)
+
+
+
