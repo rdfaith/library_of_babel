@@ -95,8 +95,8 @@ class GameWorld:
 
         if delta > 0.025:
             delta = 0.016
-
-        self.level_timer += delta
+        if self.player.state != self.player.State.WIN and self.player.state != self.player.State.DEAD:
+            self.level_timer += delta
         if self.player.picked_up_time:
             self.level_timer = max(self.level_timer - TIME_ITEM_VALUE, 0.0)
             self.player.picked_up_time = False

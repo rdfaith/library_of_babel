@@ -274,6 +274,7 @@ class Player(MovingObject):
                 self.sound_manager.play_movement_sound("dash", False)
             case self.State.DEAD:
                 self.set_animation(self.dead)
+                self.sound_manager.play_system_sound("disappointed")
                 self.sound_manager.play_movement_sound("idle")
             case self.State.WIN:
                 self.set_animation(self.win)
@@ -464,7 +465,7 @@ class Player(MovingObject):
 
         if self.state == self.State.DEAD or self.state == self.State.WIN:
             self.velocity.x = 0
-            if self.time_until_over != 0:
+            if self.time_until_over != 0 and self.position.y < game_world.level_height:
                 self.time_until_over -= delta
                 super().update(delta, game_world)
                 self.animator.update()
