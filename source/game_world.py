@@ -10,9 +10,9 @@ class GameWorld:
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
-
+        self.level_settings = load_file(LEVELS)
         self.player = Player(player_pos)
-        self.egg = Egg(egg_pos) if egg_pos else None
+        self.egg = Egg(egg_pos) if egg_pos and self.level_settings["HEX_1.csv"] == "99.99" else None
         self.level_timer: float = 0.0
 
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
