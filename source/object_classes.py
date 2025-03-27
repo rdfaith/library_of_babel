@@ -213,6 +213,7 @@ class LetterPickUp(InteractableObject):
         if player.on_pickup_letter(self.letter, game_world):  # If player picks up (doesn't pick up if inventory full)
             game_world.interactable_objects.remove(self)
 
+
 class HeartPickUp(InteractableObject):
     def __init__(self, position: pg.Vector2):
         image = pg.image.load(get_path("assets/sprites/ui/ui_heart.png"))
@@ -230,6 +231,7 @@ class HeartPickUp(InteractableObject):
     def on_collide(self, player, game_world) -> None:
         if player.on_pickup_heart():  # If player picks up (doesn't pick up if inventory full)
             game_world.interactable_objects.remove(self)
+
 
 class TimePickUp(InteractableObject):
     def __init__(self, position: pg.Vector2):
