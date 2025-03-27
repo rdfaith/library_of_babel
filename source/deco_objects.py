@@ -15,7 +15,7 @@ class Candle(AnimatedObject):
             position.copy(),
             pg.Vector2(9, 17),
             pg.Color((240, 120, 30)),
-            40.0,
+            50.0,
             0.1,
             flicker=True
         )

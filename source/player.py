@@ -102,6 +102,7 @@ class Player(MovingObject):
         self.dash = Animation("dash", get_path('assets/sprites/anim/dino-dash-Sheet.png'), 32, 24, 1, 1)
         self.dead = Animation("dead", get_path('assets/sprites/anim/dino-death-Sheet.png'), 24, 24, 8, 8)
         self.win = Animation("win", get_path('assets/sprites/anim/dino-win-Sheet.png'), 24, 24, 4, 8)
+        self.still = Animation("still", get_path('assets/sprites/dino/dino-still.png'), 24, 24, 1)
 
         self.active_animation = self.idle
         self.animator = Animator(self.active_animation)

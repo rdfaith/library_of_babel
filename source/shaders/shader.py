@@ -6,7 +6,8 @@ from array import array
 class Shader:
     def __init__(self, screen_width, screen_height):
         self.light_debug_mode = LIGHT_DEBUG_MODE
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED)
+        self.screen = pg.display.set_mode((screen_width, screen_height),
+                                          pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED | pg.OPENGL | pg.DOUBLEBUF)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
                                              range(NUM_BG_LAYERS)]  # 4 Parallax BG screens
@@ -81,10 +82,12 @@ class Shader:
         screen_number = 0
 
         # Create background screen uniforms
+        bg_texes = []
         for screen in self.bg_screens:
             tex = surf_to_texture(screen)
             tex.use(screen_number)
             self.program[f'bg{screen_number}Tex'] = screen_number
+            bg_texes.append(tex)
             screen_number += 1
 
         ui_tex = surf_to_texture(self.ui_screen)
@@ -102,10 +105,10 @@ class Shader:
         self.program['fgTex'] = screen_number
         screen_number += 1
 
-        # game_normal = surf_to_texture(self.game_normal_screen)
-        # game_normal.use(screen_number)
-        # self.program['gameNormal'] = screen_number
-        # screen_number += 1
+        game_normal = surf_to_texture(self.game_normal_screen)
+        game_normal.use(screen_number)
+        self.program['gameNormal'] = screen_number
+        screen_number += 1
 
         num_lights = NUM_LIGHTS  # Has to be the same as in frag_shader.glsl!!
 
@@ -127,20 +130,23 @@ class Shader:
 
         self.program['time'] = self.time
         self.program['cameraPos'] = (camera_pos.x, camera_pos.y)
-        
+
         self.program['lightDebugMode'] = self.light_debug_mode
 
         self.render_object.render(mode=moderngl.TRIANGLE_STRIP)
 
         pg.display.flip()
 
+        for tex in bg_texes:
+            tex.release()
         ui_tex.release()
         game_tex.release()
-
+        fg_tex.release()
+        game_normal.release()
 
 class FakeShader():
     def __init__(self, screen_width, screen_height):
-        self.screen = pg.display.set_mode((screen_width,  screen_height), pg.DOUBLEBUF | pg.SCALED)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.SCALED)
 
         self.light_map = None
 
@@ -169,7 +175,7 @@ class FakeShader():
         return self.screen
 
     def update(self, camera_pos: pg.Vector2 = pg.Vector2(), light_map: LightMap = LightMap()):
-
         pg.display.flip()
+
 
 warnings.filterwarnings("ignore", category=FutureWarning, message=".*SCALED|OPENGL.*")

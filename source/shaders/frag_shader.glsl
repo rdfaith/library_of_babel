@@ -7,7 +7,7 @@
 #define SCREEN_HEIGHT 180.0
 
 uniform sampler2D gameTex;
-//uniform sampler2D gameNormal;
+uniform sampler2D gameNormal;
 uniform sampler2D uiTex;
 uniform sampler2D bg0Tex; // Parallax background (moon sky)
 uniform sampler2D bg1Tex; // Parallax background (wall windows)
@@ -63,7 +63,7 @@ vec2 getFragPos(vec2 _worldPos) {
                 (_worldPos.y - cameraPos.y) / SCREEN_HEIGHT);
 }
 
-vec3 getLight(vec2 worldPos) {
+vec3 getLight(vec2 worldPos, vec4 normal) {
     vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity; // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
@@ -74,10 +74,13 @@ vec3 getLight(vec2 worldPos) {
 
         if (distance > lightRadii[i]) continue;  // Skip if light is too far
 
-//        vec3 lightVec = normalize(vec3(lightDir.x, -1 * lightDir.y, -0.2)); // Convert to 3D vector
-
+        // NORMALS
+        // Convert normal map from [0,1] to [-1,1] range
+//        vec3 N = normalize(normal.rgb * 2.0 - 1.0);
+//        // Compute 3D light vector (flip y-dir)
+//        vec3 lightVec = normalize(vec3(lightDir.x, -1 * lightDir.y, 1.0));
 //        // Compute normal influence (Lambertian reflection)
-//        float NdotL = max(dot(normal, lightVec), 0.0);
+//        float NdotL = (normal.a > 0.1) ? max(dot(N, lightVec), 0.0) : 1.0; // Dot product if normal has alpha
 
         // Smoothstep falloff (soft edge falloff)
         float flicker = lightIntensities[i];
@@ -86,10 +89,10 @@ vec3 getLight(vec2 worldPos) {
         vec3 light = vec3(lightColors[i] * attenuation);
         // Apply lightSourceIntensity modifier (unless it's the player light source)
         float intensityModifier =  (i == 0) ? 1.0 : lightSourceIntensity;
-        finalLight += light * intensityModifier;  // * NdotL; // Apply normal influence
+        finalLight += light * intensityModifier; // * NdotL; // Apply normal influence
     }
 
-    return finalLight;
+    return finalLight; // return
 }
 
 vec4 applyVignette(vec4 baseColor, vec2 uv) {
@@ -142,8 +145,7 @@ void main() {
 
     vec4 gameColor = texture(gameTex, fragTexCoord);
     vec4 uiColor = texture(uiTex, fragTexCoord);
-
-//  vec4 normal = texture(gameNormal, fragTexCoord);
+    vec4 normal = texture(gameNormal, fragTexCoord);
 
     vec4 color = vec4(0.0);
 
@@ -175,19 +177,21 @@ void main() {
     vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * intensity, parallaxBG.a);
 
 
+    // Get lighting
+    // float lighting = quantizeLighting(getLight(worldPos), 8);
+    // vec3 normalLighting = vec3(0.0);
+    vec3 pointLighting = getLight(worldPos, normal);
+    // lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
+
+    // Apply normal lighting to game world
+    gameColor = vec4(gameColor.rgb * pointLighting, gameColor.a);
 
     // Adjust skybox lighting
     bg0 = vec4(bg0.rgb * moonLightIntensity, bg0.a);
 
     // Add parallax ontop of skybox
+    // finalParallax = vec4(finalParallax.rgb * pointLighting, finalParallax.a); // parallax point lighting for volumetric
     color = addLayerColor(bg0, finalParallax);
-
-    // Do foreground lighting
-    //float lighting = quantizeLighting(getLight(worldPos), 8);
-    vec3 lighting = getLight(worldPos);
-    // lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
-    gameColor = vec4(gameColor.rgb * lighting, gameColor.a);
-
 
     // Add foreground ontop of background
     color = addLayerColor(color, gameColor);
@@ -199,7 +203,7 @@ void main() {
     if (lightDebugMode) {
         vec4 onlyLight = vec4(0.5, 0.5, 0.5, 1.0);
         onlyLight = vec4(onlyLight.rgb + lightColor * lightStrength * intensity, onlyLight.a);
-        onlyLight = vec4(onlyLight.rgb * lighting, onlyLight.a);
+        onlyLight = vec4(onlyLight.rgb * pointLighting, onlyLight.a);
         f_color = onlyLight;
     }
 }

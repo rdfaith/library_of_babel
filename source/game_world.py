@@ -10,9 +10,9 @@ class GameWorld:
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
-
+        self.level_settings = load_file(LEVELS)
         self.player = Player(player_pos)
-        self.egg = Egg(egg_pos) if egg_pos else None
+        self.egg = Egg(egg_pos) if egg_pos and self.level_settings["HEX_1.csv"] == "99.99" else None
         self.level_timer: float = 0.0
 
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
@@ -24,7 +24,7 @@ class GameWorld:
         self.is_moonlight_on = level_name != "HEX_1.csv"
         self.moon_light_intensity: float = 0.0
         self.is_light_sources_on = True
-        self.light_source_intensity: float = 0.0  # Light intensity of all light sources in the game
+        self.light_source_intensity: float = 1.0  # Light intensity of all light sources in the game
         self.time: float = 0.0
 
         self.word_animation_timer = 0.0
@@ -218,6 +218,10 @@ class GameWorld:
                 sprites["ui_backspace"].set_alpha(int(time * 255))
                 ui_screen.blit(sprites["ui_question_mark"], pg.Vector2(241, 2))
                 ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
+            if self.player.player_lives <= 0:
+                time = (math.sin(self.time * 3) + 1)
+                sprites["ui_backspace"].set_alpha(int(time * 255))
+                ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]
@@ -252,6 +256,9 @@ class GameWorld:
                 if layer["depth"] <= 0:
                     draw_parallax_layer(layer, max_depth, False, screen=fg_screen)
 
+        def draw_normals(screen):
+            for o in self.get_all_objects():
+                o.draw_normal(screen, camera_pos=self.camera_pos)
 
         # draw background parallax
         draw_bg_parallax()
@@ -272,22 +279,24 @@ class GameWorld:
                         self.light_map.add_source(o.get_light_source())
 
 
-        # draw player
-        self.player.draw(game_screen, self.camera_pos)
-
 
         # Draw egg and return if egg animation is running
         if self.egg:
-
             if self.egg.is_animation_over:
                 self.egg = None
                 self.level_timer = 0.0
                 self.is_light_sources_on = True
+                self.player.set_animation(self.player.idle)
             else:
+                self.player.set_animation(self.player.still)
+                self.player.draw(game_screen, self.camera_pos)
                 self.egg.draw(game_screen, self.camera_pos)
                 shader.set_moon_light_intensity(0.0)
                 shader.set_light_source_intensity(0.0)
                 return
+
+        self.player.draw(game_screen, self.camera_pos)
+
 
         shader.set_moon_light_intensity(self.moon_light_intensity)
         shader.set_light_source_intensity(self.light_source_intensity)
@@ -295,6 +304,9 @@ class GameWorld:
 
         # draw foreground parallax
         draw_fg_parallax()
+
+        # Normal map
+        draw_normals(normal_screen)
 
         # Visual effects
         # draw_post_processing()

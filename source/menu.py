@@ -199,7 +199,7 @@ def menu_main(running: bool):
             last_game_state = GameState.GAME_OVER
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
+                    if event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
                         game_state = GameState.IN_GAME_MENU
                     elif event.key == pg.K_BACKSPACE:
                         game_world = load_world(current_level)
@@ -229,7 +229,7 @@ def menu_main(running: bool):
 
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE:
+                    if event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
                         game_state = last_game_state if game_state == GameState.IN_GAME_MENU else GameState.IN_GAME_MENU
                         shader = get_shader()
                     elif event.key == pg.K_DOWN:
@@ -274,11 +274,9 @@ def menu_main(running: bool):
                         sound_manager.play_system_sound("selection")
                         for keys in in_game_menu.settings.keys():
                             in_game_menu.draw_button(keys, in_game_menu.options[selected_button], shader.get_ui_screen())
-                    elif event.key == pg.K_ESCAPE:
+                    elif event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
                         game_state = last_game_state
                         shader = get_shader()
-                    elif event.key == pg.K_BACKSPACE:
-                        game_state = GameState.LEVEL_SELECTION
                     elif event.key == pg.K_r:
                         reset_file(LEVELS)
                         print("level wurden zurückgesetzt")
