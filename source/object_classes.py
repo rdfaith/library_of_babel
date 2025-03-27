@@ -314,7 +314,7 @@ class KeyPickUp(MovingObject):
             pg.Vector2(4, 4),
             COLOR_GOLD,
             10.0,
-            0.01
+            0.02
         )
         super().__init__(position.copy(), image, True, light_source=light_source)
 
@@ -332,7 +332,7 @@ class MovingPlatform(MovingObject):
         if self.has_max_distance:
             self.max_distance = 90
         else:
-            self.has_max_distance = 100000
+            self.max_distance = 100000
         self.current_direction = 1
 
     def update(self, delta: float, game_world):
