@@ -3,7 +3,7 @@ import os
 from source.utils import get_path
 
 # Debug Settings
-DEBUG_MODE = False
+DEBUG_MODE = True
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
@@ -117,7 +117,7 @@ PLAYER_SOUNDS = {
             "run": pg.mixer.Sound(get_path("assets/sounds/run_slower.wav")),
             "jump": pg.mixer.Sound(get_path("assets/sounds/jump_up2.mp3")),
             "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
-            "damage": pg.mixer.Sound(get_path("assets/sounds/damage.wav")),
+            "damage": pg.mixer.Sound(get_path("assets/sounds/sad_whine.mp3")),
             "dash": pg.mixer.Sound(get_path("assets/sounds/dash.wav")),
             "idle": None
         }

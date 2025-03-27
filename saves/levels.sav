@@ -3,3 +3,5 @@ HEX_2.csv=False
 HEX_3.csv=False
 wall_lvl.csv=99.99
 showcase.csv=99.99
+walljump_showcase.csv=0.13
+walljumps.csv=99.99

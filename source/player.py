@@ -48,7 +48,7 @@ class Player(MovingObject):
             self.is_jump_unlocked: bool = True
             self.is_crouch_unlocked: bool = True
             self.is_dash_unlocked: bool = True
-            self.is_wall_jump_unlocked: bool = False
+            self.is_wall_jump_unlocked: bool = True
             self.is_double_jump_unlocked: bool = True
         else:
             self.is_jump_unlocked: bool = False
@@ -349,7 +349,7 @@ class Player(MovingObject):
             self.jump_counter = 0
             if self.is_wall_jump_unlocked and (
                     keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) and not self.jump_lock:
-                self.velocity.y = -self.jump_force
+                self.velocity.y = -(self.jump_force)
                 new_state = self.State.JUMP
                 self.jump_cooldown = self.jump_cooldown_time
                 self.wall_jump_timer = self.wall_jump_lock_time
@@ -396,7 +396,7 @@ class Player(MovingObject):
                     self.jump_lock = True
                     has_jumped = True
             elif self.velocity.y < 0:
-                if not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) or self.jump_timer <= 0:
+                if not self.is_wall_jumping and (not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) or self.jump_timer <= 0):
                     self.velocity.y *= 0.5  # Cut the jump short (micro jump)
                 else: # if player is continuously pressing jump
                     self.velocity.y += -3  # counterbalance some gravity
