@@ -10,9 +10,9 @@ class GameWorld:
         self.objects = objects
         self.static_objects = collision_objects
         self.interactable_objects = interactable_objects
-
+        self.level_settings = load_file(LEVELS)
         self.player = Player(player_pos)
-        self.egg = Egg(egg_pos) if egg_pos else None
+        self.egg = Egg(egg_pos) if egg_pos and self.level_settings["HEX_1.csv"] == "99.99" else None
         self.level_timer: float = 0.0
 
         self.camera_pos: pg.Vector2 = pg.Vector2(self.player.get_rect().x - SCREEN_WIDTH // 2,
@@ -217,6 +217,10 @@ class GameWorld:
                 time = (math.sin(self.time * 3) + 1)
                 sprites["ui_backspace"].set_alpha(int(time * 255))
                 ui_screen.blit(sprites["ui_question_mark"], pg.Vector2(241, 2))
+                ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
+            if self.player.player_lives <= 0:
+                time = (math.sin(self.time * 3) + 1)
+                sprites["ui_backspace"].set_alpha(int(time * 255))
                 ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):

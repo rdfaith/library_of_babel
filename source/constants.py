@@ -3,7 +3,7 @@ import os
 from source.utils import get_path
 
 # Debug Settings
-DEBUG_MODE = True
+DEBUG_MODE = False
 DEBUG_HITBOXES = False
 LIGHT_DEBUG_MODE = False
 
@@ -133,9 +133,9 @@ SYSTEM_SOUNDS = {
             "wining": pg.mixer.Sound(get_path("assets/sounds/wining.wav")),
             "disappointed": pg.mixer.Sound(get_path("assets/sounds/disappointed.wav")),
             "new_highscore": pg.mixer.Sound(get_path("assets/sounds/new_highscore.wav")),
-            "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
-            "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
-            "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3")),
+            #"egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
+            # "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
+            # "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3")),
             "idle": None
         }
 BG_MUSIC = {
