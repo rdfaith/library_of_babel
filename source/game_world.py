@@ -218,6 +218,10 @@ class GameWorld:
                 sprites["ui_backspace"].set_alpha(int(time * 255))
                 ui_screen.blit(sprites["ui_question_mark"], pg.Vector2(241, 2))
                 ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
+            if self.player.player_lives <= 0:
+                time = (math.sin(self.time * 3) + 1)
+                sprites["ui_backspace"].set_alpha(int(time * 255))
+                ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
 
         def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
             depth: int = layer["depth"]
