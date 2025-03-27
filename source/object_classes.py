@@ -534,7 +534,7 @@ class FlyingBook(Enemy):
             # region Do sound stuff
             player_pos = game_world.player.position
             distance = self.position.distance_to(player_pos)
-            max_distance = 200  # Distance at which volume starts to fade
+            max_distance = 150  # Distance at which volume starts to fade
             if distance < max_distance and not self.is_playing_sound:
                 self.audio_channel = self.sound_manager.play_enemy_sound("paper_flutter")
                 self.is_playing_sound = True
