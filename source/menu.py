@@ -67,7 +67,8 @@ def display_levels(levels, selected_level, screen, filename: str):
     highscores = load_file(filename)
     for i, option in enumerate(levels):
         color = '#a05b53' if i == selected_level else (244,204,161)
-        line = f"{option[:-4]} - {highscores[option]}" if highscores[option] != "False" and highscores[option] != "99.99" else f"{option[:-4]} - NONE"
+        level_name_str = option[:-4].replace("_", " ").upper()
+        line = f"{level_name_str} - {highscores[option]}" if highscores[option] != "False" and highscores[option] != "99.99" else f"{level_name_str} - NONE"
         text = FONT_16.render(line, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
 
