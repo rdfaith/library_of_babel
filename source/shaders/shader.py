@@ -146,7 +146,7 @@ class Shader:
 
 class FakeShader():
     def __init__(self, screen_width, screen_height):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.RESIZABLE)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.SCALED)
 
         self.light_map = None
 
