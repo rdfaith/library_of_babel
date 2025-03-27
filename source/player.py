@@ -411,10 +411,12 @@ class Player(MovingObject):
                 new_state == self.state.DUCK_IDLE or new_state == self.state.DUCK_WALK):
             self.set_hitbox("crouch")
         # Crouch -> not crouch (disallow uncrouching when that would collide with ceiling)
-        if (
-                self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
+        if (self.state == self.State.DUCK_IDLE or self.state == self.State.DUCK_WALK) and new_state != self.state.DUCK_IDLE and new_state != self.state.DUCK_WALK:
             if not self.try_set_hitbox("default", game_world):  # If switching hitbox to default fails
-                new_state = self.state  # Set back to DUCK
+                if self.velocity.x != 0:
+                    new_state = self.State.DUCK_WALK
+                else:
+                    new_state = self.State.DUCK_IDLE
 
         if self.dash_timer != 0:
             new_state = self.State.DASH
