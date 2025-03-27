@@ -327,7 +327,7 @@ class KeyPickUp(MovingObject):
 class MovingPlatform(MovingObject):
     def __init__(self, position: pg.Vector2, has_max_distance: bool = True):
         super().__init__(position, pg.image.load(get_path('assets/sprites/tiles/platform.png')), False, pg.image.load(get_path("assets/sprites/tiles/platform_collider.png")))
-        self.speed_x = 20
+        self.speed_x = 25
         self.distance = 0
         self.has_max_distance = has_max_distance
         if self.has_max_distance:
