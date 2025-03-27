@@ -153,12 +153,11 @@ void main() {
     // Adjust background lighting (general ambient lighting)
     parallaxBG = vec4(parallaxBG.rgb * 0.3 * moonLightIntensity, parallaxBG.a);
 
-    // Light rays from moonlight (raymarching)
+    // Light rays from moonlight
     vec2 moonPosNormalised = pixelToUV(moonPosition);
     vec2 lightDirection = (fragCoords - moonPosNormalised); // direction for moonlight
     float lightStrength = 0.0;  // Start with no light
-
-    // If the mask is transparent, start raymarching
+    // If the mask is not transparent, start raymarching
     if (parallaxBG.a > 0.5) {
         vec2 offset = lightDirection * - 0.005;  // Small step size for the rays
         vec2 pos = fragCoords;
@@ -172,9 +171,8 @@ void main() {
 
     // Apply the volumetric light effect
     vec3 lightColor = vec3(0.5, 0.8, 0.95);  // Cold moonlight color
-    float flicker = moonLightIntensity + 0.4 * sin(time * 0.75);
-    float intensity = 0.5 * flicker;
-    vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * intensity, parallaxBG.a);
+    float flicker = 0.4 * sin(time * 0.75);
+    vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * (lightStrength + flicker) * moonLightIntensity, parallaxBG.a);
 
 
     // Get lighting
@@ -202,7 +200,7 @@ void main() {
 
     if (lightDebugMode) {
         vec4 onlyLight = vec4(0.5, 0.5, 0.5, 1.0);
-        onlyLight = vec4(onlyLight.rgb + lightColor * lightStrength * intensity, onlyLight.a);
+        onlyLight = vec4(onlyLight.rgb + lightColor * (lightStrength + flicker) * moonLightIntensity, onlyLight.a);
         onlyLight = vec4(onlyLight.rgb * pointLighting, onlyLight.a);
         f_color = onlyLight;
     }
