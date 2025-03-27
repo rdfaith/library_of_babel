@@ -137,6 +137,7 @@ SYSTEM_SOUNDS = {
             "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
             "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
             "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3")),
+            "gate_open": pg.mixer.Sound(get_path("assets/sounds/gate_1.mp3")),
             "idle": None
         }
 BG_MUSIC = {

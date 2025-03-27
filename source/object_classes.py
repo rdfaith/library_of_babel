@@ -260,11 +260,12 @@ class Door(ColliderObject):
         UNLOCKED = 2
 
     def __init__(self, position: pg.Vector2):
-        self.unlocking = Animation("unlocking", get_path('assets/test/door-unlocking-Sheet.png'), 16, 32, 17, 6)
+        self.unlocking = Animation("unlocking", get_path('assets/test/door-unlocking-Sheet.png'), 16, 32, 17, 4)
         self.animator = Animator(self.unlocking)
         self.current_direction = 1
         self.state = self.State.LOCKED
-        self.time_until_open = 2.5
+        self.time_until_open = 3.7
+        self.sound_manager = SoundManager()
 
         hitbox_image = pg.image.load(get_path('assets/sprites/dino/test_hitbox.png')).convert()
 
@@ -275,6 +276,7 @@ class Door(ColliderObject):
     def unlock(self, game_world):
         """Remove the door's hit box when unlocked."""
         self.state = self.State.UNLOCKED
+        self.sound_manager.play_system_sound("gate_open")
 
     def update(self, delta, game_world):
         if self.state == self.State.UNLOCKED:
