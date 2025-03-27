@@ -136,15 +136,18 @@ class GameWorld:
                     return current_pos + (target_pos - current_pos) * (delay / 100)
                 return current_pos
 
+            player_x, player_y = self.player.position
+
             # Zielposition der Kamera
             target_pos: pg.Vector2 = pg.Vector2(
-                self.player.position.x - SCREEN_WIDTH // 2,
-                self.player.position.y - SCREEN_HEIGHT // 2
+                player_x - SCREEN_WIDTH // 2,
+                player_y - SCREEN_HEIGHT // 2
             )
 
             self.camera_pos.x = smooth_movement(self.camera_pos.x, target_pos.x, CAMERA_DELAY_X)
-            if abs(target_pos.y - self.camera_pos.y) > DEAD_ZONE_Y:
-                self.camera_pos.y = smooth_movement(self.camera_pos.y, target_pos.y, CAMERA_DELAY_Y if self.player.velocity.y < 350 else 0.2)
+            y_distance = abs(target_pos.y - self.camera_pos.y)
+            if y_distance > DEAD_ZONE_Y:
+                self.camera_pos.y = smooth_movement(self.camera_pos.y, target_pos.y, CAMERA_DELAY_Y * y_distance * 0.1)
             self.camera_pos.x = max(0, min(self.camera_pos.x, self.level_width - SCREEN_WIDTH))
             self.camera_pos.y = max(0, min(self.camera_pos.y, self.level_height - SCREEN_HEIGHT))
 
@@ -224,13 +227,16 @@ class GameWorld:
                 sprites["ui_backspace"].set_alpha(int(time * 255))
                 ui_screen.blit(sprites["ui_backspace"], pg.Vector2(261, 20))
 
-        def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen):
+        def draw_parallax_layer(layer, max_depth, y_parallax=True, screen=game_screen, clip_to_bottom: bool = False):
             depth: int = layer["depth"]
             parallax_factor: float = 1 - (depth / max_depth)  # Dynamische Berechnung des Parallax-Faktors
             y_parallax_factor: float = 0.1  # Größer -> stärkeres Y-parallax, niedriger -> schwächeres Y-parallax
 
             # Berechnung der versetzten Hintergrundposition (x und y)
-            offset_y: int = layer["offset_y"]
+            if clip_to_bottom:
+                offset_y = self.level_height - 320
+            else:
+                offset_y: int = layer["offset_y"]
             x_pos = (-self.camera_pos.x + (self.play_start_position.x - SCREEN_WIDTH // 2)) * parallax_factor
             y_pos = offset_y - self.camera_pos.y * parallax_factor * y_parallax_factor if y_parallax else offset_y - self.camera_pos.y
             bg_pos: pg.Vector2 = pg.Vector2(x_pos, y_pos)
@@ -254,7 +260,7 @@ class GameWorld:
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for layer in FG_LAYERS:
                 if layer["depth"] <= 0:
-                    draw_parallax_layer(layer, max_depth, False, screen=fg_screen)
+                    draw_parallax_layer(layer, max_depth, False, screen=fg_screen, clip_to_bottom=True)
 
         def draw_normals(screen):
             for o in self.get_all_objects():
