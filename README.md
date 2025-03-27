@@ -12,3 +12,5 @@ Platformer Game - The Library of Babel
 ![The Library of Babel - Gameplay](project/screenshot_3.png)
 
 ![The Library of Babel - Gameplay](project/screenshot_5.png)
+
+![The Library of Babel - Gameplay](project/screenshot_7.png)
