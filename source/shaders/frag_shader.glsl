@@ -1,13 +1,13 @@
 #version 330 core
 
 #define NUM_LIGHTS 25  // Max number of lights
-#define VIGNETTE_STRENGTH 0.7
+#define VIGNETTE_STRENGTH 0.1
 
 #define SCREEN_WIDTH 320.0
 #define SCREEN_HEIGHT 180.0
 
 uniform sampler2D gameTex;
-uniform sampler2D gameNormal;
+//uniform sampler2D gameNormal;
 uniform sampler2D uiTex;
 uniform sampler2D bg0Tex; // Parallax background (moon sky)
 uniform sampler2D bg1Tex; // Parallax background (wall windows)
@@ -63,7 +63,7 @@ vec2 getFragPos(vec2 _worldPos) {
                 (_worldPos.y - cameraPos.y) / SCREEN_HEIGHT);
 }
 
-vec3 getLight(vec2 worldPos, vec4 normal) {
+vec3 getLight(vec2 worldPos) { //, vec4 normal, out vec3 normalOut) {
     vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity; // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
@@ -74,11 +74,11 @@ vec3 getLight(vec2 worldPos, vec4 normal) {
 
         if (distance > lightRadii[i]) continue;  // Skip if light is too far
 
-        // NORMALS
-        // Convert normal map from [0,1] to [-1,1] range
+//        // NORMALS
+//        // Convert normal map from [0,1] to [-1,1] range
 //        vec3 N = normalize(normal.rgb * 2.0 - 1.0);
 //        // Compute 3D light vector (flip y-dir)
-//        vec3 lightVec = normalize(vec3(lightDir.x, -1 * lightDir.y, 1.0));
+//        vec3 lightVec = normalize(vec3(lightDir.x, -1 * lightDir.y, 0.0));
 //        // Compute normal influence (Lambertian reflection)
 //        float NdotL = (normal.a > 0.1) ? max(dot(N, lightVec), 0.0) : 1.0; // Dot product if normal has alpha
 
@@ -89,7 +89,8 @@ vec3 getLight(vec2 worldPos, vec4 normal) {
         vec3 light = vec3(lightColors[i] * attenuation);
         // Apply lightSourceIntensity modifier (unless it's the player light source)
         float intensityModifier =  (i == 0) ? 1.0 : lightSourceIntensity;
-        finalLight += light * intensityModifier; // * NdotL; // Apply normal influence
+        finalLight += light * intensityModifier;
+//        normalOut += light * intensityModifier * NdotL; // Apply normal influence
     }
 
     return finalLight; // return
@@ -145,7 +146,7 @@ void main() {
 
     vec4 gameColor = texture(gameTex, fragTexCoord);
     vec4 uiColor = texture(uiTex, fragTexCoord);
-    vec4 normal = texture(gameNormal, fragTexCoord);
+//    vec4 normal = texture(gameNormal, fragTexCoord);
 
     vec4 color = vec4(0.0);
 
@@ -171,17 +172,17 @@ void main() {
 
     // Apply the volumetric light effect
     vec3 lightColor = vec3(0.5, 0.8, 0.95);  // Cold moonlight color
-    float flicker = 0.4 * sin(time * 0.75);
-    vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * (lightStrength + flicker) * moonLightIntensity, parallaxBG.a);
+    float flicker = 1.0 + 0.2 * sin(time * 0.75);
+    vec4 finalParallax = vec4(parallaxBG.rgb + lightColor * lightStrength * moonLightIntensity * flicker, parallaxBG.a);
 
 
     // Get lighting
     // float lighting = quantizeLighting(getLight(worldPos), 8);
-    // vec3 normalLighting = vec3(0.0);
-    vec3 pointLighting = getLight(worldPos, normal);
+//    vec3 normalLighting = vec3(0.0);
+    vec3 pointLighting = getLight(worldPos); //, normal, normalLighting);
     // lighting = quantizeColor(lighting, 8); // quantize lighting levels to 8
 
-    // Apply normal lighting to game world
+    // Apply lighting to game world
     gameColor = vec4(gameColor.rgb * pointLighting, gameColor.a);
 
     // Adjust skybox lighting
@@ -195,12 +196,15 @@ void main() {
     color = addLayerColor(color, gameColor);
     color = addLayerColor(color, vec4(fg0.rgb * 0.2, fg0.a * 0.5));
 
+    // Add vignette
+//    color = applyVignette(color, uv);
+
     // Add UI on top and return
     f_color = addLayerColor(color, uiColor);
 
     if (lightDebugMode) {
         vec4 onlyLight = vec4(0.5, 0.5, 0.5, 1.0);
-        onlyLight = vec4(onlyLight.rgb + lightColor * (lightStrength + flicker) * moonLightIntensity, onlyLight.a);
+        onlyLight = vec4(onlyLight.rgb + lightColor * lightStrength * moonLightIntensity * flicker, onlyLight.a);
         onlyLight = vec4(onlyLight.rgb * pointLighting, onlyLight.a);
         f_color = onlyLight;
     }

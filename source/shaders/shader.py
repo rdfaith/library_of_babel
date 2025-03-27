@@ -7,7 +7,7 @@ class Shader:
     def __init__(self, screen_width, screen_height):
         self.light_debug_mode = LIGHT_DEBUG_MODE
         self.screen = pg.display.set_mode((screen_width, screen_height),
-                                          pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.RESIZABLE | pg.OPENGL | pg.DOUBLEBUF)
+                                          pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED | pg.OPENGL | pg.DOUBLEBUF)
 
         self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
                                              range(NUM_BG_LAYERS)]  # 4 Parallax BG screens
@@ -105,10 +105,11 @@ class Shader:
         self.program['fgTex'] = screen_number
         screen_number += 1
 
-        game_normal = surf_to_texture(self.game_normal_screen)
-        game_normal.use(screen_number)
-        self.program['gameNormal'] = screen_number
-        screen_number += 1
+        if LIGHT_DEBUG_MODE:
+            game_normal = surf_to_texture(self.game_normal_screen)
+            game_normal.use(screen_number)
+            self.program['gameNormal'] = screen_number
+            screen_number += 1
 
         num_lights = NUM_LIGHTS  # Has to be the same as in frag_shader.glsl!!
 
@@ -142,11 +143,13 @@ class Shader:
         ui_tex.release()
         game_tex.release()
         fg_tex.release()
-        game_normal.release()
+
+        if LIGHT_DEBUG_MODE:
+            game_normal.release()
 
 class FakeShader():
     def __init__(self, screen_width, screen_height):
-        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.SCALED)
+        self.screen = pg.display.set_mode((screen_width, screen_height), pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED | pg.DOUBLEBUF)
 
         self.light_map = None
 

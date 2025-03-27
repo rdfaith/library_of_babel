@@ -1,7 +1,6 @@
 import math
-
 from source import *
-
+from source.shaders.shader import Shader
 
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
@@ -323,10 +322,12 @@ class GameWorld:
 
 
         # draw foreground parallax
-        draw_fg_parallax()
+        if shader is Shader:
+            draw_fg_parallax()
 
         # Normal map
-        # draw_normals(normal_screen)
+        if LIGHT_DEBUG_MODE:
+            draw_normals(normal_screen)
 
         # Visual effects
         # draw_post_processing()
