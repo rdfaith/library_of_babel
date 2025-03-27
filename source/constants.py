@@ -123,6 +123,7 @@ PLAYER_SOUNDS = {
         }
 ENEMY_SOUNDS = {
             "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
+            "paper_flutter": pg.mixer.Sound(get_path("assets/sounds/paper_flutter_shorter.mp3")),
             "idle": None
         }
 SYSTEM_SOUNDS = {
@@ -162,6 +163,7 @@ FALSE_BUTTON_IMAGE_SELECTED = pg.image.load(get_path('assets/sprites/ui/ui_toggl
 
 SETTINGS = get_path("saves/settings.sav")
 LEVELS = get_path("saves/levels.sav")
+MENU_IMAGE = pg.image.load(get_path('assets/sprites/menu/babel_pause_screen.png'))
 
 
 

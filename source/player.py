@@ -210,6 +210,7 @@ class Player(MovingObject):
                     self.is_double_jump_unlocked = True
                 else:
                     self.is_jump_unlocked = True
+                word_completed = True
             case "WALL":
                 self.wall_collected = True
                 word_completed = True

@@ -1,4 +1,5 @@
-HEX_1.csv=0.12
-HEX_2.csv=99.99
+HEX_1.csv=99.99
+HEX_2.csv=False
 HEX_3.csv=False
-wall_lvl.csv=False
+wall_lvl.csv=99.99
+showcase.csv=99.99

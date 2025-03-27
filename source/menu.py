@@ -67,15 +67,17 @@ def display_levels(levels, selected_level, screen, filename: str):
     highscores = load_file(filename)
     for i, option in enumerate(levels):
         color = '#a05b53' if i == selected_level else (244,204,161)
-        line = f"{option[:-4]} - {highscores[option]}" if highscores[option] != "False" and highscores[option] != "99.99" else f"{option[:-4]} - NONE"
+        level_name_str = option[:-4].replace("_", " ").upper()
+        line = f"{level_name_str} - {highscores[option]}" if highscores[option] != "False" and highscores[option] != "99.99" else f"{level_name_str} - NONE"
         text = FONT_16.render(line, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
 
 def display_menu(menu, selected_option, screen):
+    screen.blit(MENU_IMAGE, (0,0,SCREEN_WIDTH,SCREEN_HEIGHT))
     for i, option in enumerate(menu.keys()):
-        color = '#a05b53' if i == selected_option else (244,204,161)
-        text = FONT_16.render(option, True, color)
-        screen.blit(text, (SCREEN_WIDTH // 2 - 110 // 2, 35 + i * 30))
+        color = '#A65E58' if i == selected_option else "#602323"
+        text = FONT_8.render(option, True, color)
+        screen.blit(text, (SCREEN_WIDTH // 2 + 45 // 2, 70 + i * 20))
 
 def unlock_levels(filename, current_level):
     levels = load_file(filename)
@@ -215,7 +217,7 @@ def menu_main(running: bool):
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
             sound_manager.play_enemy_sound("idle")
-            shader.get_ui_screen().fill((57, 49, 75))
+            #shader.get_ui_screen().fill((57, 49, 75))
 
             MENU_OPTIONS = {
                 "RESUME": GameState.GAME,
@@ -230,7 +232,7 @@ def menu_main(running: bool):
             for event in pg.event.get():
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
-                        game_state = last_game_state if game_state == GameState.IN_GAME_MENU else GameState.IN_GAME_MENU
+                        game_state = GameState.GAME
                         shader = get_shader()
                     elif event.key == pg.K_DOWN:
                         selected_option = (selected_option + 1) % len(MENU_OPTIONS)
