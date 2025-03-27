@@ -129,11 +129,11 @@ SYSTEM_SOUNDS = {
             "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
             "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3")),
-            "wining": pg.mixer.Sound(get_path("assets/sounds/wining.wav")),
-            "new_highscore": pg.mixer.Sound(get_path("assets/sounds/new_highscore.wav")),
-            "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
-            "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
-            "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3"))
+            # "wining": pg.mixer.Sound(get_path("assets/sounds/wining.wav")),
+            # "new_highscore": pg.mixer.Sound(get_path("assets/sounds/new_highscore.wav")),
+            # "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
+            # "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
+            # "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3"))
         }
 BG_MUSIC = {
             "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
