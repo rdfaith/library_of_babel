@@ -87,7 +87,7 @@ class SoundManager:
         self.current_system_sound = SYSTEM_SOUNDS.get(system_sound_name)
         if self.current_system_sound:
             if self.settings["SFX"] == "True":
-                if system_sound_name[:3] == "egg":
+                if system_sound_name[:3] == "egg" or "typ":
                     self.current_system_sound.set_volume(1)
                 else:
                     self.current_system_sound.set_volume(0.5)

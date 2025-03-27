@@ -7,7 +7,7 @@ class GameState(Enum):
     START = 1
     LEVEL_SELECTION = 2
     GAME = 3
-    GAME_OVER = 4
+    TRAILER = 4
     IN_GAME_MENU = 5
     SETTINGS = 6
 
@@ -55,16 +55,13 @@ class In_Game_Menu:
         self.settings[name] = "False" if self.settings[name] == "True" else "True"
         return self.settings
 
-
 def load_world(level_name: str):
     return world_generation.generate_world(f"{MAP_FOLDER + level_name}")
-
 
 def availible_levels(filename: str) -> list:
     levels = load_file(filename)
     unlocked_levels = [key for key, value in levels.items() if value != "False"]
     return unlocked_levels
-
 
 def display_levels(levels, selected_level, screen, filename: str):
     highscores = load_file(filename)
@@ -111,6 +108,7 @@ def menu_main(running: bool):
     selected_level = 0
     selected_button = 0
     selected_option = 0
+    voice_timer = 0
     sound_manager = SoundManager()
     game_state: GameState = GameState.START
     delta = 0.0
@@ -118,11 +116,11 @@ def menu_main(running: bool):
     shader = get_shader()
     in_game_menu = In_Game_Menu(SETTINGS)
     last_game_state = GameState.START
+    dino_title_screen: TitleScreen = TitleScreen("START")
+    monkey_title_screen: TitleScreen = TitleScreen("TRAILER")
 
     game_world = None  # global name
     current_level = None # global name
-
-    title_screen: TitleScreen = TitleScreen()
 
     while running:
         while game_state == GameState.START:
@@ -137,15 +135,45 @@ def menu_main(running: bool):
                     pg.quit()
                     sys.exit()
                 if event.type == pg.KEYDOWN:
-                    game_state = GameState.LEVEL_SELECTION
+                    current_settings = load_file(LEVELS)
+                    if current_settings["HEX_1.csv"] == "99.99":
+                        game_state = GameState.TRAILER
+                    else:
+                        game_state = GameState.LEVEL_SELECTION
 
             # Render with shader
-            title_screen.do_updates(delta)
-            title_screen.do_render(shader)
-            shader.update(light_map=title_screen.light_map)
+            dino_title_screen.do_updates(delta)
+            dino_title_screen.do_render(shader)
+            shader.update(light_map=dino_title_screen.light_map)
+            clock.tick(60)
+
+        while game_state == GameState.TRAILER:
+            sound_manager.play_movement_sound("typewriter")
+            sound_manager.play_enemy_sound("voiceover")
+            last_game_state = GameState.START
+            shader.get_ui_screen().fill((20, 20, 20))
+            voice_timer += 0.1
+
+            # poll for events
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
+                    pg.quit()
+                    sys.exit()
+                if event.type == pg.KEYDOWN:
+                    game_state = GameState.LEVEL_SELECTION
+            if voice_timer > 145:
+                game_state = GameState.LEVEL_SELECTION
+
+            # Render with shader
+            monkey_title_screen.do_updates(delta)
+            monkey_title_screen.do_render(shader)
+            shader.update(light_map=monkey_title_screen.light_map)
             clock.tick(60)
 
         while game_state == GameState.LEVEL_SELECTION:
+            sound_manager.play_movement_sound("idle")
+            sound_manager.play_enemy_sound("idle")
             last_game_state = GameState.LEVEL_SELECTION
             shader.get_ui_screen().fill((57, 49, 75))
 
@@ -191,12 +219,13 @@ def menu_main(running: bool):
                     unlock_levels(LEVELS, current_level)
                     unlocked_levels = availible_levels(LEVELS)
                     game_world = load_world(unlocked_levels[-1])
+                    current_level = unlocked_levels[-1]
                     clock = pg.time.Clock()
                 elif event.type == DOOR_UNLOCKED:  # unlock door
                     for o in game_world.static_objects:
                         if isinstance(o, object_classes.Door):
                             o.unlock(game_world)
-                elif event.type == WORD_LIGHT:  # player collected word 'LIGHT'
+                elif event.type == WORD_LIGHT:  # player collected word 'LIGHT'.
                     game_world.on_player_collected_light()
                 if event.type == pg.QUIT:
                     running = False
@@ -208,27 +237,11 @@ def menu_main(running: bool):
             shader.update(game_world.camera_pos, game_world.get_light_map())
             delta = clock.tick(60) / 1000
 
-        while game_state == GameState.GAME_OVER:
-            last_game_state = GameState.GAME_OVER
-            for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
-                        game_state = GameState.IN_GAME_MENU
-                    elif event.key == pg.K_BACKSPACE:
-                        game_world = load_world(current_level)
-                        game_state = GameState.GAME
-                if event.type == pg.QUIT:
-                    running = False
-                    pg.quit()
-                    sys.exit()
-
-            clock.tick(60)
         while game_state == GameState.IN_GAME_MENU:
             last_game_state = GameState.IN_GAME_MENU
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
             sound_manager.play_enemy_sound("idle")
-            #shader.get_ui_screen().fill((57, 49, 75))
 
             MENU_OPTIONS = {
                 "RESUME": GameState.GAME,

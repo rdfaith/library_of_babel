@@ -159,6 +159,7 @@ class MovingObject(InteractableObject):
 
         # Calculate movement
         dx, dy = self.velocity * delta
+        previous_x, previous_y = self.position
 
         # Move x and check collisions
         rect = self.get_rect()
@@ -170,9 +171,9 @@ class MovingObject(InteractableObject):
         colliding_object = self.check_collision(rect, game_world.static_objects)
         if colliding_object:
             self.has_collided = True
-            if self.position.x < colliding_object.position.x:  # Moving right
+            if previous_x < colliding_object.position.x:  # Moving right
                 rect.right = colliding_object.get_rect().left
-            elif self.position.x > colliding_object.position.x:  # Moving left
+            elif previous_x > colliding_object.position.x:  # Moving left
                 rect.left = colliding_object.get_rect().right
             self.position.x, _ = rect.topleft  # Reset precise position
 
@@ -185,11 +186,11 @@ class MovingObject(InteractableObject):
 
         colliding_object = self.check_collision(rect, game_world.static_objects)
         if colliding_object:
-            if self.position.y < colliding_object.position.y:  # Falling down
+            if previous_y < colliding_object.position.y:  # Falling down
                 rect.bottom = colliding_object.get_rect().top
                 self.velocity.y = 0
                 # self.on_ground = True
-            elif self.position.y > colliding_object.position.y:  # Hitting the ceiling
+            elif previous_y > colliding_object.position.y:  # Hitting the ceiling
                 rect.top = colliding_object.get_rect().bottom
                 self.velocity.y = 0
             _, self.position.y = rect.topleft  # Reset precise position

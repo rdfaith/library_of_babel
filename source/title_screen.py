@@ -1,16 +1,20 @@
 from source import *
 class TitleScreen:
 
-    def __init__(self):
+    def __init__(self, state):
 
         self.light_map = LightMap()
+        self.state = state
         self.time: float = 0.0
         self.moon_light_intensity: float = 1.0
         self.is_moonlight_on: bool = True
         self.moon_position: pg.Vector2 = pg.Vector2(64, 40)
-
-        self.dino_anim = Animation("tower", get_path('assets/sprites/menu/babel_start_spritesheet.png'), 320, 180, 2, 1)
-        self.dino_anim_pos = pg.Vector2(154, 147)
+        if self.state == "START":
+            self.dino_anim = Animation("tower", get_path('assets/sprites/menu/babel_start_spritesheet.png'), 320, 180, 2, 1)
+        else:
+            self.dino_anim = Animation("tower", get_path('assets/sprites/anim/monkey-Sheet.png'), 32, 48,
+                                       9, 4)
+        self.dino_anim_pos = pg.Vector2((SCREEN_WIDTH - 32) // 2, (SCREEN_HEIGHT - 32) // 2)
 
         self.dino_animator: Animator = Animator(self.dino_anim)
 
@@ -32,15 +36,18 @@ class TitleScreen:
         bg_screens = shader.get_bg_screens()
 
         for screen in bg_screens:
-            screen.fill((0, 0, 0, 0))
+            screen.fill((20, 20, 20, 20))
 
-        game_screen.fill((0, 0, 0, 0))
-        ui_screen.fill((0, 0, 0, 0))
+        game_screen.fill((20, 20, 20, 20))
+        ui_screen.fill((20, 20, 20, 20))
 
 
         title_dino = self.dino_animator.get_frame()
 
-        bg_screens[0].blit(title_dino, pg.Vector2())
+        if self.state == "START":
+            bg_screens[0].blit(title_dino, pg.Vector2())
+        else:
+            bg_screens[0].blit(title_dino, self.dino_anim_pos)
 
         # get light sources:
         self.light_map.clear_sources()
@@ -49,7 +56,7 @@ class TitleScreen:
             offset=pg.Vector2(),
             radius=80.0,
             intensity=0.03,
-            color=pg.Color(120, 220, 250)
+            color=pg.Color(0, 0, 0)
         ))
 
         shader.set_moon_position(self.moon_position)
