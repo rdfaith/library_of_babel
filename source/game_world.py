@@ -306,7 +306,7 @@ class GameWorld:
         draw_fg_parallax()
 
         # Normal map
-        draw_normals(normal_screen)
+        # draw_normals(normal_screen)
 
         # Visual effects
         # draw_post_processing()
