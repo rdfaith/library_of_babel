@@ -105,11 +105,11 @@ class Shader:
         self.program['fgTex'] = screen_number
         screen_number += 1
 
-        if LIGHT_DEBUG_MODE:
-            game_normal = surf_to_texture(self.game_normal_screen)
-            game_normal.use(screen_number)
-            self.program['gameNormal'] = screen_number
-            screen_number += 1
+        # if LIGHT_DEBUG_MODE:
+        #     game_normal = surf_to_texture(self.game_normal_screen)
+        #     game_normal.use(screen_number)
+        #     self.program['gameNormal'] = screen_number
+        #     screen_number += 1
 
         num_lights = NUM_LIGHTS  # Has to be the same as in frag_shader.glsl!!
 
@@ -144,8 +144,8 @@ class Shader:
         game_tex.release()
         fg_tex.release()
 
-        if LIGHT_DEBUG_MODE:
-            game_normal.release()
+        # if LIGHT_DEBUG_MODE:
+        #     game_normal.release()
 
 class FakeShader():
     def __init__(self, screen_width, screen_height):

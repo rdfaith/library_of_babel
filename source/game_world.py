@@ -2,6 +2,7 @@ import math
 from source import *
 from source.shaders.shader import Shader
 
+
 class GameWorld:
     def __init__(self, objects: list, collision_objects: list, interactable_objects: list, player_pos: pg.Vector2,
                  level_size: tuple[int, int], level_name: str, egg_pos=None) -> None:
@@ -21,7 +22,6 @@ class GameWorld:
             self.player.is_wall_jump_unlocked = True
         if level_number > 5:
             self.player.is_double_jump_unlocked = True
-
 
         self.egg = Egg(egg_pos) if egg_pos and self.level_settings["HEX_1.csv"] == "99.99" else None
         self.level_timer: float = 0.0
@@ -56,7 +56,6 @@ class GameWorld:
             light_source = o.get_light_source()
             if light_source:
                 self.light_map.add_source(light_source)
-
 
         # Initialise Parallax bgs
         self.BG_LAYERS = [
@@ -196,7 +195,7 @@ class GameWorld:
                 current_time = minutes + round(seconds / 100, 2)
                 current_highscore = 99.99 if self.highscores[self.level_name] == "None" else current_highscore
                 ui_time_text = FONT_8.render(f"{minutes:02}:{seconds:02}", True,
-                                              "#F2A81D" if current_time > float(current_highscore) else "#36733F")
+                                             "#F2A81D" if current_time > float(current_highscore) else "#36733F")
                 if settings["TIMER"] == "True":
                     ui_screen.blit(ui_timer, pg.Vector2(131, 0))
                     ui_screen.blit(ui_time_text, pg.Vector2(151, 4))
@@ -296,8 +295,6 @@ class GameWorld:
                     if o.get_light_source():
                         self.light_map.add_source(o.get_light_source())
 
-
-
         # Draw egg and return if egg animation is running
         if self.egg:
             if self.egg.is_animation_over:
@@ -316,18 +313,16 @@ class GameWorld:
 
         self.player.draw(game_screen, self.camera_pos)
 
-
         shader.set_moon_light_intensity(self.moon_light_intensity)
         shader.set_light_source_intensity(self.light_source_intensity)
-
 
         # draw foreground parallax
         if shader is Shader:
             draw_fg_parallax()
 
-        # Normal map
-        if LIGHT_DEBUG_MODE:
-            draw_normals(normal_screen)
+        # # Normal map
+        # if LIGHT_DEBUG_MODE:
+        #     draw_normals(normal_screen)
 
         # Visual effects
         # draw_post_processing()
