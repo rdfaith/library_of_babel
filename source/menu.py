@@ -190,8 +190,8 @@ def menu_main(running: bool):
             clock.tick(60)
 
         while game_state == GameState.TRAILER:
-            sound_manager.play_movement_sound("typewriter")
-            sound_manager.play_enemy_sound("voiceover")
+            sound_manager.play_object_sound("typewriter")
+            sound_manager.play_animation_sound("voiceover")
             last_game_state = GameState.START
             shader.get_ui_screen().fill((20, 20, 20))
             voice_timer += 0.1
@@ -222,8 +222,8 @@ def menu_main(running: bool):
 
 
         while game_state == GameState.LEVEL_SELECTION:
-            sound_manager.play_movement_sound("idle")
-            sound_manager.play_enemy_sound("idle")
+            sound_manager.play_object_sound("mute")
+            sound_manager.play_animation_sound("mute")
             last_game_state = GameState.LEVEL_SELECTION
             shader.get_ui_screen().fill((57, 49, 75))
 
@@ -303,7 +303,7 @@ def menu_main(running: bool):
             last_game_state = GameState.IN_GAME_MENU
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
-            sound_manager.play_enemy_sound("idle")
+            sound_manager.play_enemy_sound("mute")
 
             MENU_OPTIONS = {
                 "RESUME": GameState.GAME,

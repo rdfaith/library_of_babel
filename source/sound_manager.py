@@ -11,6 +11,10 @@ class SoundManager:
         self.current_system_sound = None
         self.current_enemy = None
         self.current_enemy_sound = None
+        self.current_object = None
+        self.current_object_sound = None
+        self.current_animation = None
+        self.current_animation_sound = None
     def play_bg_music(self, menu_state):
         self.settings = load_file(SETTINGS)
         if self.current_menu_state == menu_state and self.settings["MUSIC"] == "True":
@@ -56,6 +60,36 @@ class SoundManager:
                 channel = self.current_enemy_sound.play(loops=50)
             return channel  # Return sound channel for directional audio
 
+    def play_object_sound(self, sound_name):
+        self.settings = load_file(SETTINGS)
+
+        if self.current_object_sound:
+            self.current_object_sound.stop()
+
+        self.current_object_sound = OBJECT_SOUNDS.get(sound_name)
+        if self.current_object_sound:
+            if self.settings["SFX"] == "True":
+                self.current_object_sound.set_volume(0.5)
+            elif self.settings["SFX"] == "False":
+                self.current_object_sound.set_volume(0)
+
+            self.current_object_sound.play()
+
+    def play_animation_sound(self, sound_name):
+        self.settings = load_file(SETTINGS)
+
+        if self.current_animation_sound:
+            self.current_animation_sound.stop()
+
+        self.current_animation_sound = ANIMATION_SOUNDS.get(sound_name)
+        if self.current_animation_sound:
+            if self.settings["SFX"] == "True":
+                self.current_animation_sound.set_volume(0.5)
+            elif self.settings["SFX"] == "False":
+                self.current_animation_sound.set_volume(0)
+
+            self.current_animation_sound.play()
+
     def play_movement_sound(self, movement_name, loop=True, interrupt=False):
         self.settings = load_file(SETTINGS)
         if self.current_movement == movement_name and self.settings["SFX"] == "True" and not interrupt:
@@ -87,10 +121,7 @@ class SoundManager:
         self.current_system_sound = SYSTEM_SOUNDS.get(system_sound_name)
         if self.current_system_sound:
             if self.settings["SFX"] == "True":
-                if system_sound_name[:3] == "egg" or "typ":
-                    self.current_system_sound.set_volume(1)
-                else:
-                    self.current_system_sound.set_volume(0.5)
+                self.current_system_sound.set_volume(0.5)
             elif self.settings["SFX"] == "False":
                 self.current_system_sound.set_volume(0)
 
