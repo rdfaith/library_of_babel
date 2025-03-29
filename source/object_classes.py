@@ -277,7 +277,7 @@ class Door(ColliderObject):
     def unlock(self, game_world):
         """Remove the door's hit box when unlocked."""
         self.state = self.State.UNLOCKED
-        self.sound_manager.play_object_sound("gate_open")
+        self.sound_manager.play_object_sound("gate")
 
     def update(self, delta, game_world):
         if self.state == self.State.UNLOCKED:

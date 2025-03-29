@@ -172,18 +172,18 @@ class Player(MovingObject):
 
     def on_pickup_key(self):
         self.has_key = True
-        self.sound_manager.play_object_sound("collect")
+        self.sound_manager.play_system_sound("collect")
 
     def on_pickup_heart(self):
         if self.player_lives < 3:
             self.player_lives += 1
-            self.sound_manager.play_object_sound("collect")
+            self.sound_manager.play_system_sound("collect")
             return True
         else:
             return False
 
     def on_pickup_time(self):
-        self.sound_manager.play_object_sound("collect")
+        self.sound_manager.play_system_sound("collect")
         self.picked_up_time = True
         return True
 
@@ -195,7 +195,7 @@ class Player(MovingObject):
 
         if len(self.letters_collected) < 5:  # return True if can pick up
             self.letters_collected.append(letter)
-            self.sound_manager.play_object_sound("collect")
+            self.sound_manager.play_system_sound("collect")
             result = True
 
         word = "".join(self.letters_collected).upper()

@@ -60,35 +60,49 @@ class SoundManager:
                 channel = self.current_enemy_sound.play(loops=50)
             return channel  # Return sound channel for directional audio
 
-    def play_object_sound(self, sound_name):
+    def play_object_sound(self, object_name, loop=False, interrupt=False):
         self.settings = load_file(SETTINGS)
-
-        if self.current_object_sound:
-            self.current_object_sound.stop()
-
-        self.current_object_sound = OBJECT_SOUNDS.get(sound_name)
-        if self.current_object_sound:
-            if self.settings["SFX"] == "True":
-                self.current_object_sound.set_volume(0.5)
-            elif self.settings["SFX"] == "False":
+        if self.current_object == object_name and self.settings["SFX"] == "True" and not interrupt:
+            if self.current_object_sound:
+                self.current_object_sound.set_volume(0.3)
+            return
+        elif self.settings["SFX"] == "False":
+            if self.current_object_sound:
                 self.current_object_sound.set_volume(0)
+        else:
 
-            self.current_object_sound.play()
+            for key, value in OBJECT_SOUNDS.items():
+                if value:
+                    value.fadeout(100)
 
-    def play_animation_sound(self, sound_name):
+            self.current_object = object_name
+            self.current_object_sound = OBJECT_SOUNDS.get(object_name)
+
+            if self.current_object_sound:
+                loops = -1 if loop else 0
+                self.current_object_sound.play(loops=loops)
+
+    def play_animation_sound(self, animation_name, loop=False, interrupt=False):
         self.settings = load_file(SETTINGS)
-
-        if self.current_animation_sound:
-            self.current_animation_sound.stop()
-
-        self.current_animation_sound = ANIMATION_SOUNDS.get(sound_name)
-        if self.current_animation_sound:
-            if self.settings["SFX"] == "True":
-                self.current_animation_sound.set_volume(0.5)
-            elif self.settings["SFX"] == "False":
+        if self.current_animation == animation_name and self.settings["SFX"] == "True" and not interrupt:
+            if self.current_animation_sound:
+                self.current_animation_sound.set_volume(1)
+            return
+        elif self.settings["SFX"] == "False":
+            if self.current_animation_sound:
                 self.current_animation_sound.set_volume(0)
+        else:
 
-            self.current_animation_sound.play()
+            for key, value in ANIMATION_SOUNDS.items():
+                if value:
+                    value.fadeout(100)
+
+            self.current_animation = animation_name
+            self.current_animation_sound = ANIMATION_SOUNDS.get(animation_name)
+
+            if self.current_animation_sound:
+                loops = -1 if loop else 0
+                self.current_animation_sound.play(loops=loops)
 
     def play_movement_sound(self, movement_name, loop=True, interrupt=False):
         self.settings = load_file(SETTINGS)

@@ -126,7 +126,6 @@ ENEMY_SOUNDS = {
             "mute": None
         }
 OBJECT_SOUNDS = {
-            "collect": pg.mixer.Sound(get_path("assets/sounds/object_sounds/collect.mp3")),
             "gate": pg.mixer.Sound(get_path("assets/sounds/object_sounds/gate.mp3")),
             "squish": pg.mixer.Sound(get_path("assets/sounds/object_sounds/squish.mp3")),
             "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/object_sounds/magical_twinkle.mp3")),
@@ -143,6 +142,7 @@ ANIMATION_SOUNDS = {
             "mute": None
         }
 SYSTEM_SOUNDS = {
+            "collect": pg.mixer.Sound(get_path("assets/sounds/system_sounds/collect.mp3")),
             "selection": pg.mixer.Sound(get_path("assets/sounds/system_sounds/selection.mp3")),
         }
 BG_MUSIC = {
