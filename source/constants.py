@@ -126,6 +126,15 @@ ENEMY_SOUNDS = {
             "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
             "paper_flutter": pg.mixer.Sound(get_path("assets/sounds/paper_flutter_shorter.mp3")),
             "voiceover": pg.mixer.Sound(get_path("assets/sounds/voiceover/voiceover_louder.wav")),
+    "typewriter": pg.mixer.Sound(get_path("assets/sounds/typewriter_louder.wav")),
+
+    "idle": None
+        }
+OBJECT_SOUNDS = {
+            "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
+            "paper_flutter": pg.mixer.Sound(get_path("assets/sounds/paper_flutter_shorter.mp3")),
+            "typewriter": pg.mixer.Sound(get_path("assets/sounds/typewriter_louder.wav")),
+            "voiceover": pg.mixer.Sound(get_path("assets/sounds/voiceover/voiceover_louder.wav")),
             "idle": None
         }
 SYSTEM_SOUNDS = {
