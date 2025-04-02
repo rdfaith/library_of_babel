@@ -277,7 +277,7 @@ class Door(ColliderObject):
     def unlock(self, game_world):
         """Remove the door's hit box when unlocked."""
         self.state = self.State.UNLOCKED
-        self.sound_manager.play_system_sound("gate_open")
+        self.sound_manager.play_object_sound("gate")
 
     def update(self, delta, game_world):
         if self.state == self.State.UNLOCKED:
@@ -438,8 +438,8 @@ class Worm(Enemy):
         if self.state == self.State.DEAD:
             # switch off sounds
             if self.is_playing_sound:
-                self.sound_manager.play_enemy_sound("idle")
-                self.sound_manager.play_system_sound("squish")
+                self.sound_manager.play_enemy_sound("mute")
+                self.sound_manager.play_object_sound("squish")
                 self.is_playing_sound = False
                 self.audio_channel =  None
 
@@ -459,7 +459,7 @@ class Worm(Enemy):
                 self.audio_channel = self.sound_manager.play_enemy_sound("bug_scuttle")
                 self.is_playing_sound = True
             elif self.position.distance_to(player_pos) > 150 and self.is_playing_sound:
-                self.sound_manager.play_enemy_sound("idle")
+                self.sound_manager.play_enemy_sound("mute")
                 self.is_playing_sound = False
                 self.audio_channel = None
             if self.audio_channel:
@@ -516,8 +516,8 @@ class FlyingBook(Enemy):
 
             # switch off sounds
             if self.is_playing_sound:
-                self.sound_manager.play_enemy_sound("idle")
-                self.sound_manager.play_system_sound("squish")
+                self.sound_manager.play_enemy_sound("mute")
+                self.sound_manager.play_object_sound("squish")
                 self.is_playing_sound = False
                 self.audio_channel = None
 
@@ -542,7 +542,7 @@ class FlyingBook(Enemy):
                 self.audio_channel = self.sound_manager.play_enemy_sound("paper_flutter")
                 self.is_playing_sound = True
             elif distance > max_distance and self.is_playing_sound:
-                self.sound_manager.play_enemy_sound("idle")
+                self.sound_manager.play_enemy_sound("mute")
                 self.is_playing_sound = False
                 self.audio_channel = None
             if self.audio_channel:

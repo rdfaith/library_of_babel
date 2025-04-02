@@ -114,38 +114,40 @@ MAP_FOLDER = "assets/levels/"
 #Sounds
 pg.mixer.init()
 PLAYER_SOUNDS = {
-            "run": pg.mixer.Sound(get_path("assets/sounds/run_slower.wav")),
-            "jump": pg.mixer.Sound(get_path("assets/sounds/jump_up2.mp3")),
-            "fall": pg.mixer.Sound(get_path("assets/sounds/fall.wav")),
-            "damage": pg.mixer.Sound(get_path("assets/sounds/sad_whine.mp3")),
-            "dash": pg.mixer.Sound(get_path("assets/sounds/dash.wav")),
-            "typewriter": pg.mixer.Sound(get_path("assets/sounds/typewriter_louder.wav")),
+            "run": pg.mixer.Sound(get_path("assets/sounds/player_sounds/run.mp3")),
+            "jump": pg.mixer.Sound(get_path("assets/sounds/player_sounds/jump_up.mp3")),
+            "fall": pg.mixer.Sound(get_path("assets/sounds/player_sounds/fall.mp3")),
+            "dash": pg.mixer.Sound(get_path("assets/sounds/player_sounds/dash.mp3")),
             "idle": None
         }
 ENEMY_SOUNDS = {
-            "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/sfx/bug_scuttle.mp3")),
-            "paper_flutter": pg.mixer.Sound(get_path("assets/sounds/paper_flutter_shorter.mp3")),
-            "voiceover": pg.mixer.Sound(get_path("assets/sounds/voiceover/voiceover_louder.wav")),
-            "idle": None
+            "bug_scuttle": pg.mixer.Sound(get_path("assets/sounds/enemy_sounds/bug_scuttle.mp3")),
+            "paper_flutter": pg.mixer.Sound(get_path("assets/sounds/enemy_sounds/paper_flutter.mp3")),
+            "mute": None
+        }
+OBJECT_SOUNDS = {
+            "gate": pg.mixer.Sound(get_path("assets/sounds/object_sounds/gate.mp3")),
+            "squish": pg.mixer.Sound(get_path("assets/sounds/object_sounds/squish.mp3")),
+            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/object_sounds/magical_twinkle.mp3")),
+            "wining": pg.mixer.Sound(get_path("assets/sounds/player_sounds/wining.mp3")),
+            "sad": pg.mixer.Sound(get_path("assets/sounds/player_sounds/sad_whine.mp3")),
+            "typewriter": pg.mixer.Sound(get_path("assets/sounds/object_sounds/typewriter.mp3")),
+            "mute": None
+        }
+ANIMATION_SOUNDS = {
+            "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/animations/egg/egg_shaking.mp3")),
+            "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/animations/egg/egg_cracking.mp3")),
+            "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/animations/egg/egg_blinking.mp3")),
+            "voiceover": pg.mixer.Sound(get_path("assets/sounds/animations/monkey/voiceover.mp3")),
+            "mute": None
         }
 SYSTEM_SOUNDS = {
-            "selection": pg.mixer.Sound(get_path("assets/sounds/selection.wav")),
-            "collect": pg.mixer.Sound(get_path("assets/sounds/sfx/collect.mp3")),
-            "squish": pg.mixer.Sound(get_path("assets/sounds/sfx/squish.mp3")),
-            "magical_twinkle": pg.mixer.Sound(get_path("assets/sounds/sfx/magical_twinkle.mp3")),
-            "wining": pg.mixer.Sound(get_path("assets/sounds/wining.wav")),
-            "disappointed": pg.mixer.Sound(get_path("assets/sounds/sad_whine.mp3")),
-            "new_highscore": pg.mixer.Sound(get_path("assets/sounds/new_highscore.wav")),
-            "egg_shaking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_shaking.mp3")),
-            "egg_cracking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_cracking.mp3")),
-            "egg_blinking": pg.mixer.Sound(get_path("assets/sounds/sfx/egg_animation/egg_blinking.mp3")),
-            "gate_open": pg.mixer.Sound(get_path("assets/sounds/gate_1.mp3")),
-            "idle": None
+            "collect": pg.mixer.Sound(get_path("assets/sounds/system_sounds/collect.mp3")),
+            "selection": pg.mixer.Sound(get_path("assets/sounds/system_sounds/selection.mp3")),
         }
 BG_MUSIC = {
-            "menu": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
-            "game": pg.mixer.Sound(get_path("assets/sounds/game.mp3")),
-            "game_over": pg.mixer.Sound(get_path("assets/sounds/menu.mp3")),
+            "menu": pg.mixer.Sound(get_path("assets/sounds/bg_music/menu.mp3")),
+            "game": pg.mixer.Sound(get_path("assets/sounds/bg_music/game.mp3")),
         }
 
 #SCREENS

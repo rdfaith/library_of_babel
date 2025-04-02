@@ -65,13 +65,17 @@ def availible_levels(filename: str) -> list:
 
 def display_levels(levels, selected_level, screen, filename: str):
     highscores = load_file(filename)
-    for i, option in enumerate(levels):
-        color = '#a05b53' if i == selected_level else (244, 204, 161)
+    all_levels = highscores.keys()
+    for i, option in enumerate(all_levels):
+        if i < len(levels):
+            color = '#a05b53' if i == selected_level else (244, 204, 161)
+        else:
+            color = "#665887"
         level_name_str = option[:-4].replace("_", " ").upper()
         line = f"{level_name_str} - {highscores[option]}" if highscores[option] != "False" and highscores[
             option] != "99.99" else f"{level_name_str} - NONE"
         text = FONT_16.render(line, True, color)
-        screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 10 + i * 30))
+        screen.blit(text, (SCREEN_WIDTH // 2 - 150 // 2, 23 + i * 30))
 
 
 def display_menu(menu, selected_option, screen):
@@ -81,15 +85,49 @@ def display_menu(menu, selected_option, screen):
         text = FONT_8.render(option, True, color)
         screen.blit(text, (SCREEN_WIDTH // 2 + 45 // 2, 70 + i * 20))
 
+def display_subtitles(filename, screen, current_time):
+    with open(filename, "r") as file:
+        all_lines = file.readlines()
+
+    timestamps = []
+    last_index = 0
+
+    for i, line in enumerate(all_lines):
+        parts = line.strip().split(" ", 1)
+        try:
+            timestamp = int(parts[0])
+            timestamps.append((timestamp, i))
+        except ValueError:
+            continue
+
+    for timestamp, i in timestamps:
+        if current_time >= timestamp:
+            last_index = i
+        else:
+            break
+
+    subtitle_text = all_lines[last_index].strip()
+    parts = subtitle_text.split(" ", 1)
+    if len(parts) > 1:
+        subtitle_text = parts[1]
+
+    lines = subtitle_text.split("\\n")
+    y_offset = 150
+
+    for line in lines:
+        subtitle = FONT_8.render(line, True, WHITE)
+        screen.blit(subtitle, ((SCREEN_WIDTH - subtitle.get_width()) // 2, y_offset))
+        y_offset += FONT_8.get_height() + 5
+
 
 def unlock_levels(filename, current_level):
     levels = load_file(filename)
-    all_levels = list(levels.keys())  # Jetzt ist es eine echte Liste
+    all_levels = list(levels.keys())
 
     if current_level in all_levels:
         current_index = all_levels.index(current_level)
 
-        if current_index + 1 < len(all_levels):  # Prüfen, ob es ein nächstes Level gibt
+        if current_index + 1 < len(all_levels):
             levels[all_levels[current_index + 1]] = "99.99"
     update_file(filename, levels)
 
@@ -134,7 +172,11 @@ def menu_main(running: bool):
                     running = False
                     pg.quit()
                     sys.exit()
-                if event.type == pg.KEYDOWN:
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
                     current_settings = load_file(LEVELS)
                     if current_settings["HEX_1.csv"] == "99.99":
                         game_state = GameState.TRAILER
@@ -148,8 +190,8 @@ def menu_main(running: bool):
             clock.tick(60)
 
         while game_state == GameState.TRAILER:
-            sound_manager.play_movement_sound("typewriter")
-            sound_manager.play_enemy_sound("voiceover")
+            sound_manager.play_object_sound("typewriter")
+            sound_manager.play_animation_sound("voiceover")
             last_game_state = GameState.START
             shader.get_ui_screen().fill((20, 20, 20))
             voice_timer += 0.1
@@ -160,20 +202,28 @@ def menu_main(running: bool):
                     running = False
                     pg.quit()
                     sys.exit()
-                if event.type == pg.KEYDOWN:
-                    game_state = GameState.LEVEL_SELECTION
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
+                    elif event.key == pg.K_RETURN:
+                        game_state = GameState.LEVEL_SELECTION
+
             if voice_timer > 145:
                 game_state = GameState.LEVEL_SELECTION
-
             # Render with shader
             monkey_title_screen.do_updates(delta)
             monkey_title_screen.do_render(shader)
+            display_subtitles(get_path("assets/subtitles/subtitles.txt"), shader.get_ui_screen(), voice_timer)
+
             shader.update(light_map=monkey_title_screen.light_map)
             clock.tick(60)
 
+
         while game_state == GameState.LEVEL_SELECTION:
-            sound_manager.play_movement_sound("idle")
-            sound_manager.play_enemy_sound("idle")
+            sound_manager.play_object_sound("mute")
+            sound_manager.play_animation_sound("mute")
             last_game_state = GameState.LEVEL_SELECTION
             shader.get_ui_screen().fill((57, 49, 75))
 
@@ -186,7 +236,11 @@ def menu_main(running: bool):
                     pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_DOWN:
+                    if event.key == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
+                    elif event.key == pg.K_DOWN:
                         selected_level = (selected_level + 1) % len(unlocked_levels)
                         sound_manager.play_system_sound("selection")
                     elif event.key == pg.K_UP:
@@ -198,6 +252,10 @@ def menu_main(running: bool):
                         game_state = GameState.GAME
                     elif event.key == pg.K_ESCAPE:
                         game_state = GameState.SETTINGS
+                    elif event.type == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
 
             # Render with shader
             shader.update()
@@ -207,7 +265,15 @@ def menu_main(running: bool):
             last_game_state = GameState.GAME
             sound_manager.play_bg_music("game")
             for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
+                if event.type == pg.QUIT:
+                    running = False
+                    pg.quit()
+                    sys.exit()
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
                     if event.key == pg.K_ESCAPE:
                         game_state = GameState.IN_GAME_MENU
                     elif event.key == pg.K_BACKSPACE:
@@ -227,10 +293,6 @@ def menu_main(running: bool):
                             o.unlock(game_world)
                 elif event.type == WORD_LIGHT:  # player collected word 'LIGHT'.
                     game_world.on_player_collected_light()
-                if event.type == pg.QUIT:
-                    running = False
-                    pg.quit()
-                    sys.exit()
 
             game_world.do_updates(delta)
             game_world.do_render(shader)
@@ -241,7 +303,7 @@ def menu_main(running: bool):
             last_game_state = GameState.IN_GAME_MENU
             sound_manager.play_bg_music("menu")
             sound_manager.play_movement_sound("idle")
-            sound_manager.play_enemy_sound("idle")
+            sound_manager.play_enemy_sound("mute")
 
             MENU_OPTIONS = {
                 "RESUME": GameState.GAME,
@@ -254,8 +316,16 @@ def menu_main(running: bool):
             clock.tick(60)  # Framerate-Limit früh setzen
 
             for event in pg.event.get():
-                if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
+                if event.type == pg.QUIT:
+                    running = False
+                    pg.quit()
+                    sys.exit()
+                elif event.type == pg.KEYDOWN:
+                    if event.key == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
+                    elif event.key == pg.K_ESCAPE or event.key == pg.K_BACKSPACE:
                         game_state = GameState.GAME
                         shader = get_shader()
                     elif event.key == pg.K_DOWN:
@@ -272,10 +342,7 @@ def menu_main(running: bool):
 
                         game_state = MENU_OPTIONS[menu_options[selected_option]]
 
-                elif event.type == pg.QUIT:
-                    running = False
-                    pg.quit()
-                    sys.exit()
+
 
             shader.update()
 
@@ -288,7 +355,11 @@ def menu_main(running: bool):
                     pg.quit()
                     sys.exit()
                 elif event.type == pg.KEYDOWN:
-                    if event.key == pg.K_DOWN:
+                    if event.key == pg.K_q:
+                        running = False
+                        pg.quit()
+                        sys.exit()
+                    elif event.key == pg.K_DOWN:
                         selected_button = (selected_button + 1) % len(in_game_menu.options)
                         sound_manager.play_system_sound("selection")
                     elif event.key == pg.K_UP:

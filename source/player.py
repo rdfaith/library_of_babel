@@ -131,7 +131,7 @@ class Player(MovingObject):
             self.velocity.y = -200
             self.invincibility_time = 0.7
 
-            self.sound_manager.play_movement_sound("damage")
+            #self.sound_manager.play_movement_sound("damage")
 
             if self.player_lives > 1:
                 print("Aua")
@@ -153,14 +153,14 @@ class Player(MovingObject):
             if float(highscores[level]) > current_time:
                 highscores[level] = current_time
                 update_file(filename, highscores)
-                self.sound_manager.play_system_sound("new_highscore")
+                #self.sound_manager.play_system_sound("new_highscore")
                 highscore_text = FONT_8_BOLD.render(f"NEW HIGHSCORE! ({current_time})", True, (255, 255, 255))
                 #print(f"New best Time for {level[:-4]} with {current_time}")
 
         else:
             highscores[level] = current_time
             update_file(filename, highscores)
-            self.sound_manager.play_system_sound("new_highscore")
+            #self.sound_manager.play_system_sound("new_highscore")
             highscore_text = FONT_8_BOLD.render(f"NEW HIGHSCORE! ({current_time})", True, (255, 255, 255))
             #print(f"New best Time for {level[:-4]} with {current_time}")
         return highscore_text
@@ -232,7 +232,7 @@ class Player(MovingObject):
             case "BABEL":
                 print("Yayy, you won!")
                 self.highscore_text = self.check_highscore(game_world.level_name, game_world.level_timer)
-                self.sound_manager.play_system_sound("wining")
+                self.sound_manager.play_object_sound("wining")
                 self.on_player_win()
             case "LIGHT":
                 print("Es werde Licht!")
@@ -241,7 +241,7 @@ class Player(MovingObject):
 
         if word_completed:
             self.word_animation_timer = 1.0
-            self.sound_manager.play_system_sound("magical_twinkle")
+            self.sound_manager.play_object_sound("magical_twinkle")
             self.last_word_completed = self.letters_collected.copy()
             self.letters_collected = []
 
@@ -282,7 +282,7 @@ class Player(MovingObject):
                 self.sound_manager.play_movement_sound("dash", False)
             case self.State.DEAD:
                 self.set_animation(self.dead)
-                self.sound_manager.play_system_sound("disappointed")
+                self.sound_manager.play_object_sound("sad")
                 self.sound_manager.play_movement_sound("idle")
             case self.State.WIN:
                 self.set_animation(self.win)
@@ -414,7 +414,7 @@ class Player(MovingObject):
                     if self.velocity.y > 600:
                         if self.player_lives > 1:
                             print("Aua")
-                            self.sound_manager.play_movement_sound("damage")
+                            #self.sound_manager.play_movement_sound("damage")
                             self.player_lives -= 1
                             self.got_damage = True
                             self.invincibility_time = 0.7
