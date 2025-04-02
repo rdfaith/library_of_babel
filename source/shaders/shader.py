@@ -9,8 +9,9 @@ class Shader:
         self.screen = pg.display.set_mode((screen_width, screen_height),
                                           pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED | pg.OPENGL | pg.DOUBLEBUF)
 
-        self.bg_screens: list[pg.Surface] = [pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA) for _ in
-                                             range(NUM_BG_LAYERS)]  # 4 Parallax BG screens
+        # Switched to singular bg screen for performance optimisation
+        self.skybox_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
+        self.bg_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
         self.fg_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)  # screen for foreground parallax
         self.game_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
         self.game_normal_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
@@ -60,8 +61,11 @@ class Shader:
     def get_ui_screen(self):
         return self.ui_screen
 
-    def get_bg_screens(self):
-        return self.bg_screens
+    def get_bg_screen(self):
+        return self.bg_screen
+
+    def get_skybox_screen(self):
+        return self.skybox_screen
 
     def get_fg_screen(self):
         return self.fg_screen
@@ -82,13 +86,13 @@ class Shader:
         screen_number = 0
 
         # Create background screen uniforms
-        bg_texes = []
-        for screen in self.bg_screens:
-            tex = surf_to_texture(screen)
-            tex.use(screen_number)
-            self.program[f'bg{screen_number}Tex'] = screen_number
-            bg_texes.append(tex)
-            screen_number += 1
+        # bg_texes = []
+        # for screen in self.bg_screens:
+        #     tex = surf_to_texture(screen)
+        #     tex.use(screen_number)
+        #     self.program[f'bg{screen_number}Tex'] = screen_number
+        #     bg_texes.append(tex)
+        #     screen_number += 1
 
         ui_tex = surf_to_texture(self.ui_screen)
         ui_tex.use(screen_number)
@@ -98,6 +102,16 @@ class Shader:
         game_tex = surf_to_texture(self.game_screen)
         game_tex.use(screen_number)
         self.program['gameTex'] = screen_number
+        screen_number += 1
+
+        bg0_tex = surf_to_texture(self.skybox_screen)
+        bg0_tex.use(screen_number)
+        self.program['bg0Tex'] = screen_number
+        screen_number += 1
+
+        bg1_tex = surf_to_texture(self.bg_screen)
+        bg1_tex.use(screen_number)
+        self.program['bg1Tex'] = screen_number
         screen_number += 1
 
         fg_tex = surf_to_texture(self.fg_screen)
@@ -138,8 +152,10 @@ class Shader:
 
         pg.display.flip()
 
-        for tex in bg_texes:
-            tex.release()
+        # for tex in bg_texes:
+        #     tex.release()
+        bg0_tex.release()
+        bg1_tex.release()
         ui_tex.release()
         game_tex.release()
         fg_tex.release()
@@ -170,6 +186,12 @@ class FakeShader():
 
     def get_bg_screens(self):
         return [self.screen for _ in range(NUM_BG_LAYERS)]
+
+    def get_bg_screen(self):
+        return self.screen
+
+    def get_skybox_screen(self):
+        return self.screen
 
     def get_fg_screen(self):
         return self.screen

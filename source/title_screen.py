@@ -33,11 +33,9 @@ class TitleScreen:
         game_screen = shader.get_game_screen()
         # normal_screen = shader.game_normal_screen
 
-        bg_screens = shader.get_bg_screens()
+        skybox_screen = shader.get_skybox_screen()
 
-        for screen in bg_screens:
-            screen.fill((20, 20, 20, 20))
-
+        skybox_screen.fill((20, 20, 20, 20))
         game_screen.fill((20, 20, 20, 20))
         ui_screen.fill((20, 20, 20, 20))
 
@@ -45,9 +43,9 @@ class TitleScreen:
         title_dino = self.dino_animator.get_frame()
 
         if self.state == "START":
-            bg_screens[0].blit(title_dino, pg.Vector2())
+            skybox_screen.blit(title_dino, pg.Vector2())
         else:
-            bg_screens[0].blit(title_dino, self.dino_anim_pos)
+            skybox_screen.blit(title_dino, self.dino_anim_pos)
 
         # get light sources:
         self.light_map.clear_sources()

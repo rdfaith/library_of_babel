@@ -164,12 +164,13 @@ class GameWorld:
         ui_screen = shader.get_ui_screen()
         game_screen = shader.get_game_screen()
         normal_screen = shader.get_normal_screen()
-
-        bg_screens = shader.get_bg_screens()
+        skybox_screen = shader.get_skybox_screen()
+        bg_screen = shader.get_bg_screen()
         fg_screen = shader.get_fg_screen()
 
-        for screen in bg_screens:
-            screen.fill((0, 0, 0, 0))
+        # for screen in bg_screens:
+        #     screen.fill((0, 0, 0, 0))
+        bg_screen.fill((0, 0, 0, 0))
         fg_screen.fill((0, 0, 0, 0))
         normal_screen.fill((0, 0, 0, 0))
         game_screen.fill((0, 0, 0, 0))
@@ -177,9 +178,9 @@ class GameWorld:
 
         set_camera_position()
 
-        self.render_game(shader, ui_screen, game_screen, normal_screen, bg_screens, fg_screen)
+        self.render_game(shader, ui_screen, game_screen, skybox_screen, bg_screen, fg_screen)
 
-    def render_game(self, shader, ui_screen, game_screen, normal_screen, bg_screens, fg_screen):
+    def render_game(self, shader, ui_screen, game_screen, skybox_screen, bg_screen, fg_screen):
         sprites = self.SPRITES
         BG_LAYERS = self.BG_LAYERS
         FG_LAYERS = self.FG_LAYERS
@@ -264,7 +265,8 @@ class GameWorld:
             max_depth: int = max(layer["depth"] for layer in BG_LAYERS)  # Maximale Tiefe bestimmen
             for i in range(len(BG_LAYERS)):
                 if BG_LAYERS[i]["depth"] > 0:
-                    draw_parallax_layer(BG_LAYERS[i], max_depth, True, bg_screens[i])
+                    screen = skybox_screen if i == 0 else bg_screen  # Render skybox on separate screen, other parallax on same screen
+                    draw_parallax_layer(BG_LAYERS[i], max_depth, True, screen)
 
         def draw_fg_parallax():
             """Draws the foreground parallax layers"""

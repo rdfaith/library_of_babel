@@ -9,10 +9,8 @@
 uniform sampler2D gameTex;
 //uniform sampler2D gameNormal;
 uniform sampler2D uiTex;
-uniform sampler2D bg0Tex; // Parallax background (moon sky)
-uniform sampler2D bg1Tex; // Parallax background (wall windows)
-uniform sampler2D bg2Tex; // Parallax background (columns)
-uniform sampler2D bg3Tex; // Parallax background (shelves)
+uniform sampler2D bg0Tex; // Skybox background (moon sky)
+uniform sampler2D bg1Tex; // Parallax background (all unified)
 uniform sampler2D fgTex;
 
 uniform float time;
@@ -114,16 +112,12 @@ vec4 addLayerColor(vec4 lowerLayerCol, vec4 higherLayerCol) {
 vec4 getParallaxLayersAt(vec2 texCoord) {
 
     vec4 bg1 = texture(bg1Tex, texCoord);
-    vec4 bg2 = texture(bg2Tex, texCoord);
-    vec4 bg3 = texture(bg3Tex, texCoord);
     vec4 gameColor = texture(gameTex, texCoord);
-    vec4 fgColor = texture(fgTex, texCoord);
+//    vec4 fgColor = texture(fgTex, texCoord);
 
     // Add parallax bgs on top of each other
-    vec4 parallaxBG = addLayerColor(bg1, bg2);
-    parallaxBG = addLayerColor(parallaxBG, bg3);
-    parallaxBG = addLayerColor(parallaxBG, gameColor);
-    parallaxBG = addLayerColor(parallaxBG, fgColor); // Add foreground (maybe remove again)
+    vec4 parallaxBG = addLayerColor(bg1, gameColor);
+//    parallaxBG = addLayerColor(parallaxBG, fgColor); // Add foreground (maybe remove again)
 
     return parallaxBG;
 }
@@ -139,8 +133,6 @@ void main() {
 
     vec4 bg0 = texture(bg0Tex, fragTexCoord);
     vec4 bg1 = texture(bg1Tex, fragTexCoord);
-    vec4 bg2 = texture(bg2Tex, fragTexCoord);
-    vec4 bg3 = texture(bg3Tex, fragTexCoord);
 
     vec4 fg0 = texture(fgTex, fragTexCoord);
 
