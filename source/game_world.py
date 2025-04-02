@@ -317,8 +317,7 @@ class GameWorld:
         shader.set_light_source_intensity(self.light_source_intensity)
 
         # draw foreground parallax
-        if shader is Shader:
-            draw_fg_parallax()
+        draw_fg_parallax()
 
         # # Normal map
         # if LIGHT_DEBUG_MODE:

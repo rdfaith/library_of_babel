@@ -405,7 +405,7 @@ class Player(MovingObject):
                 if not self.is_wall_jumping and (not (keys[pg.K_SPACE] or keys[pg.K_w] or keys[pg.K_UP]) or self.jump_timer <= 0):
                     self.velocity.y *= 0.5  # Cut the jump short (micro jump)
                 else: # if player is continuously pressing jump
-                    self.velocity.y += -3  # counterbalance some gravity
+                    self.velocity.y += -7  # counterbalance some gravity
                     self.jump_timer -= delta # Reduce jump hold time
                 new_state = self.State.JUMP
             else:

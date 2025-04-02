@@ -64,7 +64,7 @@ vec2 getFragPos(vec2 _worldPos) {
 }
 
 vec3 getLight(vec2 worldPos) { //, vec4 normal, out vec3 normalOut) {
-    vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity; // Base ambient moonlight
+    vec3 finalLight = vec3(0.05, 0.28, 0.32) * moonLightIntensity * 1.2; // Base ambient moonlight
 
     for (int i = 0; i < NUM_LIGHTS; i++) {
         if (lightPositions[i] == vec2(0.0)) break;  // Break entire loop if empty entry (following will be empty too)
