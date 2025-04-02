@@ -1,11 +1,11 @@
 def load_file(filename: str) -> dict:
-    settings = dict()
+    file_dict = dict()
 
     with open(filename, 'r') as file:
         for line in file:
             key, value = line.strip().split('=')
-            settings[key] = value
-    return settings
+            file_dict[key] = value
+    return file_dict
 
 def update_file(filename: str, settings: dict):
     with open(filename, 'w') as file:

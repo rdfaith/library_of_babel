@@ -36,7 +36,7 @@ class In_Game_Menu:
         self.image_width = self.image.get_width()
         self.image_height = self.image.get_height()
 
-        self.lable = self.font.render(name, True, (244, 204, 161))
+        self.lable = self.font.render(name, True, COLOR_LIGHTORANGE)
         self.lable_width = self.lable.get_width()
         self.lable_height = self.lable.get_height()
 
@@ -60,17 +60,20 @@ def load_world(level_name: str):
 
 def availible_levels(filename: str) -> list:
     levels = load_file(filename)
-    unlocked_levels = [key for key, value in levels.items() if value != "False"]
+    unlocked_levels = [key for key, value in levels.items() if (value != "False" and value != "None")]
     return unlocked_levels
 
 def display_levels(levels, selected_level, screen, filename: str):
     highscores = load_file(filename)
-    all_levels = highscores.keys()
+    all_levels = list(highscores.keys())
+    print(all_levels)
+    print(levels)
     for i, option in enumerate(all_levels):
         if i < len(levels):
-            color = '#a05b53' if i == selected_level else (244, 204, 161)
+            color = COLOR_REDWOOD if i == selected_level else COLOR_LIGHTORANGE
         else:
-            color = "#665887"
+            color = COLOR_ULTRAVIOLET
+        print(color)
         level_name_str = option[:-4].replace("_", " ").upper()
         line = f"{level_name_str} - {highscores[option]}" if highscores[option] != "False" and highscores[
             option] != "99.99" else f"{level_name_str} - NONE"

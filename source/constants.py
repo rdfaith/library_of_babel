@@ -53,6 +53,9 @@ COLOR_GOLD = pg.Color('#f4b41b')
 COLOR_PALEBLUE = pg.Color('#8aebf1')
 COLOR_SILVER = pg.Color('#dff6f5')
 COLOR_ORANGE = pg.Color('#f47e1b')
+COLOR_REDWOOD = pg.Color('#a05b53')
+COLOR_ULTRAVIOLET = pg.Color('#665887')
+COLOR_LIGHTORANGE = pg.Color('#f4cca1')
 
 # LETTER_POS_0: pg.Vector2 = pg.Vector2(256, 0)
 UI_LETTER_POSITIONS: list[pg.Vector2] = []

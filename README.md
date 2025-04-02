@@ -24,6 +24,7 @@ Platformer Game - The Library of Babel
 - Move with WASD or arrow keys
 - Press [ESC] while in-game to open settings menu
 - While in settings menu, press [R] to reset game progress
+- Press [Q] to quit game to desktop
 
 ## Screenshots
 ![The Library of Babel - Gameplay](project/screenshot_4.png) 
