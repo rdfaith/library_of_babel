@@ -7,7 +7,7 @@ Platformer Game - The Library of Babel
 > — Jorge Luis Borges, *La Biblioteca de Babel*
 
 
-https://github.com/rdfaith/library_of_babel/blob/main/project/trailer_library_of_babel.mp4
+![](https://github.com/rdfaith/library_of_babel/blob/main/project/trailer_library_of_babel.mp4)
 
 
 ---
