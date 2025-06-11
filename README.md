@@ -6,6 +6,10 @@ Platformer Game - The Library of Babel
 > _**"La Biblioteca existe ab aeterno. De esa verdad cuyo corolario inmediato es la eternidad futura del mundo, ninguna mente razonable puede dudar."**_  
 > — Jorge Luis Borges, *La Biblioteca de Babel*
 
+
+https://github.com/rdfaith/library_of_babel/blob/main/project/trailer_library_of_babel.mp4
+
+
 ---
 ## Dependencies
 - Python >= 3.10 [How to Install Python?](https://www.geeksforgeeks.org/how-to-install-python-on-windows/)
