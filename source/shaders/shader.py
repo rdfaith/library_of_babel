@@ -7,7 +7,7 @@ class Shader:
     def __init__(self, screen_width, screen_height):
         self.light_debug_mode = LIGHT_DEBUG_MODE
         self.screen = pg.display.set_mode((screen_width, screen_height),
-                                          pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.SCALED | pg.OPENGL | pg.DOUBLEBUF)
+                                          pg.OPENGL | pg.DOUBLEBUF | pg.RESIZABLE if DEBUG_MODE else pg.RESIZABLE | pg.OPENGL | pg.DOUBLEBUF)
 
         # Switched to singular bg screen for performance optimisation
         self.skybox_screen = pg.Surface((screen_width, screen_height), flags=pg.SRCALPHA)
